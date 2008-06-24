@@ -21,7 +21,7 @@
  * Namespace for Web Core.
  * @namespace
  */
-Core.Web = { 
+Core.Web = {
 
     /**
      * Flag indicating that a drag-and-drop operation is in process.
@@ -50,9 +50,6 @@ Core.Web = {
     
         if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
             Core.Web.DOM.addEventListener(document, "selectstart", Core.Web._selectStartListener, false);
-            // Set documentElement.style.overflow to hidden in order to hide root scrollbar in IE.
-            // This is a non-standard CSS property.
-            document.documentElement.style.overflow = "hidden";
         }
         
         Core.Web.initialized = true;
@@ -762,7 +759,7 @@ Core.Web.Event = {
     /**
      * Unregister all event handlers from a specific element.
      * Use of this operation is recommended when disposing of components, it is
-     * more efficient than removing listenerse individually and guarantees proper clean-up.
+     * more efficient than removing listeners individually and guarantees proper clean-up.
      * 
      * @param {Element} element the element
      */
@@ -1158,6 +1155,10 @@ Core.Web.Library = {
          * @private
          */
         _install: function() {
+            if (Core.Web.Library._loadedLibraries[this._url]) {
+                // If library was already loaded by another invocation, do not load it again.
+                return;
+            }
             Core.Web.Library._loadedLibraries[this._url] = true;
             if (this._content == null) {
                 throw new Error("Attempt to install library when no content has been loaded.");
@@ -1177,7 +1178,38 @@ Core.Web.Library = {
             conn.addResponseListener(Core.method(this, this._retrieveListener));
             conn.connect();
         }
-    })
+    }),
+    
+    /**
+     * Loads required libraries and then executes a function.
+     * This is a convenience method for use by applications that
+     * automatically creates a Group and invokes the specified function
+     * once the libraries have loaded.
+     * This operation is asynchronous, this method will return before the specified function has been invoked.
+     * Any libraries which have already been loaded will NOT be re-loaded.
+     *
+     * @param {Array} requiredLibraries the URLs of the libraries which must be loaded before the function can execute
+     * @param {Function} f the function to execute
+     */
+    exec: function(requiredLibraries, f) {
+        var group = null;
+        for (var i = 0; i < requiredLibraries.length; ++i) {
+            if (!Core.Web.Library._loadedLibraries[requiredLibraries[i]]) {
+                if (group == null) {
+                    group = new Core.Web.Library.Group();
+                }
+                group.add(requiredLibraries[i]);
+            }
+        }
+        
+        if (group == null) {
+            Core.Web.Scheduler.run(f);
+            return;
+        }
+        
+        group.addLoadListener(f);
+        group.load();
+    }
 };
 
 /**
@@ -1444,10 +1476,8 @@ Core.Web.Scheduler = {
      * @param {Core.Web.Scheduler.Runnable} runnable the runnable to enqueue
      */
     add: function(runnable) {
-        var currentTime = new Date().getTime();
-        var timeInterval = runnable.timeInterval ? runnable.timeInterval : 0;
-        runnable._enabled = true;
-        runnable._nextExecution = currentTime + timeInterval;
+        Core.Arrays.remove(Core.Web.Scheduler._runnables, runnable);
+        runnable._nextExecution = new Date().getTime() + (runnable.timeInterval ? runnable.timeInterval : 0);
         Core.Web.Scheduler._runnables.push(runnable);
         Core.Web.Scheduler._start(runnable._nextExecution);
     },
@@ -1463,7 +1493,7 @@ Core.Web.Scheduler = {
         // Execute pending runnables.
         for (var i = 0; i < Core.Web.Scheduler._runnables.length; ++i) {
             var runnable = Core.Web.Scheduler._runnables[i];
-            if (runnable._nextExecution && runnable._nextExecution <= currentTime) {
+            if (runnable && runnable._nextExecution && runnable._nextExecution <= currentTime) {
                 runnable._nextExecution = null;
                 try {
                     runnable.run();
@@ -1476,7 +1506,7 @@ Core.Web.Scheduler = {
         var newRunnables = [];
         for (var i = 0; i < Core.Web.Scheduler._runnables.length; ++i) {
             var runnable = Core.Web.Scheduler._runnables[i];
-            if (!runnable._enabled) {
+            if (runnable == null) {
                 continue;
             }
 
@@ -1511,7 +1541,7 @@ Core.Web.Scheduler = {
         Core.Web.Scheduler._runnables = newRunnables;
         
         if (nextInterval < Number.MAX_VALUE) {
-            this._nextExecution = currentTime + nextInterval;
+            Core.Web.Scheduler._nextExecution = currentTime + nextInterval;
             Core.Web.Scheduler._threadHandle = window.setTimeout(Core.Web.Scheduler._execute, nextInterval);
         } else {
             Core.Web.Scheduler._threadHandle = null;
@@ -1524,8 +1554,8 @@ Core.Web.Scheduler = {
      * @param {Core.Web.Scheduler.Runnable} runnable the runnable to dequeue
      */
     remove: function(runnable) {
-        runnable._enabled = false;
-        runnable._nextExecution = null;
+        var index = Core.Arrays.indexOf(Core.Web.Scheduler._runnables, runnable);
+        Core.Web.Scheduler._runnables[index] = null;
     },
     
     /**
@@ -1540,7 +1570,7 @@ Core.Web.Scheduler = {
      */
     run: function(f, timeInterval, repeat) {
         var runnable = new Core.Web.Scheduler.MethodRunnable(f, timeInterval, repeat);
-        this.add(runnable);
+        Core.Web.Scheduler.add(runnable);
         return runnable;
     },
     
@@ -1552,12 +1582,12 @@ Core.Web.Scheduler = {
     _start: function(nextExecution) {
         var currentTime = new Date().getTime();
         if (Core.Web.Scheduler._threadHandle == null) {
-            this._nextExecution = nextExecution;
+            Core.Web.Scheduler._nextExecution = nextExecution;
             Core.Web.Scheduler._threadHandle = window.setTimeout(Core.Web.Scheduler._execute, nextExecution - currentTime);
-        } else if (this._nextExecution > nextExecution) {
+        } else if (nextExecution < Core.Web.Scheduler._nextExecution) { 
             // Cancel current timeout, start new timeout.
             window.clearTimeout(Core.Web.Scheduler._threadHandle);
-            this._nextExecution = nextExecution;
+            Core.Web.Scheduler._nextExecution = nextExecution;
             Core.Web.Scheduler._threadHandle = window.setTimeout(Core.Web.Scheduler._execute, nextExecution - currentTime);
         }
     },
@@ -1574,6 +1604,16 @@ Core.Web.Scheduler = {
         window.clearTimeout(Core.Web.Scheduler._threadHandle);
         Core.Web.Scheduler._threadHandle = null;
         Core.Web.Scheduler._nextExecution = null;
+    },
+    
+    update: function(runnable) {
+        if (Core.Arrays.indexOf(Core.Web.Scheduler._runnables, runnable) == -1) {
+            return;
+        }
+        var currentTime = new Date().getTime();
+        var timeInterval = runnable.timeInterval ? runnable.timeInterval : 0;
+        runnable._nextExecution = currentTime + timeInterval;
+        Core.Web.Scheduler._start(runnable._nextExecution);
     }
 };
 
@@ -1581,8 +1621,6 @@ Core.Web.Scheduler = {
  * A runnable task that may be scheduled with the Scheduler.
  */
 Core.Web.Scheduler.Runnable = Core.extend({
-    
-    _enabled: null,
     
     _nextExecution: null,
     

@@ -124,7 +124,7 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
             throw new Error("Invalid orientation: " + orientation);
         }
         this._resizable = this.component.render("resizable");
-        this._requested = this.component.render("separatorPosition", Echo.SplitPane.DEFAULT_SEPARATOR_POSITION);
+        this._requested = this.component.render("separatorPosition");
         this._separatorSize = Echo.Sync.Extent.toPixels(this.component.render(
                 this._orientationVertical ? "separatorHeight" : "separatorWidth",
                 this._resizable ? Echo.SplitPane.DEFAULT_SEPARATOR_SIZE_RESIZABLE 
@@ -352,15 +352,18 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
             Echo.Sync.FillImage.render(layoutData.backgroundImage, paneDiv);
             if (!child.pane) {
                 Echo.Sync.Insets.render(layoutData.insets, paneDiv, "padding");
+                switch (layoutData.overflow) {
+                case Echo.SplitPane.OVERFLOW_HIDDEN:
+                    paneDiv.style.overflow = "hidden";
+                    break;
+                case Echo.SplitPane.OVERFLOW_SCROLL:
+                    paneDiv.style.overflow = "scroll";
+                    break;
+                }
             }
-            switch (layoutData.overflow) {
-            case Echo.SplitPane.OVERFLOW_HIDDEN:
-                paneDiv.style.overflow = "hidden";
-                break;
-            case Echo.SplitPane.OVERFLOW_SCROLL:
-                paneDiv.style.overflow = "scroll";
-                break;
-            }
+        }
+        if (child.pane) {
+            paneDiv.style.overflow = "hidden";
         }
         
         var insetsAdjustment = this._getInsetsSizeAdjustment(layoutData);
@@ -456,7 +459,8 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         } else if (this._childPanes[1] && this._childPanes[1].component == child) {
             index = 1;
         } else {
-            throw new Error("Specified component is not a child of the SplitPane.");
+            // Do nothing (component was never rendered within the SplitPane).
+            return;
         }
 
         this._childPanes[index] = null;
@@ -472,8 +476,7 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
             fullRender = true;
         } else if (update.hasUpdatedProperties() || update.hasUpdatedLayoutDataChildren()) {
             if (update.isUpdatedPropertySetIn({ separatorPosition: true })) {
-                this._requested =  Echo.Sync.Extent.toPixels(this.component.render("separatorPosition",
-                        Echo.SplitPane.DEFAULT_SEPARATOR_POSITION), this._orientationVertical);
+                this._requested = this.component.render("separatorPosition");
                 this._setSeparatorPosition(this._requested);
             } else {
                 fullRender = true;
@@ -510,6 +513,17 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
     
     _setSeparatorPosition: function(newValue) {
         var oldValue = this._rendered;
+        
+        if (newValue == null) {
+            // If new value is null, attempt to retrieve from minimumSize property
+            // of pane 0, then 1, then maximumSize property of pane 0, then 1, then
+            // from SplitPane's default value.
+            newValue = (this._childPanes[0] ? this._childPanes[0].minimumSize : null)
+                    || (this._childPanes[1] ? this._childPanes[1].minimumSize : null)
+                    || (this._childPanes[0] ? this._childPanes[0].maximumSize : null)
+                    || (this._childPanes[1] ? this._childPanes[1].maximumSize : null)
+                    || Echo.SplitPane.DEFAULT_SEPARATOR_POSITION;
+        }
         
         if (Echo.Sync.Extent.isPercent(newValue)) {
             var totalSize = this._orientationVertical ? 

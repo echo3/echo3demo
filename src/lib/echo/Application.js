@@ -107,22 +107,14 @@ Echo.Application = Core.extend({
     },
 
     /**
-     * Adds a ComponentUpdateListener.
+     * Adds an arbitrary event listener.
      * 
-     * @param {Function} l the listener to add
+     * @param {String} eventType the event type name
+     * @param {Function} eventTarget the method to invoke when the event occurs 
+     *        (the event will be passed as the single argument)
      */
-    addComponentUpdateListener: function(l) {
-        this._listenerList.addListener("componentUpdate", l);
-    },
-    
-    /**
-     * Adds a FocusListener.  Focus listeners will be invoked when the focused
-     * component in the application changes.
-     * 
-     * @param {Function} l the listener to add
-     */
-    addFocusListener: function(l) {
-        this._listenerList.addListener("focus", l);
+    addListener: function(eventType, eventTarget) {
+        this._listenerList.addListener(eventType, eventTarget);
     },
     
     /**
@@ -159,13 +151,26 @@ Echo.Application = Core.extend({
     },
 
     /**
+     * Provides notification of an arbitrary event.
+     * Listeners will be notified based on the event's type property.
+     * 
+     * @param event the event to fire
+     */
+    fireEvent: function(event) {
+        if (this._listenerList == null) {
+            return;
+        }
+        this._listenerList.fireEvent(event);
+    },
+
+    /**
      * Focuses the previous/next component based on the currently focused component.
      * 
      * @param {Boolean} reverse false to focus the next component, true to focus the
      *        previous component
      */
     focusNext: function(reverse) {
-        focusedComponent = this.focusManager.find(null, reverse);
+        var focusedComponent = this.focusManager.find(null, reverse);
         if (focusedComponent != null) {
             this.setFocusedComponent(focusedComponent);
         }
@@ -252,6 +257,7 @@ Echo.Application = Core.extend({
     
     /**
      * Notifies the application of an update to a component.
+     * Fires a <code>componentUpdate</code> event.
      * 
      * @param {Echo.Component} parent the parent component
      * @param {String} propertyName the updated property
@@ -287,26 +293,19 @@ Echo.Application = Core.extend({
     },
     
     /**
-     * Removes a ComponentUpdateListener.
+     * Removes an arbitrary event listener.
      * 
-     * @param {Function} l the listener to remove
+     * @param {String} eventType the event type name
+     * @param {Function} eventTarget the method to invoke when the event occurs 
+     *        (the event will be passed as the single argument)
      */
-    removeComponentUpdateListener: function(l) {
-        this._listenerList.removeListener("componentUpdate", l);
+    removeListener: function(eventType, eventTarget) {
+        this._listenerList.removeListener(eventType, eventTarget);
     },
-    
+
     /**
-     * Removes a FocusListener.  Focus listeners will be invoked when the focused
-     * component in the application changes.
-     * 
-     * @param {Function} l the listener to remove
-     */
-    removeFocusListener: function(l) {
-        this._listenerList.removeListener("focus", l);
-    },
-    
-    /**
-     * Sets the focused component
+     * Sets the focused component.
+     * A "focus" event is fired to application listeners to inform them of the change.
      * 
      * @param {Echo.Component} newValue the new focused component
      */
@@ -321,7 +320,6 @@ Echo.Application = Core.extend({
             var modalContextRoot = this.getModalContextRoot();
             if (!modalContextRoot.isAncestorOf(newValue)) {
                 // Reject request to focus component outside of modal context.
-                Core.Debug.consoleWrite("not in modal:" + newValue);
                 return;
             }
         }
@@ -424,7 +422,7 @@ Echo.ComponentFactory = {
     newInstance: function(typeName, renderId) {
         var typeConstructor = this._typeToConstructorMap[typeName];
         if (!typeConstructor) {
-            throw new Error("Type not registered: " + typeName);
+            throw new Error("Type not registered with ComponentFactory: " + typeName);
         }
         var component = new typeConstructor();
         component.renderId = renderId;
@@ -452,7 +450,7 @@ Echo.ComponentFactory = {
     getSuperType: function(typeName) {
         var typeConstructor = this._typeToConstructorMap[typeName];
         if (!typeConstructor) {
-            throw new Error("Type not found: " + typeName + ".");
+            throw new Error("Type not registered with ComponentFactory: " + typeName);
         }
         if (typeConstructor.$super) {
             return typeConstructor.$super.prototype.componentType;
@@ -675,6 +673,14 @@ Echo.Component = Core.extend({
         if (this.application) {
             component.register(this.application);
             this.application.notifyComponentUpdate(this, "children", null, component);
+        }
+        
+        if (component._listenerList && component._listenerList.hasListeners("parent")) {
+            component._listenerList.fireEvent({type: "parent", source: component, oldValue: null, newValue: this});
+        }
+
+        if (this._listenerList && this._listenerList.hasListeners("children")) {
+            this._listenerList.fireEvent({type: "children", source: this, add: component, index: index});
         }
     },
     
@@ -956,9 +962,8 @@ Echo.Component = Core.extend({
         }
     
         if (!application) { // unregistering
-            
+            // Recursively unregister children.
             if (this.children != null) {
-                // Recursively unregister children.
                 for (var i = 0; i < this.children.length; ++i) {
                      this.children[i].register(false); // Recursively unregister children.
                 }
@@ -966,11 +971,16 @@ Echo.Component = Core.extend({
             
             // Notify application.
             this.application._unregisterComponent(this);
-            
+
             // Change application focus in the event the focused component is being removed.
             // Note that this is performed after deregistration to ensure any removed modal context is cleared.
             if (this.application._focusedComponent == this) {
                 this.application.setFocusedComponent(this.parent);
+            }
+
+            // Notify dispose listeners.
+            if (this._listenerList != null && this._listenerList.hasListeners("dispose")) {
+                this._listenerList.fireEvent({ type: "dispose", source: this });
             }
         }
     
@@ -978,7 +988,7 @@ Echo.Component = Core.extend({
         this.application = application;
     
         if (application) { // registering
-            
+            // Assign render id if required.
             if (this.renderId == null) {
                 this.renderId = "cl_" + ++Echo.Component._nextRenderId;
             }
@@ -986,8 +996,13 @@ Echo.Component = Core.extend({
             // Notify application.
             this.application._registerComponent(this);
             
+            // Notify init listeners.
+            if (this._listenerList != null && this._listenerList.hasListeners("init")) {
+                this._listenerList.fireEvent({ type: "init", source: this });
+            }
+
+            // Recursively register children.
             if (this.children != null) {
-                // Recursively register children.
                 for (var i = 0; i < this.children.length; ++i) {
                      this.children[i].register(application); // Recursively unregister children.
                 }
@@ -1085,6 +1100,14 @@ Echo.Component = Core.extend({
         
         if (this.application) {
             this.application.notifyComponentUpdate(this, "children", component, null);
+        }
+        
+        if (component._listenerList && component._listenerList.hasListeners("parent")) {
+            component._listenerList.fireEvent({type: "parent", source: component, oldValue: this, newValue: null});
+        }
+
+        if (this._listenerList && this._listenerList.hasListeners("children")) {
+            this._listenerList.fireEvent({type: "children", source: this, remove: component, index: index});
         }
     },
     
@@ -1524,7 +1547,7 @@ Echo.StyleSheet = Core.extend({
         }
         
         // Retrieve style for specific componentType.
-        style = typeToStyleMap[componentType];
+        var style = typeToStyleMap[componentType];
         if (style == null) {
             var testType = componentType;
             while (style == null) {
@@ -1699,7 +1722,7 @@ Echo.Update.ComponentUpdate = Core.extend({
      * This method is invoked when a component is removed that is an ancestor
      * of a component that has an update in the update manager.
      * 
-     * @param {Echo.Update.CompoenntUpdate} update the update from which to pull 
+     * @param {Echo.Update.CompoentUpdate} update the update from which to pull 
      *        removed components/descendants
      */
     _appendRemovedDescendants: function(update) {
@@ -1708,8 +1731,8 @@ Echo.Update.ComponentUpdate = Core.extend({
             if (this._removedDescendantIds == null) {
                 this._removedDescendantIds = [];
             }
-            for (var x in update._removedDescendantIds) {
-                this._removedDescendantIds.push(x);
+            for (var i = 0; i < update._removedDescendantIds.length; ++i) {
+                this._removedDescendantIds.push(update._removedDescendantIds[i]);
             }
         }
         
@@ -1718,8 +1741,8 @@ Echo.Update.ComponentUpdate = Core.extend({
             if (this._removedDescendantIds == null) {
                 this._removedDescendantIds = [];
             }
-            for (var x in update._removedChildIds) {
-                this._removedDescendantIds.push(x);
+            for (var i = 0; i < update._removedChildIds.length; ++i) {
+                this._removedDescendantIds.push(update._removedChildIds[i]);
             }
         }
         
@@ -1937,7 +1960,7 @@ Echo.Update.ComponentUpdate = Core.extend({
     
     /**
      * Records the removal of a descendant of the parent component.
-     * All children of a removed compoennt are recorded as removed
+     * All children of a removed compoent are recorded as removed
      * descendants when the child is removed.
      * This method will recursively invoke itself on children of
      * the specified descendant.
@@ -2824,7 +2847,7 @@ Echo.SplitPane = Core.extend(Echo.Component, {
         ORIENTATION_VERTICAL_TOP_BOTTOM: 4,
         ORIENTATION_VERTICAL_BOTTOM_TOP: 5,
         
-        DEFAULT_SEPARATOR_POSITION: 100,
+        DEFAULT_SEPARATOR_POSITION: "50%",
         DEFAULT_SEPARATOR_SIZE_FIXED: 0,
         DEFAULT_SEPARATOR_SIZE_RESIZABLE: 4,
         DEFAULT_SEPARATOR_COLOR: "#3f3f4f",
@@ -2884,6 +2907,16 @@ Echo.TextComponent = Core.extend(Echo.Component, {
         Echo.ComponentFactory.registerType("TC", this);
     },
 
+    $virtual: {
+        
+        /**
+         * Programatically performs a text component action.
+         */
+        doAction: function() {
+            this.fireEvent({type: "action", source: this, actionCommand: this.get("actionCommand")});
+        }
+    },
+
     componentType: "TextComponent",
     focusable: true
 });
@@ -2934,7 +2967,10 @@ Echo.PasswordField = Core.extend(Echo.TextField, {
  * @sp {#FillImageBorder} border the border frame containing thw WindowPane
  * @sp {Boolean} closable flag indicating whether the window is closable
  * @sp {#ImageReference} closeIcon the close button icon
+ * @sp {#Insets} controlsInsets the inset margin around the controls area
  * @sp {#Insets} closeIconInsets the inset margin around the close button icon
+ * @sp {#Insets} maximizeIconInsets the inset margin around the maximize button icon
+ * @sp {#Insets} minimizeIconInsets the inset margin around the minimize button icon
  * @sp {#Extent} height the outside height of the window, including its border
  * @sp {#ImageReference} icon the icon to display adjacent the window title
  * @sp {#Insets} iconInsets the inset margin around the icon

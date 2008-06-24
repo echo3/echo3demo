@@ -1,8 +1,7 @@
 /**
  * @fileoverview
  * <ul> 
- *  <li>Provides core property renderers.</li>
- *  <li>Provides property rendering utilities.</li>
+ *  <li>Provides property rendering utilities for core properties.</li>
  *  <li>Provides TriCellTable rendering utility (used by buttons and labels).</li>
  *  <li>Provides a floating pane z-index management system.</li> 
  * </ul>
@@ -177,30 +176,17 @@ Echo.Sync.Border = {
                 }
             }
         } else {
-            if (border.top) {
-                if (border.right) {
-                    // Top and right specified: render top and right directly.
-                    this.render(border.top, element, styleName + "Top");
-                    this.render(border.right, element, styleName + "Right");
-                    if (border.bottom) {
-                        // Bottom specified: render.
-                        this.render(border.bottom, element, styleName + "Bottom");
-                    } else {
-                        // Bottom not specified: render top as bottom.
-                        this.render(border.top, element, styleName + "Bottom");
-                    }
-                    if (border.left) {
-                        // Left specified: render.
-                        this.render(border.left, element, styleName + "Left");
-                    } else {
-                        // Left not specified: render right as left.
-                        this.render(border.right, element, styleName + "Left");
-                    }
-                } else {
-                    // Right not specified: just render entire border using top.
-                    this.render(border.top, element, styleName);
-                }
+            this.render(border.top, element, styleName + "Top");
+            if (border.right !== null) {
+                this.render(border.right || border.top, element, styleName + "Right");
             }
+            if (border.bottom !== null) {
+                this.render(border.bottom || border.top, element, styleName + "Bottom");
+            }
+            if (border.left !== null) {
+                this.render(border.left || border.right || border.top, element, styleName + "Left");
+            }
+            
         }
     },
     
@@ -746,7 +732,7 @@ Echo.Sync.TriCellTable = Core.extend({
             tableElement.style.borderCollapse = "collapse";
             tableElement.style.padding = "0";
             
-            tbodyElement = document.createElement("tbody");
+            var tbodyElement = document.createElement("tbody");
             tableElement.appendChild(tbodyElement);
             
             return tableElement;
@@ -822,8 +808,11 @@ Echo.Sync.TriCellTable = Core.extend({
     
     addSpacer: function(parentElement, size, vertical) {
         var divElement = document.createElement("div");
-        divElement.style.width = vertical ? "1px" : size + "px";
-        divElement.style.height = vertical ? size + "px" : "1px";
+        if (vertical) {
+            divElement.style.cssText = "width:1px;height:" + size + "px;font-size:1px;line-height:0;";
+        } else {
+            divElement.style.cssText = "width:" + size + "px;height:1px;font-size:1px;line-height:0;";
+        }
         parentElement.appendChild(divElement);
     },
     

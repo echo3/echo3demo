@@ -418,6 +418,11 @@ Extras.Sync.Menu.RenderedMenu = Core.extend({
                     menuItemContentTdElement.colSpan = 2;
                 }
             } else if (item instanceof Extras.SeparatorModel) {
+                if (i == 0 || i == items.length - 1 || items[i - 1] instanceof Extras.SeparatorModel
+                       ||  items[i + 1] instanceof Extras.SeparatorModel) {
+                    // Ignore separators at zero position.
+                    continue;
+                }
                 var menuItemTrElement = document.createElement("tr");
                 menuTbodyElement.appendChild(menuItemTrElement);
                 var menuItemContentTdElement = document.createElement("td");
@@ -624,7 +629,7 @@ Extras.Sync.ContextMenu = Core.extend(Extras.Sync.Menu, {
             
             var reOpenMenu = this.maskDeployed && (modelUpdate || stateModelUpdate);
             if (reOpenMenu) {
-	            this.deactivate();
+                this.deactivate();
             }
             if (modelUpdate) {
                 this.menuModel = modelUpdate.newValue;
@@ -633,7 +638,7 @@ Extras.Sync.ContextMenu = Core.extend(Extras.Sync.Menu, {
                 this.stateModel = stateModelUpdate.newValue;
             }
             if (reOpenMenu) {
-	            this.activate();
+                this.activate();
                 this.activateItem(this.menuModel);
             }
             return false;
@@ -751,7 +756,7 @@ Extras.Sync.DropDownMenu = Core.extend(Extras.Sync.Menu, {
             Echo.Sync.Insets.render(insets, this._containerDivElement, "padding");
             if (height) {
                 var insetsPx = Echo.Sync.Insets.toPixels(insets);
-                var compensatedHeight = Math.max(0, Echo.Sync.Extent.toPixels(height) - insetsPx.top - insetsPx.top);
+                var compensatedHeight = Math.max(0, Echo.Sync.Extent.toPixels(height) - insetsPx.top - insetsPx.bottom);
                 this._containerDivElement.style.height = compensatedHeight + "px";
             }
         } else {

@@ -26,6 +26,8 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
      */
     _input: null,
     
+    _text: null,
+    
     _renderStyle: function() {
         if (this.component.isRenderEnabled()) {
             Echo.Sync.Border.render(this.component.render("border"), this._input);
@@ -44,10 +46,15 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
             Echo.Sync.FillImage.render(Echo.Sync.getEffectProperty(this.component, 
                     "backgroundImage", "disabledBackgroundImage", true), this._input);
         }
+        Echo.Sync.Alignment.render(this.component.render("alignment"), this._input, false, null);
         Echo.Sync.Insets.render(this.component.render("insets"), this._input, "padding");
         var width = this.component.render("width");
         if (width) {
-            this._input.style.width = width.toString();
+            if (width == "100%") {
+                this._input.style.width = "95%";
+            } else {
+                this._input.style.width = width.toString();
+            }
         }
         var height = this.component.render("height");
         if (height) {
@@ -64,6 +71,17 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
         Core.Web.Event.add(this._input, "blur", Core.method(this, this._processBlur), false);
         Core.Web.Event.add(this._input, "keypress", Core.method(this, this._processKeyPress), false);
         Core.Web.Event.add(this._input, "keyup", Core.method(this, this._processKeyUp), false);
+    },
+    
+    renderDisplay: function() {
+        var width = this.component.render("width");
+        if (width == "100%" && this._input.parentNode.offsetWidth) {
+            var border = this.component.render("border");
+            var borderSize = Echo.Sync.Border.getPixelSize(this.component.render("border", "2px solid #000000"), "left")
+                    + Echo.Sync.Border.getPixelSize(this.component.render("border", "2px solid #000000"), "right") + 1;
+            var adjustedPercent = 100 - Math.ceil(100 * borderSize / this._input.parentNode.offsetWidth);
+            this._input.style.width = (adjustedPercent > 75 ? adjustedPercent : 75) + "%";
+        }
     },
     
     renderDispose: function(update) {
@@ -107,8 +125,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
         
         this.component.set("text", this._text);
         if (e.keyCode == 13) {
-            //FIXME fire from component.
-            this.component.fireEvent({type: "action", source: this.component});
+            this.component.doAction();
         }
         return true;
     },
@@ -131,10 +148,13 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
             if (update.hasUpdatedProperties()) {
                 var textUpdate = update.getUpdatedProperty("text");
                 if (textUpdate && textUpdate.newValue != this._text) {
-                    this._input.value = textUpdate.newValue;
+                    this._input.value = textUpdate.newValue == null ? "" : textUpdate.newValue;
                 }
             }
         }
+        
+        // Store text in local value.
+        this._text = this.component.get("text");
         
         return false; // Child elements not supported: safe to return false.
     }
@@ -156,7 +176,7 @@ Echo.Sync.TextArea = Core.extend(Echo.Sync.TextComponent, {
         this._input.style.overflow = "auto";
         this._addEventHandlers(this._input);
         if (this.component.get("text")) {
-            this._input.value = this.component.get("text");
+            this._text = this._input.value = this.component.get("text");
         }
         parentElement.appendChild(this._input);
     }
@@ -191,7 +211,7 @@ Echo.Sync.TextField = Core.extend(Echo.Sync.TextComponent, {
         this._renderStyle(this._input);
         this._addEventHandlers(this._input);
         if (this.component.get("text")) {
-            this._input.value = this.component.get("text");
+            this._text = this._input.value = this.component.get("text");
         }
         parentElement.appendChild(this._input);
     },

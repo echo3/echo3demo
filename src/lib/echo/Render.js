@@ -256,7 +256,6 @@ Echo.Render = {
             // if property updates are present.
             if (updates[i].renderContext.displayRequired) {
                 for (var j = 0; j < updates[i].renderContext.displayRequired.length; ++j) {
-                    Core.Debug.consoleWrite("PartialRenderUpdate:" + updates[i].renderContext.displayRequired[j]);
                     Echo.Render._doRenderDisplay(updates[i].renderContext.displayRequired[j], true);
                 }
             } else {
@@ -281,11 +280,7 @@ Echo.Render = {
         
         // Perform focus update if required.
         if (client.focusUpdateRequired) {
-            var focusedComponent = client.application.getFocusedComponent();
-            if (focusedComponent && focusedComponent.peer && focusedComponent.peer.renderFocus) {
-                focusedComponent.peer.renderFocus();
-                client.focusUpdateRequired = false;
-            }
+            Echo.Render.updateFocus(client);
         }
     },
     
@@ -401,6 +396,21 @@ Echo.Render = {
         component.peer.client = null;
         component.peer.component = null;
         component.peer = null;
+    },
+
+    /**
+     * Focuses the currently focused component of the application.  
+     *
+     * This method may be necessary to invoke manually by component renderers
+     * that use animation and may be hiding the focused component (such that
+     * the client browser will not focus it) when processUpdates() completes. 
+     */
+    updateFocus: function(client) {
+        var focusedComponent = client.application.getFocusedComponent();
+        if (focusedComponent && focusedComponent.peer && focusedComponent.peer.renderFocus) {
+            focusedComponent.peer.renderFocus();
+            client.focusUpdateRequired = false;
+        }
     }
 };
 
