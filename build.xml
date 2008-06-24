@@ -1,0 +1,70 @@
+<project name="Echo3Demo" default="compress" basedir=".">
+    <target name="clean">
+        <delete dir="out"/>
+    </target>
+    <target name="compress" depends="clean">
+        <concat destfile="out/Concat.js" fixlastline="true">
+            <filelist dir="src/lib/corejs/">
+                <file name="Core.js"/>
+                <file name="Core.Web.js"/>
+            </filelist>
+            <filelist dir="src/lib/echo/">
+                <file name="Application.js"/>
+                <file name="Render.js"/>
+                <file name="ApplicationRender.js"/>
+                <file name="Serial.js"/>
+                <file name="Client.js"/>
+                <file name="FreeClient.js"/>
+                <file name="Arc.js"/>
+                <file name="Render.ArrayContainer.js"/>
+                <file name="Render.Button.js"/>
+                <file name="Render.ContentPane.js"/>
+                <file name="Render.Grid.js"/>
+                <file name="Render.Label.js"/>
+                <file name="Render.List.js"/>
+                <file name="Render.SplitPane.js"/>
+                <file name="Render.TextComponent.js"/>
+                <file name="Render.WindowPane.js"/>
+            </filelist>
+            <filelist dir="src/lib/extras/">
+                <file name="Extras.js"/>
+                <file name="Application.AccordionPane.js"/>
+                <file name="Render.AccordionPane.js"/>
+                <file name="Application.Menu.js"/>
+                <file name="Render.Menu.js"/>
+                <file name="Application.TransitionPane.js"/>
+                <file name="Render.TransitionPane.js"/>
+                <file name="Application.TabPane.js"/>
+                <file name="Render.TabPane.js"/>
+                <file name="Application.ColorSelect.js"/>
+                <file name="Render.ColorSelect.js"/>
+                <file name="Application.RichTextArea.js"/>
+                <file name="Render.RichTextArea.js"/>
+                <file name="Application.ToolTipContainer.js"/>
+                <file name="Render.ToolTipContainer.js"/>
+            </filelist>
+            <filelist dir="src/app/">
+                <file name="Main.js"/>
+                <file name="Default.StyleSheet.js"/>
+                <file name="Messages.js"/>
+                <file name="WelcomeScreen.js"/>
+                <file name="WindowPaneScreen.js"/>
+                <file name="SplitPaneScreen.js"/>
+                <file name="BasicComponentsScreen.js"/>
+                <file name="LayoutContainersScreen.js"/>
+                <file name="JSDevelopmentScreen.js"/>
+                <file name="JavaDevelopmentScreen.js"/>
+                <file name="AccordionPaneScreen.js"/>
+                <file name="TabPaneScreen.js"/>
+                <file name="RichTextScreen.js"/>
+            </filelist>
+        </concat>
+        <java fork="true" jar="build-lib/yuicompressor-2.3.5.jar" output="out/AppCompressed.js">
+            <arg value="out/Concat.js"/>
+        </java>
+        <delete file="out/Concat.js"/>
+        <copy todir="out/">
+            <fileset dir="src/"/>
+        </copy>
+    </target>
+</project>
