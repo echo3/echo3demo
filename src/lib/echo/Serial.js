@@ -427,9 +427,10 @@ Echo.Serial.addPropertyTranslator("AL", Echo.Serial.Alignment);
 Echo.Serial.Border = {
 
     toProperty: function(client, propertyElement) {
-        var value = propertyElement.getAttribute("v");
-        if (value) {
-            return value;
+	    if (propertyElement.firstChild.nodeType == 3) { // Text content
+	        return propertyElement.firstChild.data;
+	    } else if (propertyElement.getAttribute("v")) {
+            return propertyElement.getAttribute("v");
         } else {
             var element = Core.Web.DOM.getChildElementByTagName(propertyElement, "b");
             var border = {};
@@ -569,10 +570,10 @@ Echo.Serial.Font = {
         if (tfElements.length > 1) {
             font.typeface = new Array(tfElements.length);
             for (var i = 0; i < tfElements.length; ++i) {
-                font.typeface[i] = tfElements[i].getAttribute("n");
+                font.typeface[i] = tfElements[i].firstChild.data;
             }
         } else if (tfElements.length == 1) {
-            font.typeface = tfElements[0].getAttribute("n");
+            font.typeface = tfElements[0].firstChild.data;
         }
         
         var size = element.getAttribute("sz");
@@ -600,20 +601,26 @@ Echo.Serial.addPropertyTranslator("F", Echo.Serial.Font);
 Echo.Serial.ImageReference = {
 
     toProperty: function(client, propertyElement) {
-        var url = propertyElement.firstChild.data;
-        if (client.decompressUrl) {
-            url = client.decompressUrl(url);
-        }
-        var width = propertyElement.getAttribute("w");
-        width = width ? width : null;
-        var height = propertyElement.getAttribute("h");
-        height = height ? height : null;
-        
-        if (width || height) {
-            return { url: url, width: width, height: height };
-        } else {
-            return url;
-        }
+	    if (propertyElement.firstChild.nodeType == 1) {
+	    	var iElement = propertyElement.firstChild;
+	        var url = iElement.firstChild.data;
+	        if (client.decompressUrl) {
+	            url = client.decompressUrl(url);
+	        }
+	        var width = iElement.getAttribute("w");
+	        width = width ? width : null;
+	        var height = iElement.getAttribute("h");
+	        height = height ? height : null;
+	        
+	        if (width || height) {
+	            return { url: url, width: width, height: height };
+	        } else {
+	            return url;
+	        }
+	    } else {
+	    	var url = propertyElement.firstChild.data;
+	    	return client.decompressUrl ? client.decompressUrl(url) : url;
+	    }
     }
 };
 

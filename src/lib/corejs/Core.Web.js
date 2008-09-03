@@ -5,8 +5,8 @@
  *  <li>Provides cross-platform API for accessing web client features that have
  *   inconsistent implementations on various browser platforms.</li>
  *  <li>Provides HTTP Connection object (wrapper for XMLHttpRequest).</li>
- *  <li>Provides HTML DOM manipulation capabilites.</li>
- *  <li>Provides DOM event mangement facility, enabling capturing/bubbling phases
+ *  <li>Provides HTML DOM manipulation capabilities.</li>
+ *  <li>Provides DOM event management facility, enabling capturing/bubbling phases
  *   on all browsers, including Internet Explorer 6.</li>
  *  <li>Provides "virtual positioning" capability for Internet Explorer 6 to
  *   render proper top/left/right/bottom CSS positioning.</li>
@@ -115,7 +115,15 @@ Core.Web.DOM = {
     createDocument: function(namespaceUri, qualifiedName) {
         if (document.implementation && document.implementation.createDocument) {
             // DOM Level 2 Browsers
-            var dom = document.implementation.createDocument(namespaceUri, qualifiedName, null);
+            var dom;
+            if (Core.Web.Env.BROWSER_FIREFOX && Core.Web.Env.BROWSER_MAJOR_VERSION == 3 
+                    && Core.Web.Env.BROWSER_MINOR_VERSION == 0) {
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=431701
+                dom = new DOMParser().parseFromString("<?xml version='1.0' encoding='UTF-8'?><" + qualifiedName + "/>",
+                        "application/xml");
+            } else {
+                dom = document.implementation.createDocument(namespaceUri, qualifiedName, null);
+            }
             if (!dom.documentElement) {
                 dom.appendChild(dom.createElement(qualifiedName));
             }
@@ -394,16 +402,17 @@ Core.Web.Env = {
     _init: function() {
         var ua = navigator.userAgent.toLowerCase();
         this.BROWSER_OPERA = ua.indexOf("opera") != -1;
-        this.BROWSER_SAFARI = ua.indexOf("safari") != -1;
         this.BROWSER_KONQUEROR = ua.indexOf("konqueror") != -1;
         this.BROWSER_FIREFOX = ua.indexOf("firefox") != -1;
+        this.BROWSER_CHROME = ua.indexOf("chrome") != -1;
+        this.BROWSER_SAFARI = !this.BROWSER_CHROME && ua.indexOf("safari") != -1;
         
         this.CSS_FLOAT = "cssFloat";
     
         // Note deceptive user agent fields:
         // - Konqueror and Safari UA fields contain "like Gecko"
         // - Opera UA field typically contains "MSIE"
-        this.DECEPTIVE_USER_AGENT = this.BROWSER_OPERA || this.BROWSER_SAFARI || this.BROWSER_KONQUEROR;
+        this.DECEPTIVE_USER_AGENT = this.BROWSER_OPERA || this.BROWSER_SAFARI || this.BROWSER_CHROME || this.BROWSER_KONQUEROR;
         
         this.BROWSER_MOZILLA = !this.DECEPTIVE_USER_AGENT && ua.indexOf("gecko") != -1;
         this.BROWSER_INTERNET_EXPLORER = !this.DECEPTIVE_USER_AGENT && ua.indexOf("msie") != -1;
@@ -415,6 +424,8 @@ Core.Web.Env = {
             this._parseVersionInfo(ua, "firefox/");
         } else if (this.BROWSER_OPERA) {
             this._parseVersionInfo(ua, "opera/");
+        } else if (this.BROWSER_CHROME) {
+            this._parseVersionInfo(ua, "chrome/");
         } else if (this.BROWSER_SAFARI) {
             this._parseVersionInfo(ua, "version/");
         } else if (this.BROWSER_MOZILLA) {
@@ -422,7 +433,7 @@ Core.Web.Env = {
         } else if (this.BROWSER_KONQUEROR) {
             this._parseVersionInfo(ua, "konqueror/");
         }
-    
+
         //FIXME Quirk flags not refined yet, some quirk flags from Echo 2.0/1 will/may be deprecated/removed.
                 
         // Set IE Quirk Flags
@@ -433,6 +444,7 @@ Core.Web.Env = {
             this.PROPRIETARY_EVENT_SELECT_START_SUPPORTED = true;
             this.QUIRK_IE_KEY_DOWN_EVENT_REPEAT = true;
             this.CSS_FLOAT = "styleFloat";
+            this.QUIRK_DELAYED_FOCUS_REQUIRED = true;
             
             if (this.BROWSER_MAJOR_VERSION < 8) {
                 // Internet Explorer 6 and 7 Flags.
@@ -441,7 +453,6 @@ Core.Web.Env = {
                 this.QUIRK_IE_REPAINT = true;
                 this.QUIRK_TEXTAREA_CONTENT = true;
                 this.QUIRK_IE_TEXTAREA_NEWLINE_OBLITERATION = true;
-                this.QUIRK_IE_SELECT_LIST_DOM_UPDATE = true;
                 this.QUIRK_CSS_BORDER_COLLAPSE_INSIDE = true;
                 this.QUIRK_CSS_BORDER_COLLAPSE_FOR_0_PADDING = true;
                 this.NOT_SUPPORTED_CSS_OPACITY = true;
@@ -451,12 +462,12 @@ Core.Web.Env = {
                 
                 if (this.BROWSER_MAJOR_VERSION < 7) {
                     // Internet Explorer 6 Flags.
+                    this.QUIRK_IE_SELECT_LIST_DOM_UPDATE = true;
                     this.QUIRK_CSS_POSITIONING_ONE_SIDE_ONLY = true;
                     this.PROPRIETARY_IE_PNG_ALPHA_FILTER_REQUIRED = true;
                     this.QUIRK_CSS_BACKGROUND_ATTACHMENT_USE_FIXED = true;
                     this.QUIRK_IE_SELECT_Z_INDEX = true;
                     this.NOT_SUPPORTED_CSS_MAX_HEIGHT = true;
-                    this.QUIRK_DELAYED_FOCUS_REQUIRED = true;
                     
                     // Enable 'garbage collection' on large associative arrays to avoid memory leak.
                     Core.Arrays.LargeMap.garbageCollectEnabled = true;
@@ -473,6 +484,10 @@ Core.Web.Env = {
             }
         } else if (this.BROWSER_OPERA) {
             this.NOT_SUPPORTED_RELATIVE_COLUMN_WIDTHS = true;
+        } else if (this.BROWSER_SAFARI) {
+            this.QUIRK_SAFARI_DOM_TEXT_ESCAPE = true;
+        } else if (this.BROWSER_CHROME) {
+            this.QUIRK_SAFARI_DOM_TEXT_ESCAPE = true;
         }
     },
     
@@ -576,7 +591,7 @@ Core.Web.Event = {
             }
         }
     },
-
+    
     /**
      * Next available sequentially assigned element identifier.
      * Elements are assigned unique identifiers to enable mapping between 
@@ -658,12 +673,13 @@ Core.Web.Event = {
      */
     _processEvent: function(e) {
         e = e ? e : window.event;
+
         if (!e.target && e.srcElement) {
             // The Internet Explorer event model stores the target element in the 'srcElement' property of an event.
             // Modify the event such the target is retrievable using the W3C DOM Level 2 specified property 'target'.
             e.target = e.srcElement;
         }
-        
+
         // Establish array containing elements ancestry, with index 0 containing 
         // the element and the last index containing its most distant ancestor.  
         // Only record elements that have ids.
@@ -675,11 +691,11 @@ Core.Web.Event = {
             }
             targetElement = targetElement.parentNode;
         }
-    
+
         var listenerList;
-        
+
         var propagate = true;
-        
+
         // Fire event to capturing listeners.
         for (var i = elementAncestry.length - 1; i >= 0; --i) {
             listenerList = Core.Web.Event._capturingListenerMap.map[elementAncestry[i].__eventProcessorId];
@@ -687,29 +703,24 @@ Core.Web.Event = {
                 // Set registered target on event.
                 e.registeredTarget = elementAncestry[i];
                 if (!listenerList.fireEvent(e)) {
+                    // Stop propagation if requested.
                     propagate = false;
+                    break;
                 }
             }
-            if (!propagate) {
-                // Stop propagation if requested.
-                break;
-            }
         }
-        
+
         if (propagate) {
             // Fire event to bubbling listeners.
             for (var i = 0; i < elementAncestry.length; ++i) {
                 listenerList = Core.Web.Event._bubblingListenerMap.map[elementAncestry[i].__eventProcessorId];
-                // Set registered target on event.
-                e.registeredTarget = elementAncestry[i];
                 if (listenerList) {
+                    // Set registered target on event.
+                    e.registeredTarget = elementAncestry[i];
                     if (!listenerList.fireEvent(e)) {
-                        propagate = false;
+                        // Stop propagation if requested.
+                        break;
                     }
-                }
-                if (!propagate) {
-                    // Stop propagation if requested.
-                    break;
                 }
             }
         }
@@ -799,7 +810,7 @@ Core.Web.Event = {
      * toString() implementation for debugging purposes.
      * Displays contents of capturing and bubbling listener maps.
      * 
-     * @return string represenation of listener maps
+     * @return string representation of listener maps
      * @type String
      */
     toString: function() {
@@ -844,8 +855,28 @@ Core.Web.HttpConnection = Core.extend({
         this._url = url;
         this._contentType = contentType;
         this._method = method;
+        if (Core.Web.Env.QUIRK_SAFARI_DOM_TEXT_ESCAPE && messageObject instanceof Document) {
+            this._preprocessSafariDOM(messageObject.documentElement);
+        }
+        
         this._messageObject = messageObject;
         this._listenerList = new Core.ListenerList();
+    },
+    
+    _preprocessSafariDOM: function(node) {
+        if (node.nodeType == 3) {
+            var value = node.data;
+            value = value.replace(/&/g, "&amp;");
+            value = value.replace(/</g, "&lt;");
+            value = value.replace(/>/g, "&gt;");
+            node.data = value;
+        } else {
+            var child = node.firstChild;
+            while (child) {
+                this._preprocessSafariDOM(child);
+                child = child.nextSibling;
+            }
+        }
     },
     
     /**
@@ -959,8 +990,10 @@ Core.Web.HttpConnection = Core.extend({
                 responseEvent = {type: "response", source: this, valid: false, exception: ex};
             }
             
-            this._listenerList.fireEvent(responseEvent);
-            this.dispose();
+            Core.Web.Scheduler.run(Core.method(this, function() {
+                this._listenerList.fireEvent(responseEvent);
+                this.dispose();
+            }));
         }
     },
     
@@ -1136,7 +1169,7 @@ Core.Web.Library = {
         },
         
         /**
-         * Event listener for response from the HttpConnection used to retrive the library.
+         * Event listener for response from the HttpConnection used to retrieve the library.
          * 
          * @param e the event
          * @private
@@ -1302,7 +1335,7 @@ Core.Web.Measure = {
      * Measures the scrollbar offset of an element, including any
      * scroll-bar related offsets of its ancestors.
      * 
-     * @param element the elemnt to measure
+     * @param element the element to measure
      * @return the offset data, with 'left' and 'top' properties specifying the offset amounts
      * @type Object
      * @private
@@ -1479,14 +1512,17 @@ Core.Web.Scheduler = {
         Core.Arrays.remove(Core.Web.Scheduler._runnables, runnable);
         runnable._nextExecution = new Date().getTime() + (runnable.timeInterval ? runnable.timeInterval : 0);
         Core.Web.Scheduler._runnables.push(runnable);
-        Core.Web.Scheduler._start(runnable._nextExecution);
+        Core.Web.Scheduler._setTimeout(runnable._nextExecution);
     },
 
     /**
      * Executes the scheduler, running any runnables that are due.
-     * This method is invoked by the interval/thread.
+     * DESIGN NOTE: this method MUST ONLY be invoked by the timeout handle Core.Web.Scheduler._threadHandle.
      */
     _execute: function() {
+        // Mark now-defunct timeout thread handle as null, because this method was invoked by it.
+        Core.Web.Scheduler._threadHandle = null;
+        
         var currentTime = new Date().getTime();
         var nextInterval = Number.MAX_VALUE;
         
@@ -1541,10 +1577,7 @@ Core.Web.Scheduler = {
         Core.Web.Scheduler._runnables = newRunnables;
         
         if (nextInterval < Number.MAX_VALUE) {
-            Core.Web.Scheduler._nextExecution = currentTime + nextInterval;
-            Core.Web.Scheduler._threadHandle = window.setTimeout(Core.Web.Scheduler._execute, nextInterval);
-        } else {
-            Core.Web.Scheduler._threadHandle = null;
+            Core.Web.Scheduler._setTimeout(currentTime + nextInterval);
         }
     },
     
@@ -1561,7 +1594,7 @@ Core.Web.Scheduler = {
     /**
      * Creates a new Runnable that executes the specified method and enqueues it into the scheduler.
      * 
-     * @param {Number} time the time interval, in milleseconds, after which the Runnable should be executed
+     * @param {Number} time the time interval, in milliseconds, after which the Runnable should be executed
      *        (may be null/undefined to execute task immediately, in such cases repeat must be false)
      * @param {Boolean} repeat a flag indicating whether the task should be repeated
      * @param f a function to invoke, may be null/undefined
@@ -1575,35 +1608,25 @@ Core.Web.Scheduler = {
     },
     
     /**
-     * Starts the scheduler "thread".
-     * If the scheduler is already running, no action is taken.
+     * Starts the scheduler "thread", to execute at the specified time.
+     * If the specified time is in the past, it will execute with a delay of 0.
      * @private
      */
-    _start: function(nextExecution) {
-        var currentTime = new Date().getTime();
-        if (Core.Web.Scheduler._threadHandle == null) {
-            Core.Web.Scheduler._nextExecution = nextExecution;
-            Core.Web.Scheduler._threadHandle = window.setTimeout(Core.Web.Scheduler._execute, nextExecution - currentTime);
-        } else if (nextExecution < Core.Web.Scheduler._nextExecution) { 
-            // Cancel current timeout, start new timeout.
-            window.clearTimeout(Core.Web.Scheduler._threadHandle);
-            Core.Web.Scheduler._nextExecution = nextExecution;
-            Core.Web.Scheduler._threadHandle = window.setTimeout(Core.Web.Scheduler._execute, nextExecution - currentTime);
-        }
-    },
-    
-    /**
-     * Stops the scheduler "thread".
-     * If the scheduler is not running, no action is taken.
-     * @private
-     */
-    _stop: function() {
-        if (Core.Web.Scheduler._threadHandle == null) {
+    _setTimeout: function(nextExecution) {
+        if (Core.Web.Scheduler._threadHandle != null && Core.Web.Scheduler._nextExecution < nextExecution) {
+            // The current timeout will fire before nextExecution, thus no work needs to be done here.
             return;
         }
-        window.clearTimeout(Core.Web.Scheduler._threadHandle);
-        Core.Web.Scheduler._threadHandle = null;
-        Core.Web.Scheduler._nextExecution = null;
+        
+        if (Core.Web.Scheduler._threadHandle != null) {
+            // Clear any existing timeout.
+            window.clearTimeout(Core.Web.Scheduler._threadHandle);
+        }
+        
+        var currentTime = new Date().getTime();
+        Core.Web.Scheduler._nextExecution = nextExecution;
+        var timeout = nextExecution - currentTime > 0 ? nextExecution - currentTime : 0;
+        Core.Web.Scheduler._threadHandle = window.setTimeout(Core.Web.Scheduler._execute, timeout);
     },
     
     update: function(runnable) {
@@ -1613,7 +1636,7 @@ Core.Web.Scheduler = {
         var currentTime = new Date().getTime();
         var timeInterval = runnable.timeInterval ? runnable.timeInterval : 0;
         runnable._nextExecution = currentTime + timeInterval;
-        Core.Web.Scheduler._start(runnable._nextExecution);
+        Core.Web.Scheduler._setTimeout(runnable._nextExecution);
     }
 };
 
@@ -1627,7 +1650,7 @@ Core.Web.Scheduler.Runnable = Core.extend({
     $virtual: {
 
         /** 
-         * Time interval, in milleseconds after which the Runnable should be executed.
+         * Time interval, in milliseconds after which the Runnable should be executed.
          * @type Number
          */
         timeInterval: null,
@@ -1646,7 +1669,7 @@ Core.Web.Scheduler.Runnable = Core.extend({
 });
 
 /**
- * A runnable task implemenation that invokes a function at regular intervals.
+ * A runnable task implementation that invokes a function at regular intervals.
  */
 Core.Web.Scheduler.MethodRunnable = Core.extend(Core.Web.Scheduler.Runnable, {
 
@@ -1656,7 +1679,7 @@ Core.Web.Scheduler.MethodRunnable = Core.extend(Core.Web.Scheduler.Runnable, {
      * Creates a new Runnable.
      *
      * @constructor
-     * @param {Number} time the time interval, in milleseconds, after which the Runnable should be executed
+     * @param {Number} time the time interval, in milliseconds, after which the Runnable should be executed
      *        (may be null/undefined to execute task immediately, in such cases repeat must be false)
      * @param {Boolean} repeat a flag indicating whether the task should be repeated
      * @param {Function} f a function to invoke, may be null/undefined

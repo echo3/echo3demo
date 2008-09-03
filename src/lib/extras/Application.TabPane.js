@@ -43,6 +43,8 @@
  * @sp {#ImageReference} tabCloseIcon the tab close icon
  * @sp {#ImageReference} tabDisabledCloseIcon the tab close icon for tabs that may not be closed
  * @sp {#ImageReference} tabRolloverCloseIcon the tab close rollover effect icon
+ * @event tabClose An event fired when the user requests to close a tab.
+ * @event tabSelect An event fired when the user selects a tab. 
  */
 Extras.TabPane = Core.extend(Echo.Component, {
 
@@ -107,6 +109,27 @@ Extras.TabPane = Core.extend(Echo.Component, {
     },
 
     componentType: "Extras.TabPane",
-    pane: true
+    pane: true,
+    
+    /**
+     * Processes a request to close a tab.
+     * Notifies listeners of a "tabClose" event.
+     * 
+     * @param child the child tab component which is to be closed
+     */
+    doTabClose: function(child) {
+        this.fireEvent({ type: "tabClose", source: this, tab: child, data: child.renderId });
+    },
+
+    //FIXME. This method should manage active tab (not sync peer).
+    /**
+     * Processes a request to select a tab.
+     * Notifies listeners of a "tabSelect" event.
+     * 
+     * @param child the child tab component which is to be selected
+     */
+    doTabSelect: function(child) {
+        this.fireEvent({ type: "tabSelect", source: this, tab: child, data: child.renderId });        
+    }
 });
 

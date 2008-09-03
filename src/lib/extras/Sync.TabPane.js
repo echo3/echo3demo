@@ -434,8 +434,8 @@ Extras.Sync.TabPane.Tab = Core.extend({
         Core.Web.Event.Selection.disable(this._headerTd);
         
         if (this._tabCloseEnabled) {
-            Core.Web.Event.add(this._headerTd, "mouseover", 
-                    Core.method(this, this._processEnter), false);
+            Core.Web.Event.add(this._headerTd, "mouseover", Core.method(this, this._processEnter), false);
+            Core.Web.Event.add(this._headerTd, "mouseout", Core.method(this, this._processExit), false);
         }
     },
     
@@ -575,33 +575,35 @@ Extras.Sync.TabPane.Tab = Core.extend({
     },
     
     _processClick: function(e) {
-        if (!this._parent.component.isActive()) {
-            return;
+        if (!this._parent.client.verifyInput(this._parent.component)) {
+            return true;
         }
         if (this._closeImageTd && Core.Web.DOM.isAncestorOf(this._closeImageTd, e.target)) {
             // close icon clicked
             if (!this._tabCloseEnabled) {
                 return;
             }
-            this._parent.component.fireEvent({type: "tabClose", source: this._parent.component, 
-                    tab: this._childComponent, data: this._childComponent.renderId});
+            this._parent.component.doTabClose(this._childComponent);
         } else {
             // tab clicked
             this._parent._selectTab(this._childComponent.renderId);
             this._parent._setActiveTabId(this._childComponent.renderId);
-            this._parent.component.fireEvent({type: "tabSelect", source: this._parent.component, 
-                    tab: this._childComponent, data: this._childComponent.renderId});
+            this._parent.component.doTabSelect(this._childComponent);
         }
     },
     
     _processEnter: function(e) {
-        if (!this._parent.component.isActive()) {
-            return;
+        if (!this._parent.client.verifyInput(this._parent.component)) {
+            return true;
         }
         
         var rollover = Core.Web.DOM.isAncestorOf(this._closeImageTd, e.target);
-        
         this._closeImageTd.firstChild.src = Echo.Sync.ImageReference.getUrl(this._getCloseImage(rollover));
+    },
+    
+    _processExit: function(e) {
+        var rollover = Core.Web.DOM.isAncestorOf(this._closeImageTd, e.target);
+        this._closeImageTd.firstChild.src = Echo.Sync.ImageReference.getUrl(this._getCloseImage(false));
     },
     
     _render: function(update) {
