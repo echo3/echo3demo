@@ -481,7 +481,8 @@ Extras.Sync.TabPane.Tab = Core.extend({
         if (!image) {
             return;
         }
-        return { url: image, repeat: "no-repeat", x: 0, y: 0 };
+        var fillImage = { url: (image.url ? image.url : image), repeat: "no-repeat", x: 0, y: 0 };
+        return { width: (image.width ? image.width : null), fillImage: fillImage };
     },
     
     _getRightImage: function(state) {
@@ -490,7 +491,8 @@ Extras.Sync.TabPane.Tab = Core.extend({
         if (!image) {
             return;
         }
-        return { url: image, repeat: "no-repeat", x: "100%", y: 0 };
+        var fillImage = { url: (image.url ? image.url : image), repeat: "no-repeat", x: "100%", y: 0 };
+        return { width: (image.width ? image.width : null), fillImage: fillImage };
     },
     
     _highlight: function(state) {
@@ -546,7 +548,7 @@ Extras.Sync.TabPane.Tab = Core.extend({
     
         if (this._leftTd) {
             var leftImage = this._getLeftImage(state); 
-            Echo.Sync.FillImage.renderClear(leftImage, this._leftTd, null);
+            Echo.Sync.FillImage.renderClear(leftImage ? leftImage.fillImage : null, this._leftTd, null);
             if (leftImage && leftImage.width) {
                 this._leftTd.style.width = leftImage.width.toString();
             }
@@ -554,7 +556,7 @@ Extras.Sync.TabPane.Tab = Core.extend({
         
         if (this._rightTd) {
             var rightImage = this._getRightImage(state); 
-            Echo.Sync.FillImage.renderClear(rightImage, this._rightTd, null);
+            Echo.Sync.FillImage.renderClear(rightImage ? rightImage.fillImage : null, this._rightTd, null);
             if (rightImage && rightImage.width) {
                 this._rightTd.style.width = rightImage.width.toString();
             }
@@ -704,7 +706,7 @@ Extras.Sync.TabPane.Tab = Core.extend({
             var tbody = document.createElement("tbody");
             var tr = document.createElement("tr");
             if (icon) {
-                tr.appendChild(this._renderIconElement(icon));
+                tr.appendChild(this._renderIcon(icon));
             }
             var textTd = document.createElement("td");
             textTd.style.whiteSpace = "nowrap";
@@ -743,7 +745,7 @@ Extras.Sync.TabPane.Tab = Core.extend({
         return headerTd;
     },
     
-    _renderIconElement: function(icon) {
+    _renderIcon: function(icon) {
         var td = document.createElement("td");
         Echo.Sync.Alignment.render(this._parent.component.render("tabAlignment", 
                 Extras.Sync.TabPane._defaultTabAlignment), td, true, this._parent.component);
