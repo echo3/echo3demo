@@ -43,6 +43,7 @@ Core.Web = {
     
         Core.Web.Env._init();
         Core.Web.Measure._calculateExtentSizes();
+        Core.Web.Measure.Bounds._initMeasureContainer();
         if (Core.Web.Env.QUIRK_CSS_POSITIONING_ONE_SIDE_ONLY) {
             // Enable virtual positioning.
             Core.Web.VirtualPosition._init();
@@ -445,6 +446,7 @@ Core.Web.Env = {
             this.QUIRK_IE_KEY_DOWN_EVENT_REPEAT = true;
             this.CSS_FLOAT = "styleFloat";
             this.QUIRK_DELAYED_FOCUS_REQUIRED = true;
+            this.QUIRK_UNLOADED_IMAGE_HAS_SIZE = true;
             
             if (this.BROWSER_MAJOR_VERSION < 8) {
                 // Internet Explorer 6 and 7 Flags.
@@ -483,6 +485,9 @@ Core.Web.Env = {
                 this.QUIRK_DELAYED_FOCUS_REQUIRED = true;
             }
         } else if (this.BROWSER_OPERA) {
+            if (this.BROWSER_MAJOR_VERSION == 9 && this.BROWSER_MINOR_VERSION >= 50) {
+                this.QUIRK_OPERA_WINDOW_RESIZE_POSITIONING = true;
+            }
             this.NOT_SUPPORTED_RELATIVE_COLUMN_WIDTHS = true;
         } else if (this.BROWSER_SAFARI) {
             this.QUIRK_SAFARI_DOM_TEXT_ESCAPE = true;
@@ -1296,7 +1301,7 @@ Core.Web.Library = {
  * Namespace for measuring-related operations.
  * @class
  */
-Core.Web.Measure = { 
+Core.Web.Measure = {
 
     _scrollElements: ["div", "body"],
 
@@ -1317,6 +1322,12 @@ Core.Web.Measure = {
     
     /** Size of one 'em' in vertical pixels. */
     _vEm: 13.3333,
+    
+    /** Estimated scroll bar width. */
+    SCROLL_WIDTH: 17,
+    
+    /** Estimated scroll bar height. */
+    SCROLL_HEIGHT: 17,
 
     /**
      * Converts any non-relative extent value to pixels.
@@ -1425,6 +1436,16 @@ Core.Web.Measure = {
      */
     Bounds: Core.extend({
 
+        $static: {
+            _initMeasureContainer: function() {
+                // Create off-screen div element for evaluating sizes.
+                this._offscreenDiv = document.createElement("div");
+                this._offscreenDiv.style.cssText 
+                        = "position: absolute; top: -1300px; left: -1700px; width: 1600px; height: 1200px;";
+                document.body.appendChild(this._offscreenDiv);
+            }
+        },
+
         /**
          * The width of the element, in pixels.
          * @type Integer
@@ -1462,16 +1483,8 @@ Core.Web.Measure = {
             }
             var rendered = testElement == document;
             
-            // Create off-screen div element for evaluating sizes if necessary.
-            if (!Core.Web.Measure.Bounds._offscreenDiv) {
-                Core.Web.Measure.Bounds._offscreenDiv = document.createElement("div");
-                Core.Web.Measure.Bounds._offscreenDiv.style.cssText 
-                        = "position: absolute; top: -1700px; left: -1300px; width: 1600px; height: 1200px;";
-            }
-        
             var parentNode, nextSibling;
             if (!rendered) {
-                document.body.appendChild(Core.Web.Measure.Bounds._offscreenDiv);
                 // Element must be added to off-screen element for measuring.
                 
                 // Store parent node and next sibling such that element may be replaced into proper position
@@ -1499,7 +1512,6 @@ Core.Web.Measure = {
                 if (parentNode) {
                     parentNode.insertBefore(element, nextSibling);
                 }
-                document.body.removeChild(Core.Web.Measure.Bounds._offscreenDiv);
             }
             
             // Determine top and left positions of element if rendered on-screen.

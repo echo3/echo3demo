@@ -420,11 +420,46 @@ Echo.Render = {
 Echo.Render.ComponentSync = Core.extend({ 
 
     $static: {
+    
+        /**
+         * Focus flag indicating up arrow keypress events should be handled by focus manager when
+         * the component is focused.
+         */
         FOCUS_PERMIT_ARROW_UP: 0x1,
+
+        /**
+         * Focus flag indicating down arrow keypress events should be handled by focus manager when
+         * the component is focused.
+         */
         FOCUS_PERMIT_ARROW_DOWN: 0x2, 
+
+        /**
+         * Focus flag indicating left arrow keypress events should be handled by focus manager when
+         * the component is focused.
+         */
         FOCUS_PERMIT_ARROW_LEFT: 0x4,
+        
+        /**
+         * Focus flag indicating right arrow keypress events should be handled by focus manager when
+         * the component is focused.
+         */
         FOCUS_PERMIT_ARROW_RIGHT: 0x8, 
-        FOCUS_PERMIT_ARROW_ALL: 0xf
+
+        /**
+         * Focus flag indicating all arrow keypress events should be handled by focus manager when
+         * the component is focused.
+         */
+        FOCUS_PERMIT_ARROW_ALL: 0xf,
+        
+        /**
+         * Dimension value for <code>getPreferredSize()</code> indicating height should be calculated.
+         */
+        SIZE_HEIGHT: 0x1,
+        
+        /**
+         * Dimension value for <code>getPreferredSize()</code> indicating width should be calculated.
+         */
+        SIZE_WIDTH: 0x2
     },
 
     /**
@@ -453,10 +488,9 @@ Echo.Render.ComponentSync = Core.extend({
          * being updated.
          *
          * @param {Echo.Update.ComponentUpdate} update the update being rendered
+         * @param {Element} parentElement the parent DOM element to which the component should be rendered.
          */
-        renderAdd: function(update, parentElement) {
-            throw new Error("Operation \"renderAdd\" not supported (Component: " + this.component + ").");
-        },
+        renderAdd: function(update, parentElement) { },
 
         /**
          * Invoked when the rendered component is about to be removed from the DOM.
@@ -477,9 +511,7 @@ Echo.Render.ComponentSync = Core.extend({
          *        
          * @param {Echo.Update.ComponentUpdate} update the update being rendered
          */
-        renderDispose: function(update) {
-            throw new Error("Operation \"renderDispose\" not supported (Component: " + this.component + ").");
-        },
+        renderDispose: function(update) { },
         
         /**
          * Renders an update to a component, e.g., children added/removed, properties updated.
@@ -488,9 +520,7 @@ Echo.Render.ComponentSync = Core.extend({
          * @param {Echo.Update.ComponentUpdate} update the update being rendered
          * @return true if this invocation has re-rendered all child components, false otherwise
          */
-        renderUpdate: function(update) {
-            throw new Error("Operation \"renderUpdate\" not supported (Component: " + this.component + ").");
-        }
+        renderUpdate: function(update) { }
     },
     
     $virtual: {
@@ -498,12 +528,28 @@ Echo.Render.ComponentSync = Core.extend({
         getFocusFlags: null,
         
         /**
-         * Invoked when component is rendered focused.
+         * (Optional) Returns the preferred rendered size of the component in pixels.  Certain parent
+         * components may query this method during <code>renderDisplay()</code> to determine
+         * the space provided to the child component.  If implemented, this method should return
+         * an object containing height and/or width properties specifying integer pixel values.
+         * 
+         * @param dimension the dimension to be calculated, one of the following values, or null
+         *        to specify that all dimensions should be calculated:
+         *        <ul>
+         *         <li><code>SIZE_WIDTH</code></li>
+         *         <li><code>SIZE_HEIGHT</code></li>
+         *        </ul>
+         * @return the preferred rendered size of the component
+         */
+        getPreferredSize: null,
+        
+        /**
+         * (Optional) Invoked when component is rendered focused.
          */
         renderFocus: null,
         
         /**
-         * Optional method.  Invoked when the component has been added to the hierarchy and first appears
+         * (Optional) Invoked when the component has been added to the hierarchy and first appears
          * on screen, and when ancestors of the component (or the containing window) have
          * resized.         
          */

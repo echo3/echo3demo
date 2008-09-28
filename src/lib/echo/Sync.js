@@ -213,7 +213,7 @@ Echo.Sync.Border = {
                 return Echo.Sync.Extent.toPixels(extent);
             }
         } else if (typeof(border) == "object") {
-            // Retrieve value for indivudal side.
+            // Retrieve value for individual side.
             // Specified side is queried first, followed by alternatives.
             while (true) {
                 var side = this.getPixelSize(border[sideName]);
@@ -496,6 +496,21 @@ Echo.Sync.Font = {
     renderClear: function(font, element) {
         if (font) {
             this.render(font, element);
+            if (!font.typeface) {
+                element.style.fontFamily = "";
+            }
+            if (!font.underline) {
+                element.style.textDecoration = "";
+            }
+            if (!font.bold) {
+                element.style.fontWeight = "";
+            }
+            if (!font.size) {
+                element.style.fontSize = "";
+            }
+            if (!font.italic) {
+                element.style.fontStyle = "";
+            }
         } else {
             element.style.fontFamily = "";
             element.style.fontSize = "";
