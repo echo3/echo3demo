@@ -2,33 +2,35 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
     "ControlPane": {
         "Row": {
             layoutData: {
-                backgroundImage: "image/ControlPaneFill.png",
-                overflow: Echo.SplitPane.OVERFLOW_HIDDEN,
-                insets: "2px 10px"
+                backgroundImage: {
+                    url: "image/ControlPaneFill.png",
+                    y: "50%"
+                },
+                overflow: Echo.SplitPane.OVERFLOW_HIDDEN
             },
-            cellSpacing: 20,
-            insets: "2px 10px"
+            cellSpacing: 3,
+            insets: "0px 9px"
         }
     },
     "ControlPane.Button": {
         "Button": {
+            insets: "3px 15px",
             lineWrap: false,
             foreground: "#000000",
-            rolloverForeground: "#6f0f0f",
+            rolloverForeground: "#ffffff",
+            rolloverBackground: "#3939d6",
+            rolloverBackgroundImage: {
+                url: "image/ControlPaneHighlight.png",
+                y: "50%"
+            },
             rolloverEnabled: true,
-            insets: "0px 8px"
-        }
-    },
-    "ControlPane.Container.Top": {
-        "SplitPane": {
-            orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM, 
-            separatorPosition: "30px"
-        }
-    },
-    "ControlPane.Container.Bottom": {
-        "SplitPane": {
-            orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP, 
-            separatorPosition: "30px"
+            pressedForeground: "#dfffff",
+            pressedBackground: "#3939d6",
+            pressedBackgroundImage: {
+                url: "image/ControlPaneHighlightLight.png",
+                y: "50%"
+            },
+            pressedEnabled: true
         }
     },
     "Default": {

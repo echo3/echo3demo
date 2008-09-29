@@ -155,8 +155,8 @@ DemoApp.AboutDialog = Core.extend(Echo.WindowPane, {
         
         Echo.WindowPane.call(this, {
             styleName: DemoApp.pref.windowStyleName,
-            width: 500,
-            height: 400,
+            width: "40em",
+            height: "30em",
             title: this._msg["About.WindowTitle"],
             iconInsets: "6px 10px",
             icon: "image/Icon16Info.gif",
@@ -241,8 +241,8 @@ DemoApp.AutomaticDemoDialog = Core.extend(Echo.WindowPane, {
         Echo.WindowPane.call(this, {
             styleName: DemoApp.pref.windowStyleName,
             modal: true,
-            width: 500,
-            height: 400, 
+            width: "40em",
+            height: "30em", 
             title: this._msg["AutomaticDemo.WindowTitle"],
             icon: "image/Icon16Play.gif",
             iconInsets: "6px 10px",
@@ -251,7 +251,8 @@ DemoApp.AutomaticDemoDialog = Core.extend(Echo.WindowPane, {
             },
             children: [
                 new Echo.SplitPane({
-                    styleName: "ControlPane.Container.Bottom",
+                    autoPositioned: true,
+                    orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
                     children: [
                         new Echo.Row({
                             styleName: "ControlPane",
@@ -548,7 +549,8 @@ DemoApp.ColorSelectButton = Core.extend(Echo.Button, {
             },
             children: [
                 new Echo.SplitPane({
-                    styleName: "ControlPane.Container.Bottom",
+                    autoPositioned: true,
+                    orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
                     children: [
                         new Echo.Row({
                             styleName: "ControlPane",
@@ -713,7 +715,8 @@ DemoApp.PerformanceTestDialog = Core.extend(Echo.WindowPane, {
             },
             children: [
                 new Echo.SplitPane({
-                    styleName: "ControlPane.Container.Bottom",
+                    autoPositioned: true,
+                    orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
                     children: [
                         new Echo.Row({
                             styleName: "ControlPane",
@@ -789,7 +792,8 @@ DemoApp.PerformanceTestResultDialog = Core.extend(Echo.WindowPane, {
             },
             children: [
                 new Echo.SplitPane({
-                    styleName: "ControlPane.Container.Bottom",
+                    autoPositioned: true,
+                    orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
                     children: [
                         new Echo.Row({
                             styleName: "ControlPane",
@@ -852,8 +856,8 @@ DemoApp.PreferencesDialog = Core.extend(Echo.WindowPane, {
         Echo.WindowPane.call(this, {
             styleName: DemoApp.pref.windowStyleName,
             modal: true,
-            width: 500,
-            height: 400, 
+            width: "40em",
+            height: "30em", 
             title: this._msg["PrefDialog.WindowTitle"],
             icon: "image/Icon16Preferences.gif",
             iconInsets: "6px 10px",
@@ -862,7 +866,8 @@ DemoApp.PreferencesDialog = Core.extend(Echo.WindowPane, {
             },
             children: [
                 new Echo.SplitPane({
-                    styleName: "ControlPane.Container.Bottom",
+                    autoPositioned: true,
+                    orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
                     children: [
                         new Echo.Row({
                             styleName: "ControlPane",
@@ -1117,8 +1122,8 @@ DemoApp.SourceWindow = Core.extend(Echo.WindowPane, {
             iconInsets: "6px 10px",
             title: this._msg["SourceWindow.TitlePrompt"] + " \"" + title + "\"",
             styleName: DemoApp.pref.windowStyleName,
-            width: 600,
-            height: 500,
+            width: "50em",
+            height: "40em",
             maximizeEnabled: true,
             events: {
                 close: function(e) {
@@ -1254,8 +1259,8 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                             orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM,
                             separatorPosition: 52,
                             layoutData: {
-                                minimumSize: 150,
-                                maximumSize: 300
+                                minimumSize: "10em",
+                                maximumSize: "33%"
                             },
                             children: [
                                 new Echo.Label({
@@ -1276,7 +1281,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                         }),
                         new Echo.SplitPane({
                             orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM,
-                            separatorPosition: 26,
+                            autoPositioned: true,
                             separatorHeight: 1,
                             separatorColor: "#000000",
                             children: [
@@ -1288,7 +1293,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                                 }),
                                 new Echo.SplitPane({
                                     orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
-                                    separatorPosition: 55,
+                                    autoPositioned: true,
                                     separatorHeight: 1,
                                     separatorColor: "#000000",
                                     children: [
@@ -1345,7 +1350,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         this._menu.set("model", this._createMenuModel());
         this._createLaunchPanel();
         
-        this.launchScreen(this.getNextScreen());
+        this.launchScreen(this.getPreviousScreen());
     },
     
     _createLaunchPanel: function() {
@@ -1566,10 +1571,10 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             closable: false,
             resizable: false,
             movable: false,
-            positionX: 2000,
-            positionY: 2000,
-            height: 100,
-            width: 230
+            positionX: "100%",
+            positionY: "100%",
+            height: "8em",
+            width: "20em"
         });
         
         if (interval > 1) {
@@ -1599,7 +1604,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             this._launchPanel.set("animationTime", 0);
             this._stopWindow.add(new Echo.SplitPane({
                 orienation: Echo.SplitPane.ORIENTATION_HORIZONTAL_LEFT_RIGHT,
-                separatorPosition: 80,
+                separatorPosition: "40%",
                 resizable: false,
                 separatorWidth: 1,
                 separatorColor: "#000000",
@@ -1673,6 +1678,6 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             this.add(new DemoApp.PerformanceTestResultDialog(performanceTestFps));
         }
         
-        this.launchScreen(this._sections[0].screens[0]);
+        this.launchScreen(this._sectionsg.screens[0]);
     }
 });

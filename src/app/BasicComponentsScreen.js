@@ -225,6 +225,8 @@ DemoApp.BasicComponentsScreen = Core.extend(Echo.ContentPane, {
     },
     
     _processDisplayModeChange: function(e) {
+        
+        alert(this._componentsDefault.selectField.peer._getSelection());
         var styled = this._showStyledButton.get("selected");
         for (var name in this._componentsDefault) {
             this._componentsDefault[name].setStyleName(styled ? "Default" : null);

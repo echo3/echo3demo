@@ -10,8 +10,8 @@ DemoApp.WelcomeScreen = Core.extend(Echo.ContentPane, {
             children: [
                 new Echo.WindowPane({
                     styleName: "GlassBlue",
-                    width: 500,
-                    height: 300,
+                    contentWidth: "32em",
+                    contentHeight: "22em",
                     positionX: "10%",
                     positionY: "90%",
                     maximizeEnabled: true,
@@ -19,8 +19,8 @@ DemoApp.WelcomeScreen = Core.extend(Echo.ContentPane, {
                     closable: false,
                     children: [
                         new Echo.Column({
-                            insets: "8px 25px",
-                            cellSpacing: 8,
+                            insets: "1em 2em",
+                            cellSpacing: "1em",
                             children: [
                                 new Echo.Label({
                                     text: this._msg["WelcomeScreen.WelcomeText"]
