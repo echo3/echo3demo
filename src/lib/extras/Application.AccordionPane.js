@@ -22,7 +22,7 @@ Extras.AccordionPane = Core.extend(Echo.Component, {
         /**
          * The default animation time, 350ms.
          */
-        DEFAULT_ANIMATION_TIME: 350
+        DEFAULT_ANIMATION_TIME: 1250
     },
     
     $load: function() {

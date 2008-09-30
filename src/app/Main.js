@@ -1,5 +1,8 @@
 init = function() {
     Core.Web.init();
+    if (Echo.DebugConsole) {
+        Echo.DebugConsole.install();
+    }
     var app = new DemoApp();
     var client = new Echo.FreeClient(app, document.getElementById("rootArea"));
     client.addResourcePath("Echo", "lib/echo/");
@@ -1259,7 +1262,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                             orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM,
                             separatorPosition: 52,
                             layoutData: {
-                                minimumSize: "10em",
+                                minimumSize: "1em",
                                 maximumSize: "33%"
                             },
                             children: [
@@ -1350,7 +1353,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         this._menu.set("model", this._createMenuModel());
         this._createLaunchPanel();
         
-        this.launchScreen(this.getPreviousScreen());
+        this.launchScreen(this.getNextScreen());
     },
     
     _createLaunchPanel: function() {

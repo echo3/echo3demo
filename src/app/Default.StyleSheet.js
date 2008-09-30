@@ -64,10 +64,16 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             tabBorder: "1px outset #272727",
             tabForeground: "#ffffff",
             tabBackground: "#514f58",
-            tabBackgroundImage: "image/TabBackground.png",
+            tabBackgroundImage: {
+                url: "image/TabBackground.png",
+                y: "50%"
+            },
             tabRolloverEnabled: true,
             tabRolloverBackground: "#86899a",
-            tabRolloverBackgroundImage: "image/TabBackgroundRollover.png"
+            tabRolloverBackgroundImage: {
+                url: "image/TabBackgroundRollover.png",
+                y: "50%"
+            }
         },
         "Extras.MenuBarPane": {
             animationTime: 150,
