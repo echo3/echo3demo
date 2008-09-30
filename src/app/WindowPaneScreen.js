@@ -96,9 +96,10 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                 }),
                 this._configWindow = new Echo.WindowPane({
                     styleName: "TransGreen",
-                    width: 300,
-                    height: 300,
-                    positionY: 80,
+                    width: "22em",
+                    height: "22em",
+                    positionX: "48%",
+                    positionY: "10%",
                     closable: false,
                     title: this._msg["WindowPaneScreen.ConfigurationTitle"],
                     events: {
@@ -150,7 +151,7 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                     layoutData: {
                                         title: this._msg["WindowPaneScreen.ConfigurationResizeTab"]
                                     },
-                                    cellSpacing: 15,
+                                    cellSpacing: "1em",
                                     children: [
                                         new Echo.Column({
                                             children: [
@@ -215,7 +216,7 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                     layoutData: {
                                         title: this._msg["WindowPaneScreen.ConfigurationControlsTab"]
                                     },
-                                    cellSpacing: 15,
+                                    cellSpacing: "1em",
                                     children: [
                                         new Echo.Column({
                                             children: [
@@ -286,10 +287,10 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                     width: 400,
                     height: 300,
                     closable: false,
-                    positionX: 20,
-                    positionY: 315,
+                    positionX: "5%",
+                    positionY: "55%",
                     background: "#f5e6c2",
-                    insets: "10px 25px",
+                    insets: "1em 2em",
                     children: [
                         new Echo.Column({
                             cellSpacing: 8,
@@ -308,10 +309,10 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                     styleName: "Default",
                     title: this._msg["WindowPaneScreen.ModalTitle"],
                     closable: false,
-                    positionX: 350,
-                    positionY: 450,
-                    height: 300,
-                    insets: "10px 25px",
+                    positionX: "52%",
+                    positionY: "95%",
+                    height: "22em",
+                    insets: "1em 2em",
                     children: [
                         new Echo.Column({
                             cellSpacing: 8,

@@ -12,6 +12,7 @@ DemoApp.WelcomeScreen = Core.extend(Echo.ContentPane, {
                     styleName: "GlassBlue",
                     contentWidth: "32em",
                     contentHeight: "22em",
+                    insets: "1em 2em",
                     positionX: "10%",
                     positionY: "90%",
                     maximizeEnabled: true,
@@ -19,7 +20,6 @@ DemoApp.WelcomeScreen = Core.extend(Echo.ContentPane, {
                     closable: false,
                     children: [
                         new Echo.Column({
-                            insets: "1em 2em",
                             cellSpacing: "1em",
                             children: [
                                 new Echo.Label({
