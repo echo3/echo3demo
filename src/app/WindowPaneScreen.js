@@ -52,11 +52,12 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                             layoutData: {
                                 title: this._msg["WindowPaneScreen.TabColorWindowTitle"]
                             },
+                            background: "#ffffff",
                             children: [
                                 new Echo.WindowPane({
                                     styleName: "GlassBlue2",
-                                    width: 250,
-                                    height: 290,
+                                    contentWidth: "19em",
+                                    contentHeight: "21em",
                                     movable: false,
                                     closable: false,
                                     resizable: false,
@@ -284,10 +285,10 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                 new Echo.WindowPane({
                     styleName: "GlassBlue",
                     title: this._msg["WindowPaneScreen.TranslucentTitle"],
-                    width: 400,
-                    height: 300,
+                    width: "30em",
+                    height: "23em",
                     closable: false,
-                    positionX: "5%",
+                    positionX: "95%",
                     positionY: "55%",
                     background: "#f5e6c2",
                     insets: "1em 2em",
