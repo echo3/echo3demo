@@ -25,7 +25,7 @@ DemoApp.BasicComponentsScreen = Core.extend(Echo.ContentPane, {
                 new Echo.SplitPane({
                     styleName: "DefaultResizableLarge",
                     orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
-                    separatorPosition: 120,
+                    autoPositioned: true,
                     children: [
                         new Echo.Label({
                             text: this._msg["BasicComponentsScreen.Description"],
@@ -36,7 +36,7 @@ DemoApp.BasicComponentsScreen = Core.extend(Echo.ContentPane, {
                         }),
                         new Echo.SplitPane({
                             orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
-                            separatorPosition: 26,
+                            autoPositioned: true,
                             children: [
                                 new Echo.Row({
                                     styleName: "ControlPane",
@@ -226,7 +226,6 @@ DemoApp.BasicComponentsScreen = Core.extend(Echo.ContentPane, {
     
     _processDisplayModeChange: function(e) {
         
-        alert(this._componentsDefault.selectField.peer._getSelection());
         var styled = this._showStyledButton.get("selected");
         for (var name in this._componentsDefault) {
             this._componentsDefault[name].setStyleName(styled ? "Default" : null);
