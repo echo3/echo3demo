@@ -16,7 +16,7 @@ DemoApp.LayoutContainersScreen = Core.extend(Echo.ContentPane, {
                 new Echo.SplitPane({
                     styleName: "DefaultResizableLarge",
                     orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM,
-                    separatorPosition: 300,
+                    separatorPosition: "50%",
                     children: [
                         new Echo.ContentPane({
                             children: [
@@ -29,16 +29,16 @@ DemoApp.LayoutContainersScreen = Core.extend(Echo.ContentPane, {
                                 new Echo.WindowPane({
                                     styleName: "Default",
                                     title: this._msg["LayoutContainersScreen.GridTitle"],
-                                    positionX: 220,
-                                    positionY: 68,
-                                    width: 250,
-                                    height: 160,
+                                    positionX: "90%",
+                                    positionY: "50%",
+                                    width: "19em",
+                                    height: "12em",
                                     closable: false,
                                     resizable: false,
                                     children: [
                                         new Echo.ContentPane({
                                             backgroundImage: "image/LightBeigeLineBackground.png",
-                                            insets: 5,
+                                            insets: "1ex",
                                             children: [
                                                 new Echo.Label({
                                                     text: this._msg["LayoutContainersScreen.GridDescription"]
@@ -155,10 +155,10 @@ DemoApp.LayoutContainersScreen = Core.extend(Echo.ContentPane, {
                                 new Echo.WindowPane({
                                     styleName: "Default",
                                     title: this._msg["LayoutContainersScreen.ColumnRowTitle"],
-                                    positionX: 0,
-                                    positionY: 40,
-                                    width: 250,
-                                    height: 200,
+                                    positionX: "10%",
+                                    positionY: "50%",
+                                    width: "19em",
+                                    height: "15em",
                                     closable: false,
                                     resizable: false,
                                     children: [
