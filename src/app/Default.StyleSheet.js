@@ -414,7 +414,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             titleBackgroundImage: {
                 url: "image/window/transgreen/Header.png",
                 repeat: "repeat-x",
-                y: "100%"
+                y: 0
             },
             border: {
                 contentInsets: "6px 15px 15px 12px",
