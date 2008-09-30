@@ -67,7 +67,7 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                     children: [
                                         new Echo.SplitPane({
                                             orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
-                                            separatorPosition: 32,
+                                            autoPositioned: true,
                                             children: [
                                                 new Echo.Row({
                                                     styleName: "ControlPane",
