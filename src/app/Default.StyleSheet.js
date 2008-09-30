@@ -78,7 +78,10 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
         "Extras.MenuBarPane": {
             animationTime: 150,
             border: "0px solid #000000",
-            backgroundImage: "image/PulldownMenuBackground.png",
+            backgroundImage: {
+                url: "image/PulldownMenuBackground.png",
+                y: "50%"
+            },
             foreground: "#ffffff",
             menuBackground: "#000000",
             menuOpacity: 92,
