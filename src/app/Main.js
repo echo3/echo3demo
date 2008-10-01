@@ -1,16 +1,3 @@
-init = function() {
-    Core.Web.init();
-    if (Echo.DebugConsole) {
-        Echo.DebugConsole.install();
-    }
-    var app = new DemoApp();
-    var client = new Echo.FreeClient(app, document.getElementById("rootArea"));
-    client.addResourcePath("Echo", "lib/echo/");
-    client.addResourcePath("Extras", "lib/extras/");
-    app.setStyleSheet(DemoApp.StyleSheet);
-    client.init();
-};
-
 /**
  * Echo.Application implementation.
  * Root namespace.
@@ -112,6 +99,19 @@ DemoApp = Core.extend(Echo.Application, {
         
         getMessages: function() {
             return DemoApp.Messages.get();
+        },
+        
+        init: function() {
+            Core.Web.init();
+            if (Echo.DebugConsole) {
+                Echo.DebugConsole.install();
+            }
+            var app = new DemoApp();
+            var client = new Echo.FreeClient(app, document.getElementById("rootArea"));
+            client.addResourcePath("Echo", "lib/echo/");
+            client.addResourcePath("Extras", "lib/extras/");
+            app.setStyleSheet(DemoApp.StyleSheet);
+            client.init();
         }
     },
     

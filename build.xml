@@ -15,15 +15,11 @@
                 <file name="Serial.js"/>
                 <file name="Client.js"/>
                 <file name="FreeClient.js"/>
-                <file name="Arc.js"/>
                 <file name="Sync.ArrayContainer.js"/>
                 <file name="Sync.Button.js"/>
                 <file name="Sync.ContentPane.js"/>
-                <file name="Sync.Grid.js"/>
                 <file name="Sync.Label.js"/>
-                <file name="Sync.List.js"/>
                 <file name="Sync.SplitPane.js"/>
-                <file name="Sync.TextComponent.js"/>
                 <file name="Sync.WindowPane.js"/>
             </filelist>
             <filelist dir="src/lib/extras/">
@@ -34,29 +30,12 @@
                 <file name="Sync.Menu.js"/>
                 <file name="Application.TransitionPane.js"/>
                 <file name="Sync.TransitionPane.js"/>
-                <file name="Application.TabPane.js"/>
-                <file name="Sync.TabPane.js"/>
-                <file name="Application.ColorSelect.js"/>
-                <file name="Sync.ColorSelect.js"/>
-                <file name="Application.RichTextArea.js"/>
-                <file name="Sync.RichTextArea.js"/>
-                <file name="Application.ToolTipContainer.js"/>
-                <file name="Sync.ToolTipContainer.js"/>
             </filelist>
             <filelist dir="src/app/">
                 <file name="Main.js"/>
                 <file name="Default.StyleSheet.js"/>
                 <file name="Messages.js"/>
                 <file name="WelcomeScreen.js"/>
-                <file name="WindowPaneScreen.js"/>
-                <file name="SplitPaneScreen.js"/>
-                <file name="BasicComponentsScreen.js"/>
-                <file name="LayoutContainersScreen.js"/>
-                <file name="JSDevelopmentScreen.js"/>
-                <file name="JavaDevelopmentScreen.js"/>
-                <file name="AccordionPaneScreen.js"/>
-                <file name="TabPaneScreen.js"/>
-                <file name="RichTextScreen.js"/>
             </filelist>
         </concat>
         <java fork="true" jar="build-lib/yuicompressor-2.3.5.jar" output="out/AppCompressed.js">
