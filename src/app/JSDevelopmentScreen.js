@@ -234,7 +234,6 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                                         })
                                                     ]
                                                 })
-                                                
                                             ]
                                         })
                                     ]
@@ -268,7 +267,7 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                                         bold: true
                                                     },
                                                     text: this._msg["JSDevelopmentScreen.Hierarchal.0"]
-                                                }),
+                                                })
                                             ]
                                         }),
                                         new Echo.SplitPane({
