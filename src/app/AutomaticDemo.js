@@ -1,7 +1,10 @@
+DemoApp.AutomaticDemo = { };
+
+
 /**
  * Dialog to configure and launch an automatic demo session.
  */
-DemoApp.AutomaticDemoDialog = Core.extend(Echo.WindowPane, {
+DemoApp.AutomaticDemo.StartDialog = Core.extend(Echo.WindowPane, {
 
     _intervalButtons: null,
     _transitionSelect: null,
@@ -173,7 +176,7 @@ DemoApp.AutomaticDemoDialog = Core.extend(Echo.WindowPane, {
     }
 });
 
-DemoApp.AutomaticDemoStopDialog = Core.extend(Echo.WindowPane, {
+DemoApp.AutomaticDemo.StopDialog = Core.extend(Echo.WindowPane, {
 
     _msg: null,
 
@@ -283,7 +286,7 @@ DemoApp.AutomaticDemoStopDialog = Core.extend(Echo.WindowPane, {
 /**
  * Core.Web.Scheduler.Runnable to launch various screens at intervals for the automatic demo.
  */
-DemoApp.AutomaticDemoRunnable = Core.extend(Core.Web.Scheduler.Runnable, {
+DemoApp.AutomaticDemo.Runnable = Core.extend(Core.Web.Scheduler.Runnable, {
 
     $static: {
         ALL_TRANSITIONS: [ 
@@ -357,10 +360,10 @@ DemoApp.AutomaticDemoRunnable = Core.extend(Core.Web.Scheduler.Runnable, {
         this.timeInterval = this._interval;
         switch (this._transitionStyle) {
         case "Random":
-            this._launcher.setTransition(DemoApp.Util.randomItem(DemoApp.AutomaticDemoRunnable.ALL_TRANSITIONS), true);
+            this._launcher.setTransition(DemoApp.Util.randomItem(DemoApp.AutomaticDemo.Runnable.ALL_TRANSITIONS), true);
             break;
         case "RandomPan":
-            this._launcher.setTransition(DemoApp.Util.randomItem(DemoApp.AutomaticDemoRunnable.PAN_TRANSITIONS), true);
+            this._launcher.setTransition(DemoApp.Util.randomItem(DemoApp.AutomaticDemo.Runnable.PAN_TRANSITIONS), true);
             break;
         case "Fade":
             this._launcher.setTransition(Extras.TransitionPane.TYPE_FADE, true);
@@ -383,7 +386,7 @@ DemoApp.AutomaticDemoRunnable = Core.extend(Core.Web.Scheduler.Runnable, {
 /**
  * Dialog to launch performance test.
  */
-DemoApp.PerformanceTestDialog = Core.extend(Echo.WindowPane, {
+DemoApp.AutomaticDemo.PerformanceTestDialog = Core.extend(Echo.WindowPane, {
 
     _msg: null,
     _workspace: null,
@@ -457,7 +460,7 @@ DemoApp.PerformanceTestDialog = Core.extend(Echo.WindowPane, {
 /**
  * Dialog to display performance test results.
  */
-DemoApp.PerformanceTestResultDialog = Core.extend(Echo.WindowPane, {
+DemoApp.AutomaticDemo.PerformanceTestResultDialog = Core.extend(Echo.WindowPane, {
 
     _msg: null,
     

@@ -799,7 +799,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             break;
         case "autodemo":
             Core.Web.Library.exec(DemoApp.MODULE_AUTOMATIC_DEMO, Core.method(this, function() {
-                this.add(new DemoApp.AutomaticDemoDialog(this));
+                this.add(new DemoApp.AutomaticDemo.StartDialog(this));
             }));
             break;
         case "download":
@@ -882,12 +882,12 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             this._launchPanel.set("animationTime", 0);
         }
         
-        this._stopWindow = new DemoApp.AutomaticDemoStopDialog(performanceTest, interval == 0);
+        this._stopWindow = new DemoApp.AutomaticDemo.StopDialog(performanceTest, interval == 0);
         this._stopWindow.addListener("stop", Core.method(this, this.stopAutomaticDemo));
         
         this.add(this._stopWindow);
         
-        this._autoDemoRunnable = new DemoApp.AutomaticDemoRunnable(this, this._sections, performanceTest, interval, 
+        this._autoDemoRunnable = new DemoApp.AutomaticDemo.Runnable(this, this._sections, performanceTest, interval, 
                 randomOrder, transitionStyle);
         Core.Web.Scheduler.add(this._autoDemoRunnable);
     },
