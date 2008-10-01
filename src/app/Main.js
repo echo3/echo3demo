@@ -19,9 +19,88 @@ DemoApp = Core.extend(Echo.Application, {
 
     $static: {
     
+        MODULE_ABOUT: [
+            "lib/extras/Application.TabPane.js",
+            "lib/extras/Sync.TabPane.js",
+            "app/About.js"
+        ],
+        
+        MODULE_AUTOMATIC_DEMO: [
+            "lib/echo/Sync.List.js",
+            "app/AutomaticDemo.js"
+        ],
+    
+        MODULE_SOURCE_VIEW: [
+            "app/SourceView.js"
+        ],
+    
+        MODULE_PREFERENCES: [
+            "lib/echo/Sync.List.js",
+            "lib/extras/Application.ColorSelect.js",
+            "lib/extras/Sync.ColorSelect.js",
+            "app/Preferences.js"
+        ],
+    
+        MODULE_DEMO_WINDOWPANE: [
+            "lib/extras/Application.TabPane.js",
+            "lib/extras/Sync.TabPane.js",
+            "lib/extras/Application.ColorSelect.js",
+            "lib/extras/Sync.ColorSelect.js",
+            "app/WindowPaneScreen.js"
+        ],
+        
+        MODULE_DEMO_SPLITPANE: [
+            "app/SplitPaneScreen.js"
+        ],
+        
+        MODULE_DEMO_BASIC_COMPONENTS: [
+            "lib/echo/Sync.Grid.js",
+            "lib/echo/Sync.List.js",
+            "lib/echo/Sync.TextComponent.js",
+            "app/BasicComponentsScreen.js"
+        ],
+    
+        MODULE_DEMO_LAYOUT_CONTAINERS: [
+            "lib/echo/Sync.Grid.js",
+            "app/LayoutContainersScreen.js"
+        ],
+        
+        MODULE_DEMO_JS_DEVELOPMENT: [
+            "lib/extras/Application.TabPane.js",
+            "lib/extras/Sync.TabPane.js",
+            "lib/extras/Application.ToolTipContainer.js",
+            "lib/extras/Sync.ToolTipContainer.js",
+            "app/SourceView.js",
+            "app/JSDevelopmentScreen.js"
+        ],
+        
+        MODULE_DEMO_JAVA_DEVELOPMENT: [
+            "app/SourceView.js",
+            "app/JavaDevelopmentScreen.js"
+        ],
+        
+        MODULE_DEMO_ACCORDIONPANE: [
+            "app/AccordionPaneScreen.js"
+        ],
+        
+        MODULE_DEMO_TABPANE: [
+            "lib/echo/Sync.Grid.js",
+            "lib/extras/Application.ColorSelect.js",
+            "lib/extras/Sync.ColorSelect.js",
+            "lib/extras/Application.TabPane.js",
+            "lib/extras/Sync.TabPane.js",
+            "app/TabPaneScreen.js"
+        ],
+        
+        MODULE_DEMO_RICHTEXTAREA: [
+            "lib/extras/Application.RichTextArea.js",
+            "lib/extras/Sync.RichTextArea.js",
+            "app/RichTextScreen.js"
+        ],
+    
         pref: {
             transitionsEnabled: true,
-            windowStyleName: "GlassBlue2",
+            windowStyleName: "Default",
             sourceViewerBackground: "#000000",
             sourceViewerForeground: "#00ff00"
         },
@@ -55,7 +134,9 @@ DemoApp = Core.extend(Echo.Application, {
                     "image/demoicon/WindowPaneIcon16.gif", 
                     "image/demoicon/WindowPaneIcon64.gif",
                     function(container) {
-                        container.setContent(new DemoApp.WindowPaneScreen()) 
+                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_WINDOWPANE, function() {
+                            container.setContent(new DemoApp.WindowPaneScreen()) 
+                        });
                     },
                     "app/WindowPaneScreen.js"
                 ),
@@ -63,8 +144,10 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["SplitPaneScreen.Title"], 
                     "image/demoicon/SplitPaneIcon16.gif", 
                     "image/demoicon/SplitPaneIcon64.gif",
-                    function(container) { 
-                        container.setContent(new DemoApp.SplitPaneScreen()) 
+                    function(container) {
+                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_SPLITPANE, function() {
+                            container.setContent(new DemoApp.SplitPaneScreen()) 
+                        });
                     },
                     "app/SplitPaneScreen.js"
                 ),
@@ -72,8 +155,10 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["BasicComponentsScreen.Title"], 
                     "image/demoicon/BasicComponentsIcon16.gif", 
                     "image/demoicon/BasicComponentsIcon64.gif",
-                    function(container) { 
-                        container.setContent(new DemoApp.BasicComponentsScreen()) 
+                    function(container) {
+                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_BASIC_COMPONENTS, function() {
+                            container.setContent(new DemoApp.BasicComponentsScreen()) 
+                        });
                     },
                     "app/BasicComponentsScreen.js"
                 ),
@@ -81,8 +166,10 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["LayoutContainersScreen.Title"], 
                     "image/demoicon/LayoutContainersIcon16.gif", 
                     "image/demoicon/LayoutContainersIcon64.gif",
-                    function(container) { 
-                        container.setContent(new DemoApp.LayoutContainersScreen()) 
+                    function(container) {
+                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_LAYOUT_CONTAINERS, function() {
+                            container.setContent(new DemoApp.LayoutContainersScreen()) 
+                        });
                     },
                     "app/LayoutContainersScreen.js"
                 )
@@ -92,8 +179,10 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["JSDevelopmentScreen.Title"], 
                     "image/demoicon/JSDevelopmentIcon16.gif", 
                     "image/demoicon/JSDevelopmentIcon64.gif",
-                    function(container) { 
-                        container.setContent(new DemoApp.JSDevelopmentScreen()) 
+                    function(container) {
+                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_JS_DEVELOPMENT, function() {
+                            container.setContent(new DemoApp.JSDevelopmentScreen()) 
+                        });
                     },
                     "app/JSDevelopmentScreen.js"
                 ),
@@ -101,8 +190,10 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["JavaDevelopmentScreen.Title"], 
                     "image/demoicon/JavaDevelopmentIcon16.gif", 
                     "image/demoicon/JavaDevelopmentIcon64.gif",
-                    function(container) { 
-                        container.setContent(new DemoApp.JavaDevelopmentScreen()) 
+                    function(container) {
+                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_JAVA_DEVELOPMENT, function() {
+                            container.setContent(new DemoApp.JavaDevelopmentScreen()) 
+                        });
                     },
                     "app/JavaDevelopmentScreen.js"
                 )
@@ -112,8 +203,10 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["AccordionPaneScreen.Title"], 
                     "image/demoicon/AccordionPaneIcon16.gif", 
                     "image/demoicon/AccordionPaneIcon64.gif",
-                    function(container) { 
-                        container.setContent(new DemoApp.AccordionPaneScreen()) 
+                    function(container) {
+                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_ACCORDIONPANE, function() {
+                            container.setContent(new DemoApp.AccordionPaneScreen()) 
+                        });
                     },
                     "app/AccordionPaneScreen.js"
                 ),
@@ -121,8 +214,10 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["TabPaneScreen.Title"], 
                     "image/demoicon/TabPaneIcon16.gif", 
                     "image/demoicon/TabPaneIcon64.gif",
-                    function(container) { 
-                        container.setContent(new DemoApp.TabPaneScreen()) 
+                    function(container) {
+                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_TABPANE, function() {
+                            container.setContent(new DemoApp.TabPaneScreen()) 
+                        });
                     },
                     "app/TabPaneScreen.js"
                 ),
@@ -130,8 +225,10 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["RichTextScreen.Title"], 
                     "image/demoicon/RichTextIcon16.gif", 
                     "image/demoicon/RichTextIcon64.gif",
-                    function(container) { 
-                        container.setContent(new DemoApp.RichTextScreen()) 
+                    function(container) {
+                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_RICHTEXTAREA, function() {
+                            container.setContent(new DemoApp.RichTextScreen()) 
+                        });
                     },
                     "app/RichTextScreen.js"
                 )
@@ -143,356 +240,6 @@ DemoApp = Core.extend(Echo.Application, {
         
         // Enable the following line to launch a specific screen at startup.
         //workspace.setContent(new DemoApp.WindowPaneScreen());
-    }
-});
-
-/**
- * Help/About Dialog.  Displays general application information, credits, and copyrights.
- */
-DemoApp.AboutDialog = Core.extend(Echo.WindowPane, {
-
-    _msg: null,
-    
-    $construct: function() {
-        this._msg = DemoApp.getMessages();
-        
-        Echo.WindowPane.call(this, {
-            styleName: DemoApp.pref.windowStyleName,
-            width: "40em",
-            height: "30em",
-            title: this._msg["About.WindowTitle"],
-            iconInsets: "6px 10px",
-            icon: "image/Icon16Info.gif",
-            modal: true,
-            closable: true,
-            events: {
-                close: function(e) {
-                    e.source.parent.remove(e.source);
-                }
-            },
-            children: [
-                new Echo.ContentPane({
-                    backgroundImage: "image/BlueLineBackground.png",
-                    children: [
-                        new Extras.TabPane({
-                            tabActiveBackground: "#ffffff",
-                            tabInactiveBackground: "#afafef",
-                            background: "#ffffff",
-                            children: [
-                                new Echo.Column({
-                                    insets: "15px 25px",
-                                    cellSpacing: 10,
-                                    layoutData: {
-                                        title: this._msg["About.GeneralTab"]
-                                    },
-                                    children: [
-                                        new Echo.Label({
-                                            icon: "image/NextApp.png"
-                                        }),
-                                        new Echo.Label({
-                                            text: this._msg["About.General1"]
-                                        }),
-                                        new DemoApp.HtmlLabel({
-                                            html: this._msg["About.General2"]
-                                        }),
-                                        new DemoApp.HtmlLabel({
-                                            html: this._msg["About.General3"]
-                                        })
-                                    ]
-                                }),
-                                new Echo.Column({
-                                    insets: "15px 25px",
-                                    cellSpacing: 10,
-                                    layoutData: {
-                                        title: this._msg["About.PhotographyTab"]
-                                    },
-                                    children: [
-                                        new DemoApp.HtmlLabel({
-                                            html: this._msg["About.Photography1"]
-                                        })
-                                    ]
-                                })
-                            ]
-                        })
-                    ]
-                })
-            ]
-        });
-    }
-});
-
-/**
- * Dialog to configure and launch an automatic demo session.
- */
-DemoApp.AutomaticDemoDialog = Core.extend(Echo.WindowPane, {
-
-    _intervalButtons: null,
-    _transitionSelect: null,
-    _transitionSelectLastId: null,
-    _speedFast: null,
-    _speedLudicrous: null,
-    _orderRandom: null,
-    _msg: null,
-    _workspace: null,
-    
-    $construct: function(workspace) {
-        this._workspace = workspace;
-        this._msg = DemoApp.getMessages();
-        var groupSpeedButtons = Echo.Application.generateUid();
-        var groupOrderButtons = Echo.Application.generateUid();
-        
-        Echo.WindowPane.call(this, {
-            styleName: DemoApp.pref.windowStyleName,
-            modal: true,
-            width: "40em",
-            height: "30em", 
-            title: this._msg["AutomaticDemo.WindowTitle"],
-            icon: "image/Icon16Play.gif",
-            iconInsets: "6px 10px",
-            events: {
-                close: Core.method(this, this._close)
-            },
-            children: [
-                new Echo.SplitPane({
-                    autoPositioned: true,
-                    orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
-                    children: [
-                        new Echo.Row({
-                            styleName: "ControlPane",
-                            children: [
-                                new Echo.Button({
-                                    styleName: "ControlPane.Button",
-                                    text: this._msg["Generic.Start"],
-                                    icon: "image/Icon24Play.gif",
-                                    events: {
-                                        action: Core.method(this, this._start)
-                                    }
-                                }),
-                                new Echo.Button({
-                                    styleName: "ControlPane.Button",
-                                    text: this._msg["Generic.Cancel"],
-                                    icon: "image/Icon24No.gif",
-                                    events: {
-                                        action: Core.method(this, this._close)
-                                    }
-                                })
-                            ]
-                        }),
-                        new Echo.Column({
-                            insets: "10px 30px",
-                            cellSpacing: 15,
-                            children: [
-                                new Echo.Label({
-                                    text: this._msg["AutomaticDemo.Description"]
-                                }),
-                                new Echo.Column({
-                                    styleName: "PreferencesColumn",
-                                    children: [
-                                        new Echo.Label({
-                                            styleName: "PreferencesTitle",
-                                            text: this._msg["AutomaticDemo.SpeedPrompt"]
-                                        }),
-                                        new Echo.Row({
-                                            cellSpacing: 40,
-                                            children: [
-                                                new Echo.RadioButton({
-                                                    group: groupSpeedButtons,
-                                                    text: this._msg["AutomaticDemo.SpeedNormal"],
-                                                    selected: true,
-                                                    events: {
-                                                        action: Core.method(this, this._processSpeedChange)
-                                                    }
-                                                }),
-                                                this._speedFast = new Echo.RadioButton({
-                                                    group: groupSpeedButtons,
-                                                    text: this._msg["AutomaticDemo.SpeedFast"],
-                                                    events: {
-                                                        action: Core.method(this, this._processSpeedChange)
-                                                    }
-                                                }),
-                                                this._speedLudicrous = new Echo.RadioButton({
-                                                    group: groupSpeedButtons,
-                                                    text: this._msg["AutomaticDemo.SpeedLudicrous"],
-                                                    events: {
-                                                        action: Core.method(this, this._processSpeedChange)
-                                                    }
-                                                })
-                                            ]
-                                        })
-                                    ]
-                                }),
-                                new Echo.Column({
-                                    styleName: "PreferencesColumn",
-                                    children: [
-                                        new Echo.Label({
-                                            styleName: "PreferencesTitle",
-                                            text: this._msg["AutomaticDemo.OrderPrompt"]
-                                        }),
-                                        new Echo.Row({
-                                            cellSpacing: 40,
-                                            children: [
-                                                new Echo.RadioButton({
-                                                    group: groupOrderButtons,
-                                                    text: this._msg["AutomaticDemo.OrderSequential"],
-                                                    selected: true
-                                                }),
-                                                this._orderRandom = new Echo.RadioButton({
-                                                    group: groupOrderButtons,
-                                                    text: this._msg["AutomaticDemo.OrderRandom"]
-                                                })
-                                            ]
-                                        })
-                                    ]
-                                }),
-                                new Echo.Column({
-                                    styleName: "PreferencesColumn",
-                                    children: [
-                                        new Echo.Label({
-                                            styleName: "PreferencesTitle",
-                                            text: this._msg["AutomaticDemo.TransitionPrompt"]
-                                        }),
-                                        this._transitionSelect = new Echo.SelectField({
-                                            items: [
-                                                { id: "Random", text: this._msg["AutomaticDemo.TransitionRandom"] },
-                                                { id: "Fade", text: this._msg["AutomaticDemo.TransitionFade"] },
-                                                { id: "RandomPan", text: this._msg["AutomaticDemo.TransitionRandomPan"] },
-                                                { id: "PanRight", text: this._msg["AutomaticDemo.TransitionPanRight"] },
-                                                { id: "None", text: this._msg["AutomaticDemo.TransitionNone"] }
-                                            ],
-                                            selectedId: DemoApp.pref.transitionsEnabled ? "Random" : "None"
-                                        })
-                                    ]
-                                })
-                            ]
-                        })
-                    ]
-                })
-            ]
-        });
-    },
-    
-    _processSpeedChange: function(e) {
-        if (e.source == this._speedLudicrous) {
-            this._transitionSelectLastId = this._transitionSelect.get("selectedId");
-            this._transitionSelect.set("selectedId", "None");
-            this._transitionSelect.setEnabled(false);
-        } else {
-            if (!this._transitionSelect.isEnabled()) {
-                this._transitionSelect.set("selectedId", this._transitionSelectLastId);
-                this._transitionSelect.setEnabled(true);
-            }
-        }
-    },
-    
-    _start: function(e) {
-        var interval = this._speedLudicrous.get("selected") ? 1 : (this._speedFast.get("selected") ? 1500 : 4500);
-        this._workspace.startAutomaticDemo(false, interval, !!this._speedLudicrous.get("selected"),
-                this._transitionSelect.get("selectedId"));
-        this.parent.remove(this);
-    },
-    
-    _close: function(e) {
-        this.parent.remove(this);
-    }
-});
-
-/**
- * Core.Web.Scheduler.Runnable to launch various screens at intervals for the automatic demo.
- */
-DemoApp.AutomaticDemoRunnable = Core.extend(Core.Web.Scheduler.Runnable, {
-
-    $static: {
-        ALL_TRANSITIONS: [ 
-            Extras.TransitionPane.TYPE_FADE,
-            Extras.TransitionPane.TYPE_CAMERA_PAN_UP,
-            Extras.TransitionPane.TYPE_CAMERA_PAN_LEFT,
-            Extras.TransitionPane.TYPE_CAMERA_PAN_RIGHT,
-            Extras.TransitionPane.TYPE_CAMERA_PAN_DOWN
-        ],
-        PAN_TRANSITIONS: [ 
-            Extras.TransitionPane.TYPE_CAMERA_PAN_UP,
-            Extras.TransitionPane.TYPE_CAMERA_PAN_LEFT,
-            Extras.TransitionPane.TYPE_CAMERA_PAN_RIGHT,
-            Extras.TransitionPane.TYPE_CAMERA_PAN_DOWN
-        ]
-    },
-
-    _screens: null,
-    _launcher: null,
-    _lastExec: 0,
-    _count: 0,
-    _performanceTest: false,
-    _startTime: null,
-    
-    $construct: function(launcher, sections, performanceTest, interval, randomOrder, transitionStyle) {
-        this._launcher = launcher;
-        this._performanceTest = performanceTest;
-        this._interval = interval;
-        this._randomOrder = randomOrder;
-        this._transitionStyle = transitionStyle;
-    
-        this._screens = [];
-        for (var i = 0; i < sections.length; ++i) {
-            for (var j = 0; j < sections[i].screens.length; ++j) {
-                this._screens.push(sections[i].screens[j]);
-            }
-        }
-        
-        this._count = 0;
-    },
-
-    repeat: true,
-
-    timeInterval: null,
-    
-    run: function() {
-        if (this._performanceTest && this._startTime == null) {
-            this._startTime = new Date().getTime();
-        }
-    
-        if (this._launcher.fpsLabel) {
-            if (this._count == 0) {
-                this._lastExec = new Date().getTime();
-            }
-    
-            ++this._count;
-
-            if (this._count % 10 == 0) {
-                var time = new Date().getTime();
-                this._launcher.fpsLabel.set("text", parseInt(100000 / (time - this._lastExec)) / 10);
-                this._lastExec = time;
-                
-                if (this._performanceTest && time > this._startTime + 30000) {
-                    var averageFps = (this._count - 1) / ((time - this._startTime) / 1000);
-                    this._launcher.stopAutomaticDemo(averageFps);
-                    return;
-                }
-            }
-        }
-    
-        this.timeInterval = this._interval;
-        switch (this._transitionStyle) {
-        case "Random":
-            this._launcher.setTransition(DemoApp.Util.randomItem(DemoApp.AutomaticDemoRunnable.ALL_TRANSITIONS), true);
-            break;
-        case "RandomPan":
-            this._launcher.setTransition(DemoApp.Util.randomItem(DemoApp.AutomaticDemoRunnable.PAN_TRANSITIONS), true);
-            break;
-        case "Fade":
-            this._launcher.setTransition(Extras.TransitionPane.TYPE_FADE, true);
-            break;
-        case "PanRight":
-            this._launcher.setTransition(Extras.TransitionPane.TYPE_CAMERA_PAN_RIGHT, true);
-            break;
-        case "None":
-            this._launcher.setTransition(Extras.TransitionPane.TYPE_IMMEDIATE, true);
-            break;
-        }
-        if (this._randomOrder) {
-            this._launcher.launchScreen(DemoApp.Util.randomItem(this._screens));
-        } else {
-            this._launcher.launchScreen(this._launcher.getNextScreen());
-        }
     }
 });
 
@@ -690,458 +437,6 @@ DemoApp.HtmlLabelSync = Core.extend(Echo.Render.ComponentSync, {
         containerElement.removeChild(element);
         this.renderAdd(update, containerElement);
         return false; // Child elements not supported: safe to return false.
-    }
-});
-
-/**
- * Dialog to launch performance test.
- */
-DemoApp.PerformanceTestDialog = Core.extend(Echo.WindowPane, {
-
-    _msg: null,
-    _workspace: null,
-    
-    $construct: function(workspace) {
-        this._workspace = workspace;
-        this._msg = DemoApp.getMessages();
-        
-        Echo.WindowPane.call(this, {
-            styleName: DemoApp.pref.windowStyleName,
-            modal: true,
-            width: 400,
-            height: 300, 
-            title: this._msg["PerformanceTest.WindowTitle"],
-            icon: "image/Icon16Performance.gif",
-            iconInsets: "6px 10px",
-            events: {
-                close: Core.method(this, this._close)
-            },
-            children: [
-                new Echo.SplitPane({
-                    autoPositioned: true,
-                    orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
-                    children: [
-                        new Echo.Row({
-                            styleName: "ControlPane",
-                            children: [
-                                new Echo.Button({
-                                    styleName: "ControlPane.Button",
-                                    text: this._msg["Generic.Start"],
-                                    icon: "image/Icon24Play.gif",
-                                    events: {
-                                        action: Core.method(this, this._start)
-                                    }
-                                }),
-                                new Echo.Button({
-                                    styleName: "ControlPane.Button",
-                                    text: this._msg["Generic.Cancel"],
-                                    icon: "image/Icon24No.gif",
-                                    events: {
-                                        action: Core.method(this, this._close)
-                                    }
-                                })
-                            ]
-                        }),
-                        new Echo.Column({
-                            insets: "10px 30px",
-                            cellSpacing: 15,
-                            children: [
-                                new Echo.Label({
-                                    text: this._msg["PerformanceTest.Description"]
-                                })
-                            ]
-                        })
-                    ]
-                })
-            ]
-        });
-    },
-    
-    _start: function(e) {
-        this._workspace.startAutomaticDemo(true);
-        this.parent.remove(this);
-    },
-    
-    _close: function(e) {
-        this.parent.remove(this);
-    }
-});
-
-/**
- * Dialog to display performance test results.
- */
-DemoApp.PerformanceTestResultDialog = Core.extend(Echo.WindowPane, {
-
-    _msg: null,
-    
-    $construct: function(fps) {
-        this._msg = DemoApp.getMessages();
-        
-        fps = parseInt(fps * 10) / 10;
-
-        Echo.WindowPane.call(this, {
-            styleName: DemoApp.pref.windowStyleName,
-            modal: true,
-            positionX: 32767,
-            positionY: 32767,
-            width: 550,
-            height: 142, 
-            resizable: false,
-            title: this._msg["PerformanceTest.WindowTitle"],
-            icon: "image/Icon16Performance.gif",
-            iconInsets: "6px 10px",
-            events: {
-                close: Core.method(this, this._close)
-            },
-            children: [
-                new Echo.SplitPane({
-                    autoPositioned: true,
-                    orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
-                    children: [
-                        new Echo.Row({
-                            styleName: "ControlPane",
-                            children: [
-                                new Echo.Button({
-                                    styleName: "ControlPane.Button",
-                                    text: this._msg["Generic.Ok"],
-                                    icon: "image/Icon24Yes.gif",
-                                    events: {
-                                        action: Core.method(this, this._close)
-                                    }
-                                })
-                            ]
-                        }),
-                        new Echo.Row({
-                            layoutData: {
-                                backgroundImage: "image/FpsBackground.png" 
-                            },
-                            insets: "10px 30px",
-                            cellSpacing: 8,
-                            foreground: "#ffffff",
-                            children: [
-                                new Echo.Label({
-                                    text: this._msg["PerformanceTest.ResultPre"]
-                                }),
-                                new Echo.Label({
-                                    font: { size: 30 },
-                                    text: fps
-                                }),
-                                new Echo.Label({
-                                    text: this._msg["PerformanceTest.ResultPost"]
-                                })
-                            ]
-                        })
-                    ]
-                })
-            ]
-        });
-    },
-    
-    _close: function(e) {
-        this.parent.remove(this);
-    }
-});
-
-/**
- * Dialog for editing user application preferences.
- */
-DemoApp.PreferencesDialog = Core.extend(Echo.WindowPane, {
-
-    _transitionsEnabled: null,
-    _sourceViewerForeground: null,
-    _sourceViewerBackground: null,
-    _windowStyleNameSelect: null,
-    
-    $construct: function() {
-        this._msg = DemoApp.getMessages();
-        var groupAnimatedScreenTransitions = Echo.Application.generateUid();
-            
-        Echo.WindowPane.call(this, {
-            styleName: DemoApp.pref.windowStyleName,
-            modal: true,
-            width: "40em",
-            height: "30em", 
-            title: this._msg["PrefDialog.WindowTitle"],
-            icon: "image/Icon16Preferences.gif",
-            iconInsets: "6px 10px",
-            events: {
-                close: Core.method(this, this._close)
-            },
-            children: [
-                new Echo.SplitPane({
-                    autoPositioned: true,
-                    orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
-                    children: [
-                        new Echo.Row({
-                            styleName: "ControlPane",
-                            children: [
-                                new Echo.Button({
-                                    styleName: "ControlPane.Button",
-                                    text: this._msg["Generic.Ok"],
-                                    icon: "image/Icon24Yes.gif",
-                                    events: {
-                                        action: Core.method(this, this._apply)
-                                    }
-                                }),
-                                new Echo.Button({
-                                    styleName: "ControlPane.Button",
-                                    text: this._msg["Generic.Cancel"],
-                                    icon: "image/Icon24No.gif",
-                                    events: {
-                                        action: Core.method(this, this._close)
-                                    }
-                                })
-                            ]
-                        }),
-                        new Echo.Column({
-                            insets: "10px 30px",
-                            cellSpacing: 15,
-                            children: [
-                                new Echo.Column({
-                                    styleName: "PreferencesColumn",
-                                    children: [
-                                        new Echo.Label({
-                                            styleName: "PreferencesTitle",
-                                            text: this._msg["PrefDialog.PromptAnimations"]
-                                        }),
-                                        new Echo.Row({
-                                            cellSpacing: 40,
-                                            children: [
-                                                this._transitionsEnabled = new Echo.RadioButton({
-                                                    group: groupAnimatedScreenTransitions,
-                                                    text: this._msg["Generic.Enabled"],
-                                                    selected: DemoApp.pref.transitionsEnabled
-                                                }),
-                                                new Echo.RadioButton({
-                                                    group: groupAnimatedScreenTransitions,
-                                                    text: this._msg["Generic.Disabled"],
-                                                    selected: !DemoApp.pref.transitionsEnabled
-                                                })
-                                            ]
-                                        })
-                                    ]
-                                }),
-                                new Echo.Column({
-                                    styleName: "PreferencesColumn",
-                                    children: [
-                                        new Echo.Label({
-                                            styleName: "PreferencesTitle",
-                                            text: this._msg["PrefDialog.PromptWindowAppearance"]
-                                        }),
-                                        this._windowStyleNameSelect = new Echo.SelectField({
-                                            items: [
-                                                { id: "Default", text: this._msg["PrefDialog.WindowStyle.BlueShadow"] },
-                                                { id: "GlassBlue2", text: this._msg["PrefDialog.WindowStyle.GlassBlueDark"] },
-                                                { id: "GlassBlue", text: this._msg["PrefDialog.WindowStyle.GlassBlueLight"] },
-                                                { id: "TransGreen", text: this._msg["PrefDialog.WindowStyle.TransGreen"] },
-                                                { id: "None", text: this._msg["PrefDialog.WindowStyle.Default"] }
-                                            ],
-                                            selectedId: DemoApp.pref.windowStyleName == null ? "None" : DemoApp.pref.windowStyleName
-                                        })
-                                    ]
-                                }),
-                                new Echo.Column({
-                                    styleName: "PreferencesColumn",
-                                    children: [
-                                        new Echo.Label({
-                                            styleName: "PreferencesTitle",
-                                            text: this._msg["PrefDialog.PromptSourceViewerColors"]
-                                        }),
-                                        new Echo.Row({
-                                            cellSpacing: 40,
-                                            children: [
-                                                new Echo.Row({
-                                                    cellSpacing: 10,
-                                                    children: [
-                                                        new Echo.Label({
-                                                            text: this._msg["PrefDialog.PromptForeground"]
-                                                        }),
-                                                        this._sourceViewerForeground = new DemoApp.ColorSelectButton(
-                                                                DemoApp.pref.sourceViewerForeground)
-                                                    ]
-                                                }),
-                                                new Echo.Row({
-                                                    cellSpacing: 10,
-                                                    children: [
-                                                        new Echo.Label({
-                                                            text: this._msg["PrefDialog.PromptBackground"]
-                                                        }),
-                                                        this._sourceViewerBackground = new DemoApp.ColorSelectButton(
-                                                                DemoApp.pref.sourceViewerBackground)
-                                                    ]
-                                                })
-                                            ]
-                                        })
-                                    ]
-                                })
-                            ]
-                        })
-                    ]
-                })
-            ]
-        });
-    },
-    
-    _apply: function(e) {
-        DemoApp.pref.windowStyleName = this._windowStyleNameSelect.get("selectedId") == "None" 
-                ? null : this._windowStyleNameSelect.get("selectedId");
-        DemoApp.pref.transitionsEnabled = this._transitionsEnabled.get("selected");
-        DemoApp.pref.sourceViewerBackground = this._sourceViewerBackground.color;
-        DemoApp.pref.sourceViewerForeground = this._sourceViewerForeground.color;
-        this.parent.remove(this);
-    },
-    
-    _close: function(e) {
-        this.parent.remove(this);
-    }
-});
-
-DemoApp.SourcePane = Core.extend(Echo.ContentPane, {
-
-    _msg: null,
-    
-    $construct: function(data) {
-        this._msg = DemoApp.getMessages();
-        Echo.ContentPane.call(this, data);
-        var url = this.render("url");
-        if (url) {
-            var conn = new Core.Web.HttpConnection(url, "GET");
-            conn.addResponseListener(Core.method(this, this._responseListener));
-            try {
-                conn.connect();
-            } catch (ex) {
-                this.add(new Echo.Label({
-                    text: this._msg["SourcePane.XHRError"]
-                }));
-            }
-        }
-    },
-    
-    _responseListener: function(e) {
-        this.add(new DemoApp.SourceView({
-            code: e.source.getResponseText()
-        }));
-    }
-});
-
-/**
- * SourceView component.  Displays formatted source code.
- * Optionally supports settings syntax colors for
- * C-style comments.
- */
-DemoApp.SourceView = Core.extend(Echo.Component, {
-
-    componentType: "DemoApp.SourceView"
-});
-
-/**
- * SourceView synchronization peer.
- */
-DemoApp.SourceViewSync = Core.extend(Echo.Render.ComponentSync, {
-
-    $load: function() {
-        Echo.Render.registerPeer("DemoApp.SourceView", this);
-    },
-    
-    renderAdd: function(update, parentElement) {
-        var code = this.component.render("code", "");
-        var lines = code.split("\n");
-        var inBlockComment = false;
-
-        this._divElement = document.createElement("div");
-        this._divElement.style.padding = "2px 1ex 2px 9ex";
-        for (var i = 0; i < lines.length; ++i) {
-            var line = lines[i];
-            var trimmedLine = DemoApp.Util.trim(line);
-            
-            if (DemoApp.Util._BLOCK_COMMENT_START.test(trimmedLine)) {
-                inBlockComment = true;
-            }
-            
-            if (DemoApp.Util.BLANK_LINE.test(line)) {
-                var blankDiv = document.createElement("div");
-                blankDiv.style.height = "1em";
-                this._divElement.appendChild(blankDiv);
-                continue;
-            }
-            
-            var lineDiv = document.createElement("div");
-            if (DemoApp.Util._LINE_COMMENT.test(trimmedLine)) {
-                Echo.Sync.Color.render(this.component.render("lineCommentColor"), lineDiv, "color");
-            } else if (inBlockComment) {
-                Echo.Sync.Color.render(this.component.render("blockCommentColor"), lineDiv, "color");
-            }
-            lineDiv.style.paddingLeft = DemoApp.Util.countLeadingSpaces(line) + "ex";
-            lineDiv.style.textIndent = "-8ex";
-            lineDiv.appendChild(document.createTextNode(trimmedLine));
-            this._divElement.appendChild(lineDiv);
-
-            if (DemoApp.Util._BLOCK_COMMENT_END.test(trimmedLine)) {
-                inBlockComment = false;
-            }
-        }        
-        
-        parentElement.appendChild(this._divElement);
-    },
-
-    renderDispose: function(update) {
-        this._divElement = null;
-    },
-
-    renderUpdate: function(update) {
-        var element = this._divElement;
-        var containerElement = element.parentNode;
-        this.renderDispose(update);
-        containerElement.removeChild(element);
-        this.renderAdd(update, containerElement);
-        return false; // Child elements not supported: safe to return false.
-    }
-});
-
-/**
- * Source code viewing window.
- * Retrieves arbitrary source code from URL.
- */
-DemoApp.SourceWindow = Core.extend(Echo.WindowPane, {
-
-    _msg: null,
-
-    $construct: function(screen) {
-        this._msg = DemoApp.getMessages();
-
-        var title, icon, url;
-        if (screen instanceof DemoApp.Workspace.ScreenData) {
-            title = screen.title;
-            icon = screen.icon16;
-            url = screen.sourceUrl;
-        } else {
-            title = screen;
-            icon = null;
-            url = screen;
-        }
-    
-        Echo.WindowPane.call(this, {
-            icon: icon,
-            iconInsets: "6px 10px",
-            title: this._msg["SourceWindow.TitlePrompt"] + " \"" + title + "\"",
-            styleName: DemoApp.pref.windowStyleName,
-            width: "50em",
-            height: "40em",
-            maximizeEnabled: true,
-            events: {
-                close: function(e) {
-                    e.source.parent.remove(e.source);
-                }
-            },
-            children: [
-                new DemoApp.SourcePane({
-                    background: DemoApp.pref.sourceViewerBackground,
-                    foreground: DemoApp.pref.sourceViewerForeground,
-                    font: { typeface: ["Courier New", "courier", "monospace"] },
-                    url: url
-                })
-            ]
-        });
     }
 });
 
@@ -1498,34 +793,52 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
     _processMenuAction: function(e) {
         switch (e.modelId) {
         case "about":
-            this.add(new DemoApp.AboutDialog());
+            Core.Web.Library.exec(DemoApp.MODULE_ABOUT, Core.method(this, function() {
+                this.add(new DemoApp.AboutDialog());
+            }));
             break;
         case "autodemo":
-            this.add(new DemoApp.AutomaticDemoDialog(this));
+            Core.Web.Library.exec(DemoApp.MODULE_AUTOMATIC_DEMO, Core.method(this, function() {
+                this.add(new DemoApp.AutomaticDemoDialog(this));
+            }));
             break;
         case "download":
             this.add(new DemoApp.DownloadWindow());
             break;            
         case "perftest":
-            this.add(new DemoApp.PerformanceTestDialog(this));
+            Core.Web.Library.exec(DemoApp.MODULE_AUTOMATIC_DEMO, Core.method(this, function() {
+                this.add(new DemoApp.PerformanceTestDialog(this));
+            }));
             break;
         case "preferences":
-            this.add(new DemoApp.PreferencesDialog(this.application));
+            Core.Web.Library.exec(DemoApp.MODULE_PREFERENCES, Core.method(this, function() {
+                this.add(new DemoApp.PreferencesDialog(this.application));
+            }));
             break;
         case "viewsource":
-            this.add(new DemoApp.SourceWindow(this._activeScreen));
+            Core.Web.Library.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+                this.add(new DemoApp.SourceWindow(this._activeScreen));
+            }));
             break;
         case "viewsource.main":
-            this.add(new DemoApp.SourceWindow("app/Main.js"));
+            Core.Web.Library.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+                this.add(new DemoApp.SourceWindow("app/Main.js"));
+            }));
             break;
         case "viewsource.ss":
-            this.add(new DemoApp.SourceWindow("app/Default.StyleSheet.js"));
+            Core.Web.Library.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+                this.add(new DemoApp.SourceWindow("app/Default.StyleSheet.js"));
+            }));
             break;
         case "viewsource.msg":
-            this.add(new DemoApp.SourceWindow("app/Messages.js"));
+            Core.Web.Library.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+                this.add(new DemoApp.SourceWindow("app/Messages.js"));
+            }));
             break;
         case "viewsource.html":
-            this.add(new DemoApp.SourceWindow("index.html"));
+            Core.Web.Library.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+                this.add(new DemoApp.SourceWindow("index.html"));
+            }));
             break;
         default:
             if (e.modelId.substring(0,2) == "L:") {
@@ -1565,101 +878,12 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             transitionStyle = "None";
         }
     
-        this._stopWindow = new Echo.WindowPane({
-            modal: true,
-            styleName: "GlassBlue2",
-            title: this._msg[performanceTest ? "PerformanceTest.WindowTitle" : "AutomaticDemo.RunWindowTitle"],
-            icon: performanceTest ? "image/Icon16Performance.gif" : "image/Icon16Play.gif",
-            iconInsets: "6px 10px",
-            closable: false,
-            resizable: false,
-            movable: false,
-            positionX: "100%",
-            positionY: "100%",
-            height: "8em",
-            width: "20em"
-        });
-        
-        if (interval > 1) {
-            this._stopWindow.add(new Echo.ContentPane({
-                overflow: Echo.ContentPane.OVERFLOW_HIDDEN,
-                backgroundImage: {
-                    url: "image/StopBackground.png",
-                    y: "50%"
-                },
-                children: [
-                    new Echo.Button({
-                        foreground: "#ffffef",
-                        font: { size: 30 },
-                        insets: 5,
-                        alignment: {
-                            horizontal: "center",
-                            vertical: "middle"
-                        },
-                        text: this._msg["AutomaticDemo.StopMessage"],
-                        events: {
-                            action: Core.method(this, this.stopAutomaticDemo)
-                        }
-                    })
-                ]
-            }));
-        } else {
+        if (interval == 0) {
             this._launchPanel.set("animationTime", 0);
-            this._stopWindow.add(new Echo.SplitPane({
-                orienation: Echo.SplitPane.ORIENTATION_HORIZONTAL_LEFT_RIGHT,
-                separatorPosition: "40%",
-                resizable: false,
-                separatorWidth: 1,
-                separatorColor: "#000000",
-                children: [
-                    new Echo.Column({
-                        foreground: "#ffffff",
-                        layoutData: {
-                            backgroundImage: {
-                                url: "image/FpsBackground.png",
-                                y: "50%"
-                            }
-                        },
-                        children: [
-                            this.fpsLabel = new Echo.Label({
-                                layoutData: {
-                                    alignment: "center"
-                                },
-                                font: { size: 22 },
-                                text: "-.-"
-                            }),
-                            new Echo.Label({
-                                layoutData: {
-                                    alignment: "center"
-                                },
-                                font: { size: 8 },
-                                text: this._msg["AutomaticDemo.Fps"]
-                            })
-                        ]
-                    }),
-                    new Echo.Button({
-                        layoutData: {
-                            backgroundImage: {
-                                url: "image/StopBackground.png",
-                                y: "50%"
-                            }
-                        },
-                        foreground: "#ffffef",
-                        font: { size: 30 },
-                        insets: 5,
-                        alignment: {
-                            horizontal: "center",
-                            vertical: "middle"
-                        },
-                        text: this._msg["AutomaticDemo.StopMessage"],
-                        events: {
-                            action: Core.method(this, this.stopAutomaticDemo)
-                        }
-                    })
-                ]
-            }));
         }
         
+        this._stopWindow = new DemoApp.AutomaticDemoStopDialog(performanceTest, interval == 0);
+        this._stopWindow.addListener("stop", Core.method(this, this.stopAutomaticDemo));
         
         this.add(this._stopWindow);
         
@@ -1681,6 +905,6 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             this.add(new DemoApp.PerformanceTestResultDialog(performanceTestFps));
         }
         
-        this.launchScreen(this._sectionsg.screens[0]);
+        this.launchScreen(this._sections[0].screens[0]);
     }
 });
