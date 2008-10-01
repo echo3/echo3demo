@@ -311,8 +311,9 @@ DemoApp.AutomaticDemo.Runnable = Core.extend(Core.Web.Scheduler.Runnable, {
     _performanceTest: false,
     _startTime: null,
     
-    $construct: function(launcher, sections, performanceTest, interval, randomOrder, transitionStyle) {
+    $construct: function(launcher, stopDialog, sections, performanceTest, interval, randomOrder, transitionStyle) {
         this._launcher = launcher;
+        this._stopDialog = stopDialog;
         this._performanceTest = performanceTest;
         this._interval = interval;
         this._randomOrder = randomOrder;
@@ -337,7 +338,7 @@ DemoApp.AutomaticDemo.Runnable = Core.extend(Core.Web.Scheduler.Runnable, {
             this._startTime = new Date().getTime();
         }
     
-        if (this._launcher.fpsLabel) {
+        if (this._stopDialog.fpsLabel) {
             if (this._count == 0) {
                 this._lastExec = new Date().getTime();
             }
@@ -346,7 +347,7 @@ DemoApp.AutomaticDemo.Runnable = Core.extend(Core.Web.Scheduler.Runnable, {
 
             if (this._count % 10 == 0) {
                 var time = new Date().getTime();
-                this._launcher.fpsLabel.set("text", parseInt(100000 / (time - this._lastExec)) / 10);
+                this._stopDialog.fpsLabel.set("text", parseInt(100000 / (time - this._lastExec)) / 10);
                 this._lastExec = time;
                 
                 if (this._performanceTest && time > this._startTime + 30000) {

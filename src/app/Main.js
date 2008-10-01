@@ -812,7 +812,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             break;            
         case "perftest":
             Core.Web.Library.exec(DemoApp.MODULE_AUTOMATIC_DEMO, Core.method(this, function() {
-                this.add(new DemoApp.PerformanceTestDialog(this));
+                this.add(new DemoApp.AutomaticDemo.PerformanceTestDialog(this));
             }));
             break;
         case "preferences":
@@ -894,8 +894,8 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         
         this.add(this._stopWindow);
         
-        this._autoDemoRunnable = new DemoApp.AutomaticDemo.Runnable(this, this._sections, performanceTest, interval, 
-                randomOrder, transitionStyle);
+        this._autoDemoRunnable = new DemoApp.AutomaticDemo.Runnable(this, this._stopWindow, this._sections, 
+                performanceTest, interval, randomOrder, transitionStyle);
         Core.Web.Scheduler.add(this._autoDemoRunnable);
     },
     
@@ -909,7 +909,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         this._autoDemoRunnable = null;
         
         if (typeof(performanceTestFps) == "number") {
-            this.add(new DemoApp.PerformanceTestResultDialog(performanceTestFps));
+            this.add(new DemoApp.AutomaticDemo.PerformanceTestResultDialog(performanceTestFps));
         }
         
         this.launchScreen(this._sections[0].screens[0]);
