@@ -106,7 +106,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             controlPaneButtonStyleName: "ControlPane.Button", 
             menuStyleName: "RichTextArea.Menu",
             toolbarButtonStyleName: "RichTextArea.Toolbar",
-            windowPaneStyleName: "GlassBlue2"
+            windowPaneStyleName: "Default"
         },
         "TextComponent": {
             background: "#cfdfff",
