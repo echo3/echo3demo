@@ -883,7 +883,9 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         }
         
         this._stopWindow = new DemoApp.AutomaticDemo.StopDialog(performanceTest, interval == 0);
-        this._stopWindow.addListener("stop", Core.method(this, this.stopAutomaticDemo));
+        this._stopWindow.addListener("stop", Core.method(this, function(e) {
+            this.stopAutomaticDemo();
+        }));
         
         this.add(this._stopWindow);
         
