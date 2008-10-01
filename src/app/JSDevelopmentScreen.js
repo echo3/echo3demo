@@ -247,36 +247,49 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                 title: this._msg["JSDevelopmentScreen.Tab.HierarchalConstruction"]
                             },
                             children: [
-                                new Echo.Column({
-                                    insets: 20,
-                                    cellSpacing: 10,
+                                new Echo.SplitPane({
+                                    orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM,
+                                    autoPositioned: true,
                                     children: [
-                                        new Echo.Label({ 
+                                        new Echo.Column({
                                             layoutData: {
-                                                insets: "15px 15px",
-                                                background: "#000000"
+                                                insets: 20
                                             },
-                                            foreground: "#ffcf3f",
-                                            font: {
-                                                typeface: "Courier New, Courier, Monospace",
-                                                size: 24,
-                                                bold: true
-                                            },
-                                            text: this._msg["JSDevelopmentScreen.Hierarchal.0"]
+                                            children: [
+                                                new Echo.Label({ 
+                                                    layoutData: {
+                                                        insets: "15px 15px",
+                                                        background: "#000000"
+                                                    },
+                                                    foreground: "#ffcf3f",
+                                                    font: {
+                                                        typeface: "Courier New, Courier, Monospace",
+                                                        size: 24,
+                                                        bold: true
+                                                    },
+                                                    text: this._msg["JSDevelopmentScreen.Hierarchal.0"]
+                                                }),
+                                            ]
                                         }),
-                                        new DemoApp.HtmlLabel({ 
-                                            layoutData: {
-                                                insets: "0px 0px 0px 580px"
-                                            },
-                                            foreground: "#ffcf9f",
-                                            html: this._msg["JSDevelopmentScreen.Hierarchal.1"]
-                                        }),
-                                        new DemoApp.HtmlLabel({ 
-                                            layoutData: {
-                                                insets: "0px 0px 0px 580px"
-                                            },
-                                            foreground: "#ffcf9f",
-                                            html: this._msg["JSDevelopmentScreen.Hierarchal.2"]
+                                        new Echo.SplitPane({
+                                            orientation: Echo.SplitPane.ORIENTATION_HORIZONTAL_RIGHT_LEFT,
+                                            separatorPosition: "35%",
+                                            children: [
+                                                new Echo.Column({
+                                                    insets: 20,
+                                                    cellSpacing: 10,
+                                                    children: [
+                                                        new DemoApp.HtmlLabel({ 
+                                                            foreground: "#ffcf9f",
+                                                            html: this._msg["JSDevelopmentScreen.Hierarchal.1"]
+                                                        }),
+                                                        new DemoApp.HtmlLabel({ 
+                                                            foreground: "#ffcf9f",
+                                                            html: this._msg["JSDevelopmentScreen.Hierarchal.2"]
+                                                        })
+                                                    ]
+                                                })
+                                            ]
                                         })
                                     ]
                                 }),
@@ -285,9 +298,9 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                     title: this._msg["JSDevelopmentScreen.Hierarchal.WindowTitle"],
                                     background: "#ffffff",
                                     positionX: 0,
-                                    positionY: 86,
-                                    width: 600,
-                                    height: 450,
+                                    positionY: "100%",
+                                    width: "65%",
+                                    height: "80%",
                                     closable: false,
                                     children: [
                                         new Echo.ContentPane({
@@ -328,7 +341,7 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                                                 repeat: "no-repeat",
                                                                 url: "image/Hierarchy.png"
                                                             }
-                                                            
+
                                                         }),
                                                         this._createHierarchalExample()
                                                     ]
