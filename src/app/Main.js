@@ -244,7 +244,7 @@ DemoApp = Core.extend(Echo.Application, {
         this.rootComponent.add(workspace);
         
         // Enable the following line to launch a specific screen at startup.
-        //workspace.setContent(new DemoApp.WindowPaneScreen());
+        workspace.launchScreen(this._sections[3].screens[2]);
     }
 });
 

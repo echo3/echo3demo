@@ -589,6 +589,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
         var contentPane;
         if (this._overlayPane == null) {
             this._overlayPane = new Extras.Sync.RichTextArea.OverlayPane();
+            this._overlayPane._richTextArea = this.component;
             contentPane = new Echo.ContentPane();
             this._overlayPane.add(contentPane);
             this.baseComponent.add(this._overlayPane);
@@ -699,6 +700,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
     },
     
     renderDisplay: function() {
+Core.Debug.consoleWrite("RDouter");        
         Core.Web.VirtualPosition.redraw(this._mainDiv);
         Echo.Arc.ComponentSync.prototype.renderDisplay.call(this);
     },
@@ -706,6 +708,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
     renderUpdate: function(update) {
         if (update.isUpdatedPropertySetIn({text: true })) {
             this._richTextInput.peer._loadData();
+            update.renderContext.displayRequired = [];
             return;
         }
     
@@ -997,6 +1000,7 @@ Extras.Sync.RichTextArea.OverlayPane = Core.extend(Echo.Component, {
         Echo.ComponentFactory.registerType("Extras.RichTextOverlayPane", this);
     },
     
+    _richTextArea: null,
     componentType: "Extras.RichTextOverlayPane",
     floatingPane: true,
     pane: true
@@ -1012,14 +1016,13 @@ Extras.Sync.RichTextArea.OverlayPanePeer = Core.extend(Echo.Render.ComponentSync
 
     renderAdd: function(update, parentElement) {
         this._div = document.createElement("div");
-        this._div.style.cssText = "position:absolute;top:0;right:0;bottom:0;left:0;z-index:32767";
+        this._div.style.cssText = "position:absolute;top:0;right:0;bottom:0;left:0;z-index:32767;";
         if (this.component.children.length == 1) {
             Echo.Render.renderComponentAdd(update, this.component.children[0], this._div);
         } else if (this.component.children.length > 1) {
             throw new Error("Too many children added to OverlayPane.");
         }
-       
-        document.body.appendChild(this._div);
+        this.component._richTextArea.peer.client.domainElement.appendChild(this._div);
     },
     
     renderDispose: function(update) {
@@ -1279,6 +1282,7 @@ Extras.Sync.RichTextArea.InputPeer = Core.extend(Echo.Render.ComponentSync, {
     },
     
     renderDisplay: function() {
+Core.Debug.consoleWrite("RDinner");        
         if (!this._contentDocumentRendered) {
             this._renderContentDocument();
         }

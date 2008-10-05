@@ -22,7 +22,7 @@ Echo.Arc.Client = Core.extend(Echo.FreeClient, {
     
     verifyInput: function(component, flags) {
         if (!this.arcSync.client.verifyInput(this.arcSync.component, flags)) {
-            return false;0
+            return false;
         }
         return Echo.FreeClient.prototype.verifyInput.call(this, component, flags);
     }
@@ -82,14 +82,11 @@ Echo.Arc.ComponentSync = Core.extend(Echo.Render.ComponentSync, {
          * 
          * When the application is created, the component returned by createComponent() 
          * will be added to the root component of the application.  The application will
-         * be installed in th DOM at the element returned by the getDomainElement().
+         * be installed in the DOM at the element returned by the getDomainElement().
          */
         renderDisplay: function() {
             if (this.arcApplication) {
-                Core.Web.Scheduler.run(Core.method(this, function() {
-                    // Perform renderDisplay() on client application in a new execution context.  This is critical for IE7.
-                    Echo.Render.renderComponentDisplay(this.baseComponent);
-                }));
+                Echo.Render.renderComponentDisplay(this.baseComponent);
             } else {
                 this.arcApplication = new Echo.Application();
                 this.arcApplication.setStyleSheet(this.client.application.getStyleSheet());
