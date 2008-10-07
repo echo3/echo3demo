@@ -159,36 +159,36 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                 title: this._msg["JSDevelopmentScreen.Tab.CoreJS"]
                             },
                             children: [
-                                new Echo.Column({
-                                    insets: 20,
-                                    cellSpacing: 10,
+                                new Echo.SplitPane({
+                                    orientation: Echo.SplitPane.ORIENTATION_HORIZONTAL_RIGHT_LEFT,
+                                    separatorPosition: "35%",
                                     children: [
-                                        new Echo.Label({ 
-                                            layoutData: {
-                                                insets: "15px 15px",
-                                                background: "#000000"
-                                            },
-                                            foreground: "#00ff00",
-                                            font: {
-                                                typeface: "Courier New, Courier, Monospace",
-                                                size: 24,
-                                                bold: true
-                                            },
-                                            text: this._msg["JSDevelopmentScreen.CoreJS.0"]
-                                        }),
-                                        new DemoApp.HtmlLabel({ 
-                                            layoutData: {
-                                                insets: "0px 0px 0px 580px"
-                                            },
-                                            foreground: "#ffcf9f",
-                                            html: this._msg["JSDevelopmentScreen.CoreJS.1"]
-                                        }),
-                                        new DemoApp.HtmlLabel({ 
-                                            layoutData: {
-                                                insets: "0px 0px 0px 580px"
-                                            },
-                                            foreground: "#ffcf9f",
-                                            html: this._msg["JSDevelopmentScreen.CoreJS.2"]
+                                        new Echo.Column({
+                                            insets: 20,
+                                            cellSpacing: 10,
+                                            children: [
+                                                new Echo.Label({ 
+                                                    layoutData: {
+                                                        insets: "15px 15px",
+                                                        background: "#000000"
+                                                    },
+                                                    foreground: "#00ff00",
+                                                    font: {
+                                                        typeface: "Courier New, Courier, Monospace",
+                                                        size: 24,
+                                                        bold: true
+                                                    },
+                                                    text: this._msg["JSDevelopmentScreen.CoreJS.0"]
+                                                }),
+                                                new DemoApp.HtmlLabel({ 
+                                                    foreground: "#ffcf9f",
+                                                    html: this._msg["JSDevelopmentScreen.CoreJS.1"]
+                                                }),
+                                                new DemoApp.HtmlLabel({ 
+                                                    foreground: "#ffcf9f",
+                                                    html: this._msg["JSDevelopmentScreen.CoreJS.2"]
+                                                })
+                                            ]
                                         })
                                     ]
                                 }),
@@ -197,14 +197,14 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                     title: this._msg["JSDevelopmentScreen.CoreJS.WindowTitle"],
                                     background: "#ffffff",
                                     positionX: 0,
-                                    positionY: 86,
-                                    width: 600,
-                                    height: 450,
+                                    positionY: "100%",
+                                    width: "65%",
+                                    height: "100%",
                                     closable: false,
                                     children: [
                                         new Echo.SplitPane({
                                             orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM,
-                                            separatorPosition: 50,
+                                            autoPositioned: true,
                                             separatorHeight: 1,
                                             separatorColor: "#3f3f4f",
                                             children: [
