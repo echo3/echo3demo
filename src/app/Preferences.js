@@ -139,8 +139,8 @@ DemoApp.PreferencesDialog = Core.extend(Echo.WindowPane, {
     },
     
     _apply: function(e) {
-        DemoApp.pref.windowStyleName = this._windowStyleNameSelect.get("selectedId") == "None" 
-                ? null : this._windowStyleNameSelect.get("selectedId");
+        DemoApp.pref.windowStyleName = this._windowStyleNameSelect.get("selectedId") == "None" ?
+                null : this._windowStyleNameSelect.get("selectedId");
         DemoApp.pref.transitionsEnabled = this._transitionsEnabled.get("selected");
         DemoApp.pref.sourceViewerBackground = this._sourceViewerBackground.color;
         DemoApp.pref.sourceViewerForeground = this._sourceViewerForeground.color;
