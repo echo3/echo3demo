@@ -4,7 +4,7 @@ DemoApp.RichTextScreen = Core.extend(Echo.ContentPane, {
         CONTENT: 
                 "<h1>Echo3 Rich Text Area</h1>" +
                 "<h3>Customization</h3>" +
-                "<p>The <span style=\"color:\#007f00;font-weight:bold\">RichTextArea</span> can be themed to fit the " +
+                "<p>The <span style=\"color:#007f00;font-weight:bold\">RichTextArea</span> can be themed to fit the " +
                 "look and feel of the " +
                 "containing application. Menus, toolbars, and pop-up windows can be configured to use styles from an " +
                 "application's stylesheet.  Additionally, features can be enabled or disabled to suit specific " +
