@@ -191,6 +191,27 @@ DemoApp.Messages = new Core.ResourceBundle({
                                                             "Closures are not used</span> by the inheritance model, " +
                                                             "eliminating a common source of reduced performance seen " +
                                                             "in JavaScript frameworks.",
+    "JSDevelopmentScreen.LazyJS.WindowTitle":               "Example",
+    "JSDevelopmentScreen.LazyJS.0":                         "Lazy-loading of Modules Enables the Development of Large " +
+                                                            "JavaScript Applications",
+    "JSDevelopmentScreen.LazyJS.1":                         "CoreJS (on which Echo3 is built) provides a " +
+                                                            "convenient means of " +
+                                                            "<span style=\"color: #ffffff;font-weight: bold;\">" +
+                                                            "dynamically downloading JavaScript " +
+                                                            "modules to the client as when they are needed</span>.  This " +
+                                                            "enables a developer to create very large JavaScript " +
+                                                            "applications without incurring an unnecessary delay " +
+                                                            "at startup to load a monolithic application.",
+    "JSDevelopmentScreen.LazyJS.2":                         "<span style=\"color: #ffffff;font-weight: bold;\">" +
+                                                            "Writing applications that use dynamic module loading is " +
+                                                            "straightforward.</span> " +
+                                                            "Just enclose any inter-module calls in a " +
+                                                            "\"Library.exec\" statement, such as in the code shown to the right.",
+    "JSDevelopmentScreen.LazyJS.3":                         "The example code shown will load the modules " +
+                                                            "\"Alpha.js\" and \"Beta.js\".  They will be installed in " +
+                                                            "the specified order, and will not be reloaded if they were " +
+                                                            "previously fetched.  When the loading has completed, the " +
+                                                            "method will be executed.",
     
     "JSDevelopmentScreen.CoreJS.WindowTitle":               "CoreJS Class Declaration",
     "JSDevelopmentScreen.CoreJS.RolloverDirection":         "Roll the mouse over any green text to see a description.",

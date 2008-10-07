@@ -46,7 +46,20 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                 "            ]\n" +
                 "        })\n" +
                 "    ]\n" +
-                "});\n" 
+                "});\n",
+        LAZY_LOAD_EXAMPLE:
+                "// Lazy-load modules, then execute code.\n" + 
+                "Core.Web.Library.exec(\n" +
+                "        [\"lib/Alpha.js\", \"lib/Beta.js\"],\n" +
+                "    Core.method(this, function() {\n" +
+                "        // The following code is executed\n" +
+                "        // only after the specified\n" +
+                "        // modules have been loaded:\n" +
+                "        var x = Alpha.getX();\n" +
+                "        this.beta = new Beta(x);\n" +
+                "        beta.doSomething();\n" +
+                "    })\n" +
+                ");\n"
     },
 
     _msg: null,
@@ -345,6 +358,80 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                                     ]
                                                 })
                                             ]
+                                        })
+                                    ]
+                                })
+                            ]
+                        }),
+                        new Echo.ContentPane({
+                            background: "#0f0f1f",
+                            layoutData: {
+                                title: this._msg["JSDevelopmentScreen.Tab.LazyModuleLoading"]
+                            },
+                            children: [
+                                new Echo.SplitPane({
+                                    orientation: Echo.SplitPane.ORIENTATION_HORIZONTAL_LEFT_RIGHT,
+                                    separatorPosition: "60%",
+                                    children: [
+                                        new Echo.Column({
+                                            layoutData: {
+                                                insets: 20
+                                            },
+                                            children: [
+                                                new Echo.Label({ 
+                                                    layoutData: {
+                                                        insets: 30,
+                                                        background: "#000000"
+                                                    },
+                                                    foreground: "#af8fff",
+                                                    font: {
+                                                        typeface: "Courier New, Courier, Monospace",
+                                                        size: 24,
+                                                        bold: true
+                                                    },
+                                                    text: this._msg["JSDevelopmentScreen.LazyJS.0"]
+                                                })
+                                            ]
+                                        }),
+                                        new Echo.Column({
+                                            insets: 40,
+                                            cellSpacing: 20,
+                                            children: [
+                                                new DemoApp.HtmlLabel({ 
+                                                    foreground: "#ffcf9f",
+                                                    html: this._msg["JSDevelopmentScreen.LazyJS.1"]
+                                                }),
+                                                new DemoApp.HtmlLabel({ 
+                                                    foreground: "#ffcf9f",
+                                                    html: this._msg["JSDevelopmentScreen.LazyJS.2"]
+                                                }),
+                                                new DemoApp.HtmlLabel({ 
+                                                    foreground: "#ffcf9f",
+                                                    html: this._msg["JSDevelopmentScreen.LazyJS.3"]
+                                                })
+                                            ]
+                                        })
+                                    ]
+                                }),
+                                new Echo.WindowPane({
+                                    styleName: "TransGreen",
+                                    title: this._msg["JSDevelopmentScreen.LazyJS.WindowTitle"],
+                                    background: "#00001f",
+                                    foreground: "#afffff",
+                                    positionX: "0%",
+                                    positionY: "100%",
+                                    width: "60%",
+                                    height: "70%",
+                                    insets: "10px 20px",
+                                    font: {
+                                        typeface: "Courier New, Courier, Monospace",
+                                        size: "13pt"
+                                    },
+                                    closable: false,
+                                    children: [
+                                        new DemoApp.SourceView({
+                                            lineCommentColor: "#3fff3f",
+                                            code: DemoApp.JSDevelopmentScreen.LAZY_LOAD_EXAMPLE
                                         })
                                     ]
                                 })
