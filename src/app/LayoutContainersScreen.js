@@ -253,7 +253,7 @@ DemoApp.LayoutContainersScreen = Core.extend(Echo.ContentPane, {
                     text: String.fromCharCode(65 + j),
                     layoutData: {
                         columnSpan: (Math.random() * 6 < 4) ? 1 : Math.floor(Math.random() * 4 + 1),
-                        rowSpan: j % 9 == 0 ? 2 : 1,
+                        rowSpan: j % 9 === 0 ? 2 : 1,
                         background: DemoApp.LayoutContainersScreen.COLORS[j  % DemoApp.LayoutContainersScreen.COLORS.length]
                     }
                 }));

@@ -405,7 +405,7 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                 ]
                             })
                         ]
-                    }))
+                    }));
                 } else {
                     row.add(new Echo.Label({
                         layoutData: layoutData,
