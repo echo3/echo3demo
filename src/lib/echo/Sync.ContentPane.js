@@ -139,40 +139,49 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
         if (this._pendingScrollX || this._pendingScrollY) {
             var componentCount = this.component.getComponentCount();
             for (var i = 0; i < componentCount; ++i) {
-                var child = this.component.getComponent(i);
+                child = this.component.getComponent(i);
                 if (!child.floatingPane) {
                     var contentElement = this._childIdToElementMap[child.renderId];
+                    var position, percent;
 
                     // Adjust horizontal scroll position, if required.
                     if (this._pendingScrollX) {
-                        if (parseInt(this._pendingScrollX) < 0) {
-                            var position = contentElement.scrollWidth - contentElement.offsetWidth;
+                        var x = Echo.Sync.Extent.toPixels(this._pendingScrollX);
+                        if (Echo.Sync.Extent.isPercent(this._pendingScrollX) || x < 0) {
+                            percent = x < 0 ? 100 : parseInt(this._pendingScrollX, 10);
+                            position = Math.round((contentElement.scrollWidth - contentElement.offsetWidth) * percent / 100);
                             if (position > 0) {
                                 contentElement.scrollLeft = position;
                                 if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
-                                    position = contentElement.scrollWidth - contentElement.offsetWidth;
+                                    // IE needs to be told twice.
+                                    position = Math.round((contentElement.scrollWidth - contentElement.offsetWidth) * 
+                                            percent / 100);
                                     contentElement.scrollLeft = position;
                                 }
                             }
                         } else {
-                            contentElement.scrollLeft = this._pendingScrollX;
+                            contentElement.scrollLeft = x;
                         }
                         this._pendingScrollX = null;
                     }
 
                     // Adjust vertical scroll position, if required.
                     if (this._pendingScrollY) {
-                        if (parseInt(this._pendingScrollY) < 0) {
-                            var position = contentElement.scrollHeight - contentElement.offsetHeight;
+                        var y = Echo.Sync.Extent.toPixels(this._pendingScrollY);
+                        if (Echo.Sync.Extent.isPercent(this._pendingScrollY) || y < 0) {
+                            percent = y < 0 ? 100 : parseInt(this._pendingScrollY, 10);
+                            position = Math.round((contentElement.scrollHeight - contentElement.offsetHeight) * percent / 100);
                             if (position > 0) {
                                 contentElement.scrollTop = position;
                                 if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
-                                    position = contentElement.scrollHeight - contentElement.offsetHeight;
+                                    // IE needs to be told twice.
+                                    position = Math.round((contentElement.scrollHeight - contentElement.offsetHeight) *
+                                            percent / 100);
                                     contentElement.scrollTop = position;
                                 }
                             }
                         } else {
-                            contentElement.scrollTop = this._pendingScrollY;
+                            contentElement.scrollTop = y;
                         }
                         this._pendingScrollY = null;
                     }
@@ -183,7 +192,7 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
     },
     
     renderUpdate: function(update) {
-        var fullRender = false;
+        var i, fullRender = false;
         if (update.hasUpdatedProperties() || update.hasUpdatedLayoutDataChildren()) {
             // Full render
             fullRender = true;
@@ -191,7 +200,7 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
             var removedChildren = update.getRemovedChildren();
             if (removedChildren) {
                 // Remove children.
-                for (var i = 0; i < removedChildren.length; ++i) {
+                for (i = 0; i < removedChildren.length; ++i) {
                     this._renderRemoveChild(update, removedChildren[i]);
                 }
             }
@@ -202,7 +211,7 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
             
             if (addedChildren) {
                 // Add children.
-                for (var i = 0; i < addedChildren.length; ++i) {
+                for (i = 0; i < addedChildren.length; ++i) {
                     if (!addedChildren[i].floatingPane) {
                         // Content updated: renderDisplay() invocation required on ContentPane itself.
                         update.renderContext.displayRequired = null;

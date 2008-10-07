@@ -8,6 +8,11 @@
  *  <li>Provides root component synchronization peer implementation.</li>
  *  <li>Provides rendering utilities for the core properties.</li>
  * </ul>
+ * 
+ * <h3>renderContext</h3>
+ * 
+ * <p>This object will add a <code>renderContext</code> property to all <code>Echo.Update.ComponentUpdate</code>
+ * objects which are processed by it.
  */
 
 /**
@@ -152,15 +157,15 @@ Echo.Render = {
      * @param {Echo.Update.ComponentUpdate} update the update
      */
     _processDispose: function(update) {
-        var components = update.getRemovedDescendants();
+        var i, components = update.getRemovedDescendants();
         if (components) {
-            for (var i = 0; i < components.length; ++i) {
+            for (i = 0; i < components.length; ++i) {
                 Echo.Render._renderComponentDisposeImpl(update, components[i]);
             }
         }
         components = update.getRemovedChildren();
         if (components) {
-            for (var i = 0; i < components.length; ++i) {
+            for (i = 0; i < components.length; ++i) {
                 Echo.Render._renderComponentDisposeImpl(update, components[i]);
             }
         }
@@ -187,24 +192,26 @@ Echo.Render = {
         // updates if they require re-rendering their descendants.
         var updates = updateManager.getUpdates();
         updates.sort(Echo.Render._componentDepthArraySort);
+        
+        var peer, i, j;
     
-        // Load peers for any root components being updated.
-        for (var i = 0; i < updates.length; ++i) {
+        // Load peers for any new root components being updated.
+        for (i = 0; i < updates.length; ++i) {
             updates[i].renderContext = {};
         
-            var peers = updates[i].parent.peer;
+            peer = updates[i].parent.peer;
             if (peer == null && updates[i].parent.componentType == "Root") {
                 Echo.Render._loadPeer(client, updates[i].parent);
             }
         }
     
         // Remove Phase: Invoke renderDispose on all updates.
-        for (var i = updates.length - 1; i >= 0; --i) {
+        for (i = updates.length - 1; i >= 0; --i) {
             if (updates[i] == null) {
                 // Skip removed updates.
                 continue;
             }
-            var peer = updates[i].parent.peer;
+            peer = updates[i].parent.peer;
             Echo.Render._processDispose(updates[i]);
         }
         
@@ -214,14 +221,14 @@ Echo.Render = {
         }
         
         // Update Phase: Invoke renderUpdate on all updates.
-        for (var i = 0; i < updates.length; ++i) {
+        for (i = 0; i < updates.length; ++i) {
             if (updates[i] == null) {
                 // The update has been removed, skip it.
                 continue;
             }
             
             // Obtain component synchronization peer.
-            var peer = updates[i].parent.peer;
+            peer = updates[i].parent.peer;
             
             // Perform update by invoking peer's renderUpdate() method.
             var fullRender = peer.renderUpdate(updates[i]);
@@ -229,7 +236,7 @@ Echo.Render = {
             // If the update required re-rendering descendants of the updated component,
             // null-out any pending updates to descendant components.
             if (fullRender) {
-                for (var j = i + 1; j < updates.length; ++j) {
+                for (j = i + 1; j < updates.length; ++j) {
                     if (updates[j] != null && updates[i].parent.isAncestorOf(updates[j].parent)) {
                         updates[j] = null;
                     }
@@ -247,7 +254,7 @@ Echo.Render = {
         }
         
         // Display Phase: Invoke renderDisplay on all updates.
-        for (var i = 0; i < updates.length; ++i) {
+        for (i = 0; i < updates.length; ++i) {
             if (updates[i] == null) {
                 // Skip removed updates.
                 continue;
@@ -257,7 +264,7 @@ Echo.Render = {
             if (updates[i].renderContext.displayRequired) {
                 // The renderContext has specified only certain child components should have their
                 // renderDisplay() methods invoked.
-                for (var j = 0; j < updates[i].renderContext.displayRequired.length; ++j) {
+                for (j = 0; j < updates[i].renderContext.displayRequired.length; ++j) {
                     Echo.Render._doRenderDisplay(updates[i].renderContext.displayRequired[j], true);
                 }
             } else {
@@ -311,9 +318,9 @@ Echo.Render = {
      */
     renderComponentAdd: function(update, component, parentElement) {
         if (!component.parent || !component.parent.peer || !component.parent.peer.client) {
-            throw new Error("Cannot find reference to the Client with which this component should be associated: "
-                    + "cannot load peer.  This is due to the component's parent's peer not being associated with a Client. "
-                    + "Component = " + component);
+            throw new Error("Cannot find reference to the Client with which this component should be associated: " +
+                    "cannot load peer.  This is due to the component's parent's peer not being associated with a Client. " +
+                    "Component = " + component);
         }
     
         Echo.Render._loadPeer(component.parent.peer.client, component);
@@ -518,6 +525,19 @@ Echo.Render.ComponentSync = Core.extend({
         /**
          * Renders an update to a component, e.g., children added/removed, properties updated.
          * The supplied update will refer specifically to an update of the supported component.
+         * 
+         * The provided update will contain a <code>renderContext</code> object property.
+         * The following properties of <code>renderContext</code> may be configured by the
+         * implementation, if desired:
+         *  
+         * <ul>
+         *  <li><code>displayRequired</code>: an array of child component objects whose synchronization peers should have their
+         *  renderDisplay() methods invoked once the update cycle is complete.  The default value of null indicates the peers
+         *  of all descendant components and the updated component itself will have their renderDisplay() methods invoked.
+         *  Specifying an empty array will cause NO components to have their renderDisplay() methods invoked.
+         *  This property is generally used on container components (or application-rendered components) which may have property
+         *  updates that need not cause renderDisplay() to be invoked on their entire descendant tree for performance reasons.
+         * </ul> 
          *
          * @param {Echo.Update.ComponentUpdate} update the update being rendered
          * @return true if this invocation has re-rendered all child components, false otherwise
@@ -593,13 +613,5 @@ Echo.Render.RootSync = Core.extend(Echo.Render.ComponentSync, {
         return fullRender;
     }
 });
-
-/**
- * Namespace for utility objects.
- * @class
- */
-Echo.Render.Util = {
-    
-};
 
 Echo.Render.registerPeer("Root", Echo.Render.RootSync);

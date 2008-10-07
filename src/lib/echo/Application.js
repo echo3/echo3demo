@@ -230,7 +230,7 @@ Echo.Application = Core.extend({
      * @return the root component of the modal context
      */
     getModalContextRoot: function() {
-        if (this._modalComponents.length == 0) {
+        if (this._modalComponents.length === 0) {
             return null;
         } else if (this._modalComponents.length == 1) {
             return this._modalComponents[0];
@@ -656,7 +656,6 @@ Echo.Component = Core.extend({
                     break;
                 default:
                     this._localStyle[name] = properties[name];
-                    break;
                 }
             }
         }
@@ -671,12 +670,12 @@ Echo.Component = Core.extend({
      */
     add: function(component, index) {
         if (!(component instanceof Echo.Component)) {
-            throw new Error("Cannot add child: specified component object is not derived from Echo.Component. "
-                    + "Parent: " + this + ", Child: " + component);
+            throw new Error("Cannot add child: specified component object is not derived from Echo.Component. " +
+                    "Parent: " + this + ", Child: " + component);
         }
         if (!component.componentType) {
-            throw new Error("Cannot add child: specified component object does not have a componentType property. "
-                    + "Parent: " + this + ", Child: " + component);
+            throw new Error("Cannot add child: specified component object does not have a componentType property. " +
+                    "Parent: " + this + ", Child: " + component);
         }
     
         if (component.parent) {
@@ -981,11 +980,13 @@ Echo.Component = Core.extend({
         if (application && this.application) {
             throw new Error("Attempt to re-register or change registered application of component.");
         }
+        
+        var i;
     
         if (!application) { // unregistering
             // Recursively unregister children.
             if (this.children != null) {
-                for (var i = 0; i < this.children.length; ++i) {
+                for (i = 0; i < this.children.length; ++i) {
                      this.children[i].register(false); // Recursively unregister children.
                 }
             }
@@ -1011,7 +1012,7 @@ Echo.Component = Core.extend({
         if (application) { // registering
             // Assign render id if required.
             if (this.renderId == null) {
-                this.renderId = "cl_" + ++Echo.Component._nextRenderId;
+                this.renderId = "cl_" + (++Echo.Component._nextRenderId);
             }
     
             // Notify application.
@@ -1024,7 +1025,7 @@ Echo.Component = Core.extend({
 
             // Recursively register children.
             if (this.children != null) {
-                for (var i = 0; i < this.children.length; ++i) {
+                for (i = 0; i < this.children.length; ++i) {
                      this.children[i].register(application); // Recursively unregister children.
                 }
             }
@@ -1352,7 +1353,7 @@ Echo.FocusManager = Core.extend({
         
         while (true) {
             /** The candidate next component to be focused */
-            var nextComponent = null;
+            var nextComponent = null, componentIndex;
 
             if ((reverse && component == originComponent) || (lastComponent && lastComponent.parent == component)) {
                 // Searching in reverse on origin component (OR) Previously moved up: do not move down.
@@ -1374,12 +1375,12 @@ Echo.FocusManager = Core.extend({
                 if (component.parent) {
                     // Get previous sibling.
                     if (reverse) {
-                        var componentIndex = component.parent.indexOf(component);
+                        componentIndex = component.parent.indexOf(component);
                         if (componentIndex > 0) {
                             nextComponent = component.parent.getComponent(componentIndex - 1);
                         }
                     } else {
-                        var componentIndex = component.parent.indexOf(component);
+                        componentIndex = component.parent.indexOf(component);
                         if (componentIndex < component.parent.getComponentCount() - 1) {
                             nextComponent = component.parent.getComponent(componentIndex + 1);
                         }
@@ -1460,8 +1461,6 @@ Echo.FocusManager = Core.extend({
     }
 });
 
-// Fundamental Property Types
-
 /**
  * Describes the layout direction of text and content to provide support 
  * for bidirectional localization.
@@ -1506,8 +1505,6 @@ Echo.LayoutDirection.LTR = new Echo.LayoutDirection(true);
  * @final
  */
 Echo.LayoutDirection.RTL = new Echo.LayoutDirection(false);
-
-// StyleSheets
 
 /**
  * An application style sheet.
@@ -1757,12 +1754,14 @@ Echo.Update.ComponentUpdate = Core.extend({
      *        removed components/descendants
      */
     _appendRemovedDescendants: function(update) {
+        var i;
+        
         // Append removed descendants.
         if (update._removedDescendantIds != null) {
             if (this._removedDescendantIds == null) {
                 this._removedDescendantIds = [];
             }
-            for (var i = 0; i < update._removedDescendantIds.length; ++i) {
+            for (i = 0; i < update._removedDescendantIds.length; ++i) {
                 this._removedDescendantIds.push(update._removedDescendantIds[i]);
             }
         }
@@ -1772,7 +1771,7 @@ Echo.Update.ComponentUpdate = Core.extend({
             if (this._removedDescendantIds == null) {
                 this._removedDescendantIds = [];
             }
-            for (var i = 0; i < update._removedChildIds.length; ++i) {
+            for (i = 0; i < update._removedChildIds.length; ++i) {
                 this._removedDescendantIds.push(update._removedChildIds[i]);
             }
         }
@@ -2259,7 +2258,7 @@ Echo.Update.Manager = Core.extend({
         }
         if (this._isAncestorBeingAdded(child)) {
             return;
-        };
+        }
         var update = this._createComponentUpdate(parent);
         update._addChild(child);
     },
@@ -2893,7 +2892,7 @@ Echo.Row = Core.extend(Echo.Component, {
  *     of the separator in vertical orientations 
  * @sp {#FillImage} separatorHorizontalImage a FillImage used to paint the separator for horizontal orientations
  * @sp {#Extent} separatorPosition an extent specifying the position of the separator
- * @sp {Boolean} autoPositioned [EXPERIMENTAL] flag indicating whether the pane should set the separator position automatically
+ * @sp {Boolean} autoPositioned flag indicating whether the pane should set the separator position automatically
  *     based on size of first child.  This feature is only available on vertically oriented panes, where the
  *     first child contains non-pane content. 
  * @sp {#FillImage} separatorVerticalImage a FillImage used to paint the separator for vertical orientations
@@ -3045,6 +3044,7 @@ Echo.PasswordField = Core.extend(Echo.TextField, {
  * @sp {Boolean} closable flag indicating whether the window is closable
  * @sp {#ImageReference} closeIcon the close button icon
  * @sp {#Insets} controlsInsets the inset margin around the controls area
+ * @sp {#Extent} controlsSpacing the spacing between controls in the controls area
  * @sp {#Insets} closeIconInsets the inset margin around the close button icon
  * @sp {#Insets} maximizeIconInsets the inset margin around the maximize button icon
  * @sp {#Insets} minimizeIconInsets the inset margin around the minimize button icon
@@ -3088,6 +3088,7 @@ Echo.WindowPane = Core.extend(Echo.Component, {
         DEFAULT_BACKGROUND: "#ffffff",
         DEFAULT_FOREGROUND: "#000000",
         DEFAULT_CONTROLS_INSETS: 4,
+        DEFAULT_CONTROLS_SPACING: 4,
         DEFAULT_HEIGHT: "15em",
         DEFAULT_MINIMUM_WIDTH: 100,
         DEFAULT_MINIMUM_HEIGHT: 100,
