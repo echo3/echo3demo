@@ -339,15 +339,15 @@ DemoApp.AutomaticDemo.Runnable = Core.extend(Core.Web.Scheduler.Runnable, {
         }
     
         if (this._stopDialog.fpsLabel) {
-            if (this._count == 0) {
+            if (this._count === 0) {
                 this._lastExec = new Date().getTime();
             }
     
             ++this._count;
 
-            if (this._count % 10 == 0) {
+            if (this._count % 10 === 0) {
                 var time = new Date().getTime();
-                this._stopDialog.fpsLabel.set("text", parseInt(100000 / (time - this._lastExec)) / 10);
+                this._stopDialog.fpsLabel.set("text", Math.round(100000 / (time - this._lastExec)) / 10);
                 this._lastExec = time;
                 
                 if (this._performanceTest && time > this._startTime + 30000) {
@@ -468,7 +468,7 @@ DemoApp.AutomaticDemo.PerformanceTestResultDialog = Core.extend(Echo.WindowPane,
     $construct: function(fps) {
         this._msg = DemoApp.getMessages();
         
-        fps = parseInt(fps * 10) / 10;
+        fps = Math.round(fps * 10) / 10;
 
         Echo.WindowPane.call(this, {
             styleName: DemoApp.pref.windowStyleName,
