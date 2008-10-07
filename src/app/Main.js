@@ -128,7 +128,7 @@ DemoApp = Core.extend(Echo.Application, {
                     "image/demoicon/WelcomeIcon16.gif", 
                     "image/demoicon/WelcomeIcon64.gif",
                     function(container) { 
-                        container.setContent(new DemoApp.WelcomeScreen()) 
+                        container.setContent(new DemoApp.WelcomeScreen());
                     },
                     "app/WelcomeScreen.js"
                 )
@@ -140,7 +140,7 @@ DemoApp = Core.extend(Echo.Application, {
                     "image/demoicon/WindowPaneIcon64.gif",
                     function(container) {
                         Core.Web.Library.exec(DemoApp.MODULE_DEMO_WINDOWPANE, function() {
-                            container.setContent(new DemoApp.WindowPaneScreen()) 
+                            container.setContent(new DemoApp.WindowPaneScreen());
                         });
                     },
                     "app/WindowPaneScreen.js"
@@ -151,7 +151,7 @@ DemoApp = Core.extend(Echo.Application, {
                     "image/demoicon/SplitPaneIcon64.gif",
                     function(container) {
                         Core.Web.Library.exec(DemoApp.MODULE_DEMO_SPLITPANE, function() {
-                            container.setContent(new DemoApp.SplitPaneScreen()) 
+                            container.setContent(new DemoApp.SplitPaneScreen());
                         });
                     },
                     "app/SplitPaneScreen.js"
@@ -162,7 +162,7 @@ DemoApp = Core.extend(Echo.Application, {
                     "image/demoicon/BasicComponentsIcon64.gif",
                     function(container) {
                         Core.Web.Library.exec(DemoApp.MODULE_DEMO_BASIC_COMPONENTS, function() {
-                            container.setContent(new DemoApp.BasicComponentsScreen()) 
+                            container.setContent(new DemoApp.BasicComponentsScreen());
                         });
                     },
                     "app/BasicComponentsScreen.js"
@@ -173,7 +173,7 @@ DemoApp = Core.extend(Echo.Application, {
                     "image/demoicon/LayoutContainersIcon64.gif",
                     function(container) {
                         Core.Web.Library.exec(DemoApp.MODULE_DEMO_LAYOUT_CONTAINERS, function() {
-                            container.setContent(new DemoApp.LayoutContainersScreen()) 
+                            container.setContent(new DemoApp.LayoutContainersScreen());
                         });
                     },
                     "app/LayoutContainersScreen.js"
@@ -186,7 +186,7 @@ DemoApp = Core.extend(Echo.Application, {
                     "image/demoicon/JSDevelopmentIcon64.gif",
                     function(container) {
                         Core.Web.Library.exec(DemoApp.MODULE_DEMO_JS_DEVELOPMENT, function() {
-                            container.setContent(new DemoApp.JSDevelopmentScreen()) 
+                            container.setContent(new DemoApp.JSDevelopmentScreen());
                         });
                     },
                     "app/JSDevelopmentScreen.js"
@@ -197,7 +197,7 @@ DemoApp = Core.extend(Echo.Application, {
                     "image/demoicon/JavaDevelopmentIcon64.gif",
                     function(container) {
                         Core.Web.Library.exec(DemoApp.MODULE_DEMO_JAVA_DEVELOPMENT, function() {
-                            container.setContent(new DemoApp.JavaDevelopmentScreen()) 
+                            container.setContent(new DemoApp.JavaDevelopmentScreen());
                         });
                     },
                     "app/JavaDevelopmentScreen.js"
@@ -210,7 +210,7 @@ DemoApp = Core.extend(Echo.Application, {
                     "image/demoicon/AccordionPaneIcon64.gif",
                     function(container) {
                         Core.Web.Library.exec(DemoApp.MODULE_DEMO_ACCORDIONPANE, function() {
-                            container.setContent(new DemoApp.AccordionPaneScreen()) 
+                            container.setContent(new DemoApp.AccordionPaneScreen());
                         });
                     },
                     "app/AccordionPaneScreen.js"
@@ -221,7 +221,7 @@ DemoApp = Core.extend(Echo.Application, {
                     "image/demoicon/TabPaneIcon64.gif",
                     function(container) {
                         Core.Web.Library.exec(DemoApp.MODULE_DEMO_TABPANE, function() {
-                            container.setContent(new DemoApp.TabPaneScreen()) 
+                            container.setContent(new DemoApp.TabPaneScreen());
                         });
                     },
                     "app/TabPaneScreen.js"
@@ -232,7 +232,7 @@ DemoApp = Core.extend(Echo.Application, {
                     "image/demoicon/RichTextIcon64.gif",
                     function(container) {
                         Core.Web.Library.exec(DemoApp.MODULE_DEMO_RICHTEXTAREA, function() {
-                            container.setContent(new DemoApp.RichTextScreen()) 
+                            container.setContent(new DemoApp.RichTextScreen());
                         });
                     },
                     "app/RichTextScreen.js"
@@ -260,7 +260,7 @@ DemoApp.ColorSelectButton = Core.extend(Echo.Button, {
 
     $construct: function(color) {
         this._msg = DemoApp.getMessages();
-        this.color = color ? color : "#000000",
+        this.color = color ? color : "#000000";
         Echo.Button.call(this, {
             width: 50,
             height: 20,
@@ -766,7 +766,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         this._activeScreen = screen;
         
         for (var i = 0; i < this._launchPanel.children.length && !this._activeScreenLaunchButton; ++i) {
-            var column = this._launchPanel.children[i]
+            var column = this._launchPanel.children[i];
             for (var j = 0; j < column.children.length && !this._activeScreenLaunchButton; ++j) {
                 var launchButton = column.children[j];
                 if (launchButton.get("id") == screen.id) {
@@ -846,11 +846,12 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             }));
             break;
         default:
+            var screen;
             if (e.modelId.substring(0,2) == "L:") {
-                var screen = this._screenMap[e.modelId.substring(2)];
+                screen = this._screenMap[e.modelId.substring(2)];
                 this.launchScreen(screen);
             } else if (e.modelId.substring(0,2) == "W:") {
-                var screen = this._screenMap[e.modelId.substring(2)];
+                screen = this._screenMap[e.modelId.substring(2)];
                 this._launchScreenWindowed(screen);
             }
             break;
@@ -873,8 +874,8 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
     },
     
     setTransition: function(type, overridePreferences) {
-        this._contentArea.set("type", overridePreferences || DemoApp.pref.transitionsEnabled 
-                ? type : Extras.TransitionPane.TYPE_IMMEDIATE);    
+        this._contentArea.set("type", overridePreferences || DemoApp.pref.transitionsEnabled ?
+                type : Extras.TransitionPane.TYPE_IMMEDIATE);    
     },
     
     startAutomaticDemo: function(performanceTest, interval, randomOrder, transitionStyle) {
@@ -883,11 +884,11 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             transitionStyle = "None";
         }
     
-        if (interval == 0) {
+        if (interval === 0) {
             this._launchPanel.set("animationTime", 0);
         }
         
-        this._stopWindow = new DemoApp.AutomaticDemo.StopDialog(performanceTest, interval == 0);
+        this._stopWindow = new DemoApp.AutomaticDemo.StopDialog(performanceTest, interval === 0);
         this._stopWindow.addListener("stop", Core.method(this, function(e) {
             this.stopAutomaticDemo();
         }));
