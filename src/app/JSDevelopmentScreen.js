@@ -314,7 +314,6 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                                     tabActiveBackground: "#ffffff",
                                                     tabInactiveBackground: "#afafaf",
                                                     borderType: Extras.TabPane.BORDER_TYPE_SURROUND,
-                                                    tabPosition: Extras.TabPane.TAB_POSITION_BOTTOM,
                                                     insets: 10,
                                                     tabInset: 30,
                                                     children: [

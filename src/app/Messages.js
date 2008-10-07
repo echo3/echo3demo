@@ -170,11 +170,12 @@ DemoApp.Messages = new Core.ResourceBundle({
                                                             "tutorial application, the \"Guess-A-Number\" game.",
 
     "JSDevelopmentScreen.Title":                            "JavaScript Development",
-    "JSDevelopmentScreen.Tab.CoreJS":                       "Core.JS Framework",
-    "JSDevelopmentScreen.Tab.HierarchalConstruction":       "Hierarchal Component Construction",
-    "JSDevelopmentScreen.CoreJS.0":                         "Echo3 uses the Core.js framework to enable true " +
+    "JSDevelopmentScreen.Tab.CoreJS":                       "CoreJS Framework",
+    "JSDevelopmentScreen.Tab.HierarchalConstruction":       "Hierarchal Construction",
+    "JSDevelopmentScreen.Tab.LazyModuleLoading":            "Lazy JS Module Loading",
+    "JSDevelopmentScreen.CoreJS.0":                         "Echo3 uses the CoreJS framework to enable true " +
                                                             "object-oriented JavaScript development.",
-    "JSDevelopmentScreen.CoreJS.1":                         "The Core.js framework allows the developer to create JavaScript " +
+    "JSDevelopmentScreen.CoreJS.1":                         "The CoreJS framework allows the developer to create JavaScript " +
                                                             "objects that use " +
                                                             "<span style=\"color: #ffffff;font-weight: bold;\">" +
                                                             "classical inheritance</span> (rather than prototype-based " +
@@ -184,14 +185,14 @@ DemoApp.Messages = new Core.ResourceBundle({
                                                             "a syntax that makes JavaScript code " +
                                                             "<span style=\"color: #ffffff;font-weight: bold;\">" +
                                                             "easy to read, write, and maintain</span>.",
-    "JSDevelopmentScreen.CoreJS.2":                         "Writing code using Core.js is not done at the expense of " +
+    "JSDevelopmentScreen.CoreJS.2":                         "Writing code using CoreJS is not done at the expense of " +
                                                             "performance.  " +
                                                             "<span style=\"color: #ffffff;font-weight: bold;\">" +
                                                             "Closures are not used</span> by the inheritance model, " +
                                                             "eliminating a common source of reduced performance seen " +
                                                             "in JavaScript frameworks.",
     
-    "JSDevelopmentScreen.CoreJS.WindowTitle":               "Core.js Class Declaration",
+    "JSDevelopmentScreen.CoreJS.WindowTitle":               "CoreJS Class Declaration",
     "JSDevelopmentScreen.CoreJS.RolloverDirection":         "Roll the mouse over any green text to see a description.",
     "JSDevelopmentScreen.CoreJS.Simple":                    "Simple",
     "JSDevelopmentScreen.CoreJS.Advanced":                  "Advanced",
@@ -199,7 +200,7 @@ DemoApp.Messages = new Core.ResourceBundle({
                                                             "is being assigned to the variable \"Example.Alpha.\"",
     "JSDevelopmentScreen.ClassNameBeta":                    "The class name.  The declared class, returned by Core.extend(), " +
                                                             "is being assigned to the variable \"Example.Beta.\"",
-    "JSDevelopmentScreen.CoreExtend":                       "Core.extend() is the Core.js method used to declare a class.",
+    "JSDevelopmentScreen.CoreExtend":                       "Core.extend() is the CoreJS method used to declare a class.",
     "JSDevelopmentScreen.BaseClass":                        "This is the base class which is being extended.  " +
                                                             "This parameter is omitted when extending directly from Object.",
     "JSDevelopmentScreen.StaticBlock":                      "This is a static declaration block.  All properties defined " +
@@ -259,9 +260,9 @@ DemoApp.Messages = new Core.ResourceBundle({
                                                             "<span style=\"color: #ffffff;font-weight: bold;\">" +
                                                             "component hierarchy</span>.",
     "JSDevelopmentScreen.Hierarchal.WindowTitle":           "Hierarchal Construction Example",
-    "JSDevelopmentScreen.Tab.HierarchalCode":               "Hierarchal Code",
-    "JSDevelopmentScreen.Tab.ComponentHierarchy":           "Component Hierarchy",
-    "JSDevelopmentScreen.Tab.RenderedComponents":           "Rendered Components",
+    "JSDevelopmentScreen.Tab.HierarchalCode":               "Code",
+    "JSDevelopmentScreen.Tab.ComponentHierarchy":           "Hierarchy",
+    "JSDevelopmentScreen.Tab.RenderedComponents":           "Result",
     
     "PerformanceTest.WindowTitle":                          "Performance Test",
     "PerformanceTest.Description":                          "The performance test will measure the rate at which this web " +
