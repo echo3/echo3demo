@@ -359,8 +359,8 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
     },
     
     _randomPastelColor: function() {
-        return "#" + parseInt(Math.random() * 64 + 192).toString(16) 
-                + parseInt(Math.random() * 64 + 192).toString(16) 
-                + parseInt(Math.random() * 64 + 192).toString(16);
+        return "#" + Math.floor(Math.random() * 64 + 192).toString(16) +
+                Math.floor(Math.random() * 64 + 192).toString(16) +
+                Math.floor(Math.random() * 64 + 192).toString(16);
     }
 });
