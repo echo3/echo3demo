@@ -44,7 +44,7 @@ Extras.Sync.ColorSelect = Core.extend(Echo.Render.ComponentSync, {
     },
     
     _processHMouseDown: function(e) {
-        if (!this.client.verifyInput(this.component) || Core.Web.dragInProgress) {
+        if (!this.client || !this.client.verifyInput(this.component) || Core.Web.dragInProgress) {
             return;
         }
         Core.Web.Event.add(this._hListenerDiv, "mousemove", this._processHMouseMoveRef, false);
@@ -69,7 +69,7 @@ Extras.Sync.ColorSelect = Core.extend(Echo.Render.ComponentSync, {
     },
     
     _processSVMouseDown: function(e) {
-        if (!this.client.verifyInput(this.component) || Core.Web.dragInProgress) {
+        if (!this.client || !this.client.verifyInput(this.component) || Core.Web.dragInProgress) {
             return;
         }
         Core.Web.Event.add(this._svListenerDiv, "mousemove", this._processSVMouseMoveRef, false);
@@ -101,7 +101,7 @@ Extras.Sync.ColorSelect = Core.extend(Echo.Render.ComponentSync, {
                 this.component.render("saturationHeight", Extras.ColorSelect.DEFAULT_SATURATION_HEIGHT), false);
         this._hueWidth = Echo.Sync.Extent.toPixels(
                 this.component.render("hueWidth", Extras.ColorSelect.DEFAULT_HUE_WIDTH), true);
-        var displayHeight = Core.Web.Measure.extentToPixels(1, "em", false);
+        var displayHeight = Core.Web.Measure.extentToPixels("1em", false);
     
         var svGradientImageSrc = this.client.getResourceUrl("Extras", "image/colorselect/ColorSelectSVGradient.png");
         var hGradientImageSrc = this.client.getResourceUrl("Extras", "image/colorselect/ColorSelectHGradient.png");
@@ -279,6 +279,8 @@ Extras.Sync.ColorSelect = Core.extend(Echo.Render.ComponentSync, {
     },
     
     renderDispose: function(update) { 
+        Core.Web.Event.removeAll(this._svListenerDiv);
+        Core.Web.Event.removeAll(this._hListenerDiv);
         this._div = null;
         this._svDiv = null;
         this._svListenerDiv = null;

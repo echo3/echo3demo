@@ -436,6 +436,8 @@ Core.Web.Env = {
         }
 
         //FIXME Quirk flags not refined yet, some quirk flags from Echo 2.0/1 will/may be deprecated/removed.
+        
+        this.CSS_BORDER_MEASURE_FACTOR = 0;
                 
         // Set IE Quirk Flags
         if (this.BROWSER_INTERNET_EXPLORER) {
@@ -447,6 +449,7 @@ Core.Web.Env = {
             this.CSS_FLOAT = "styleFloat";
             this.QUIRK_DELAYED_FOCUS_REQUIRED = true;
             this.QUIRK_UNLOADED_IMAGE_HAS_SIZE = true;
+            this.CSS_BORDER_MEASURE_FACTOR = 1;
             
             if (this.BROWSER_MAJOR_VERSION < 8) {
                 // Internet Explorer 6 and 7 Flags.
@@ -476,6 +479,7 @@ Core.Web.Env = {
                 }
             }
         } else if (this.BROWSER_MOZILLA) {
+            this.CSS_BORDER_MEASURE_FACTOR = 2;
             if (this.BROWSER_FIREFOX) {
                 if (this.BROWSER_MAJOR_VERSION < 2) {
                     this.QUIRK_DELAYED_FOCUS_REQUIRED = true;
@@ -490,8 +494,10 @@ Core.Web.Env = {
             }
             this.NOT_SUPPORTED_RELATIVE_COLUMN_WIDTHS = true;
         } else if (this.BROWSER_SAFARI) {
+            this.CSS_BORDER_MEASURE_FACTOR = 1;
             this.QUIRK_SAFARI_DOM_TEXT_ESCAPE = true;
         } else if (this.BROWSER_CHROME) {
+            this.CSS_BORDER_MEASURE_FACTOR = 1;
             this.QUIRK_SAFARI_DOM_TEXT_ESCAPE = true;
         }
     },
@@ -607,6 +613,16 @@ Core.Web.Event = {
     _nextId: 0,
     
     /**
+     * Current listener count.
+     */
+    _listenerCount: 0,
+    
+    /**
+     * Flag to display listener count every time an event is fired.  Enable this flag to check for listener leaks.
+     */
+    debugListenerCount: false,
+    
+    /**
      * Mapping between element ids and ListenerLists containing listeners to invoke during capturing phase.
      * @type Core.Arrays.LargeMap
      */
@@ -664,6 +680,7 @@ Core.Web.Event = {
         // Register event listener on DOM element.
         if (!listenerList.hasListeners(eventType)) {
             Core.Web.DOM.addEventListener(element, eventType, Core.Web.Event._processEvent, false);
+            ++Core.Web.Event._listenerCount;
         }
 
         // Add event handler to the ListenerList.
@@ -676,6 +693,10 @@ Core.Web.Event = {
      * @param {Event} e 
      */
     _processEvent: function(e) {
+        if (Core.Web.Event.debugListenerCount) {
+            Core.Debug.consoleWrite("Core.Web.Event listener count: " + Core.Web.Event._listenerCount);        
+        }
+
         e = e ? e : window.event;
         
         if (!e.target && e.srcElement) {
@@ -764,6 +785,7 @@ Core.Web.Event = {
             // Unregister event listener on DOM element if all listeners have been removed.
             if (!listenerList.hasListeners(eventType)) {
                 Core.Web.DOM.removeEventListener(element, eventType, Core.Web.Event._processEvent, false);
+                --Core.Web.Event._listenerCount;
             }
         }
     },
@@ -801,7 +823,8 @@ Core.Web.Event = {
     
         var types = listenerList.getListenerTypes();
         for (var i = 0; i < types.length; ++i) {
-            Core.Web.DOM.removeEventListener(element, types[i], Core.Web.Event._processEvent, false); 
+            Core.Web.DOM.removeEventListener(element, types[i], Core.Web.Event._processEvent, false);
+            --Core.Web.Event._listenerCount;
         }
         
         listenerMap.remove(element.__eventProcessorId);
@@ -1047,10 +1070,10 @@ Core.Web.HttpConnection = Core.extend({
      * @param {String} value the value of the header
      */
     setRequestHeader: function(header, value) {
-    	if (!this._requestHeaders) {
-    		this._requestHeaders = { };
-    	} 
-		this._requestHeaders[header] = value;
+        if (!this._requestHeaders) {
+            this._requestHeaders = { };
+        } 
+        this._requestHeaders[header] = value;
     }
 });
 
@@ -1323,17 +1346,25 @@ Core.Web.Measure = {
     
     /** Estimated scroll bar height. */
     SCROLL_HEIGHT: 17,
+    
+    _PARSER: /^(-?\d+(?:\.\d+)?)(.+)?$/,
 
     /**
-     * Converts any non-relative extent value to pixels.
+     * Converts any non-relative extent value to pixels.  Returns null in the case of a percentage extent.
      * 
-     * @param {Number} value the value to convert
-     * @param {String} units units, one of the following values: in, cm, mm, pt, pc, em, ex
+     * @param {String} value a unitized extent value, e.g., "2px", "5em", etc.
      * @param {Boolean} horizontal a flag indicating whether the extent is horizontal (true) or vertical (false)
      * @return the pixel value (may have a fractional part)
      * @type Number
      */
-    extentToPixels: function(value, units, horizontal) {
+    extentToPixels: function(extent, horizontal) {
+        var parts = this._PARSER.exec(extent);
+        if (!parts) {
+            throw new Error("Invalid Extent: " + extent);
+        }
+        var value = parseFloat(parts[1]);
+        var units = parts[2] ? parts[2] : "px";
+
         if (!units || units == "px") {
             return value;
         }
@@ -1418,6 +1449,14 @@ Core.Web.Measure = {
         do {
             valueT += element.offsetTop  || 0;
             valueL += element.offsetLeft || 0;
+            if (element.style.borderLeftWidth) {
+                valueL += (Core.Web.Measure.extentToPixels(element.style.borderLeftWidth, true) || 0) *
+                         Core.Web.Env.CSS_BORDER_MEASURE_FACTOR;
+            }
+            if (element.style.borderTopWidth) {
+                valueT += (Core.Web.Measure.extentToPixels(element.style.borderTopWidth, false) || 0) *
+                         Core.Web.Env.CSS_BORDER_MEASURE_FACTOR;
+            }
             element = element.offsetParent;
         } while (element);
         return { left: valueL, top: valueT };

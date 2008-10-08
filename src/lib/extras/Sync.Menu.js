@@ -263,6 +263,7 @@ Extras.Sync.Menu.RenderedMenu = Core.extend({
     },
 
     close: function() {
+        Core.Web.Event.removeAll(this.element);
         document.body.removeChild(this.element);
         this.element = null;
         this.itemElements = null;
@@ -514,7 +515,7 @@ Extras.Sync.Menu.RenderedMenu = Core.extend({
     },
     
     _processRollover: function(e, state) {
-        if (!this.client.verifyInput(this.component) || Core.Web.dragInProgress) {
+        if (!this.client || !this.client.verifyInput(this.component) || Core.Web.dragInProgress) {
             return true;
         }
         
@@ -593,7 +594,7 @@ Extras.Sync.ContextMenu = Core.extend(Extras.Sync.Menu, {
     },
 
     _processContextClick: function(e) {
-        if (!this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY) || Core.Web.dragInProgress) {
+        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY) || Core.Web.dragInProgress) {
             return true;
         }
     
@@ -708,7 +709,7 @@ Extras.Sync.DropDownMenu = Core.extend(Extras.Sync.Menu, {
     },
 
     _processClick: function(e) {
-        if (!this.client.verifyInput(this.component) || Core.Web.dragInProgress) {
+        if (!this.client || !this.client.verifyInput(this.component) || Core.Web.dragInProgress) {
             return true;
         }
         
@@ -940,7 +941,7 @@ Extras.Sync.MenuBarPane = Core.extend(Extras.Sync.Menu, {
             throw new Error("Invalid menu: " + menuModel);
         }
         
-        var containerBounds = new Core.Web.Measure.Bounds(this.element);
+        var containerBounds = new Core.Web.Measure.Bounds(this.element.parentNode);
         var itemBounds = new Core.Web.Measure.Bounds(itemElement);
 
         var x = itemBounds.left;
@@ -959,7 +960,7 @@ Extras.Sync.MenuBarPane = Core.extend(Extras.Sync.Menu, {
     },
     
     _processClick: function(e) {
-        if (!this.client.verifyInput(this.component)) {
+        if (!this.client || !this.client.verifyInput(this.component)) {
             return true;
         }
         
@@ -975,7 +976,7 @@ Extras.Sync.MenuBarPane = Core.extend(Extras.Sync.Menu, {
     },
     
     _processRollover: function(e, state) {
-        if (!this.client.verifyInput(this.component) || Core.Web.dragInProgress) {
+        if (!this.client || !this.client.verifyInput(this.component) || Core.Web.dragInProgress) {
             return true;
         }
         

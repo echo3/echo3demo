@@ -62,7 +62,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
         Echo.Sync.Insets.render(this.component.render("insets"), this._input, "padding");
         var width = this.component.render("width");
         if (width && !Echo.Sync.Extent.isPercent(width)) {
-            container.style.width = Echo.Sync.Extent.toCssValue(width, true);
+            this._input.style.width = Echo.Sync.Extent.toCssValue(width, true);
         }
         var height = this.component.render("height");
         if (height) {
@@ -89,7 +89,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
     
     _processBlur: function(e) {
         this._focused = false;
-        if (!this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
             return true;
         }
         this.sanitizeInput();
@@ -97,7 +97,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
     },
     
     _processClick: function(e) {
-        if (!this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
             return true;
         }
         this.component.application.setFocusedComponent(this.component);
@@ -105,21 +105,21 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
 
     _processFocus: function(e) {
         this._focused = true;
-        if (!this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
             return true;
         }
         this.component.application.setFocusedComponent(this.component);
     },
     
     _processKeyPress: function(e) {
-        if (!this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
             Core.Web.DOM.preventEventDefault(e);
             return true;
         }
     },
     
     _processKeyUp: function(e) {
-        if (!this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
             Core.Web.DOM.preventEventDefault(e);
             return true;
         }

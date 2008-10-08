@@ -91,7 +91,7 @@ Extras.Sync.CalendarSelect = Core.extend(Echo.Render.ComponentSync, {
     },
     
     _processDateSelect: function(e) {
-        if (!this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
             return;
         }
         if (e.target._cellIndex == null) {
@@ -130,7 +130,7 @@ Extras.Sync.CalendarSelect = Core.extend(Echo.Render.ComponentSync, {
     },
     
     _processMonthSelect: function(e) {
-        if (!this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
             this._monthSelect.selectedIndex = this._month;
             return;
         }
@@ -141,7 +141,7 @@ Extras.Sync.CalendarSelect = Core.extend(Echo.Render.ComponentSync, {
     },
     
     _processYearChange: function(e) {
-        if (!this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
             this._yearField.value = this._year;
             return;
         }
@@ -151,7 +151,7 @@ Extras.Sync.CalendarSelect = Core.extend(Echo.Render.ComponentSync, {
     },
     
     _processYearDecrement: function(e) {
-        if (!this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
             return;
         }
         --this._year;
@@ -161,7 +161,7 @@ Extras.Sync.CalendarSelect = Core.extend(Echo.Render.ComponentSync, {
     },
 
     _processYearIncrement: function(e) {
-        if (!this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
             return;
         }
         ++this._year;
@@ -235,7 +235,9 @@ Extras.Sync.CalendarSelect = Core.extend(Echo.Render.ComponentSync, {
         Echo.Sync.Border.render(this.component.render("border", 
                 Extras.Sync.CalendarSelect.DEFAULT_BORDER), this._table);
         Echo.Sync.Color.render(this.component.render("foreground",
-                Extras.Sync.CalendarSelect.DEFAULT_FOREGROUND), this._table); 
+                Extras.Sync.CalendarSelect.DEFAULT_FOREGROUND), this._table, "color"); 
+        Echo.Sync.Color.render(this.component.render("background",
+                Extras.Sync.CalendarSelect.DEFAULT_BACKGROUND), this._table, "backgroundColor"); 
         Echo.Sync.FillImage.render(this.component.render("backgroundImage"), this._table); 
         
         var tbody = document.createElement("tbody");
@@ -364,7 +366,7 @@ Extras.Sync.CalendarSelect = Core.extend(Echo.Render.ComponentSync, {
                         Echo.Sync.Color.renderClear(selectedForeground, td, "color");
                         Echo.Sync.Color.renderClear(selectedBackground, td, "backgroundColor");
                     } else {
-                        Echo.Sync.Color.renderClear(foreground, td, "color");
+                        Echo.Sync.Color.renderClear(null, td, "color");
                         Echo.Sync.Color.renderClear(null, td, "backgroundColor");
                     }
                 }
