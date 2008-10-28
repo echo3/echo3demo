@@ -149,6 +149,9 @@ DemoApp.Messages = new Core.ResourceBundle({
                                                             "properties such as colors, borders, and fonts, many " +
                                                             "components can be configured to provide rollover and " +
                                                             "selection effects.",
+
+    "ExtrasWidgetsScreen.Title":                            "Widgets",
+
     "JavaDevelopmentScreen.Title":                          "Java Development",
     "JavaDevelopmentScreen.Text.1":                         "Echo3 applications can be built entirely in server-side " +
                                                             "Java.  When using this development method, the state of an " +

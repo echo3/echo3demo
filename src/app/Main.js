@@ -90,6 +90,14 @@ DemoApp = Core.extend(Echo.Application, {
             "app/RichTextScreen.js"
         ],
     
+        MODULE_DEMO_EXTRAS_WIDGETS: [
+            "lib/extras/Application.CalendarSelect.js",
+            "lib/extras/Sync.CalendarSelect.js",
+            "lib/extras/Application.ColorSelect.js",
+            "lib/extras/Sync.ColorSelect.js",
+            "app/ExtrasWidgetsScreen.js"
+        ],
+    
         pref: {
             transitionsEnabled: true,
             windowStyleName: "Default",
@@ -236,6 +244,17 @@ DemoApp = Core.extend(Echo.Application, {
                         });
                     },
                     "app/RichTextScreen.js"
+                ),
+                new DemoApp.Workspace.ScreenData(
+                    this._msg["ExtrasWidgetsScreen.Title"], 
+                    "image/demoicon/ChartIcon16.gif", 
+                    "image/demoicon/ChartIcon64.gif",
+                    function(container) {
+                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_EXTRAS_WIDGETS, function() {
+                            container.setContent(new DemoApp.ExtrasWidgetsScreen());
+                        });
+                    },
+                    "app/ExtrasWidgetsScreen.js"
                 )
             ])
         ];
@@ -244,7 +263,7 @@ DemoApp = Core.extend(Echo.Application, {
         this.rootComponent.add(workspace);
         
         // Edit/Enable the following line to launch a specific screen at startup.
-        // workspace.launchScreen(this._sections[2].screens[0]);
+        workspace.launchScreen(this._sections[3].screens[3]);
     }
 });
 
