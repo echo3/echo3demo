@@ -84,12 +84,13 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                     ]
                 }),
                 this._configWindow = new Echo.WindowPane({
-                    styleName: "TransGreen",
+                    styleName: "Default",
                     width: "22em",
                     height: "22em",
                     positionX: "48%",
                     positionY: "10%",
-                    closable: false,
+                    closable: true,
+                    maximizeEnabled: true,
                     title: this._msg["WindowPaneScreen.ConfigurationTitle"],
                     events: {
                         windowClosing: Core.method(this, this._processConfigurationClose)
@@ -212,13 +213,13 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                                 this._closeEnableButton = new Echo.RadioButton({
                                                     group: closeGroup,
                                                     text: this._msg["WindowPaneScreen.ConfigurationCloseEnable"],
+                                                    selected: true,
                                                     events: {
                                                         action: Core.method(this, this._processConfigCloseEnable)
                                                     }
                                                 }),
                                                 new Echo.RadioButton({
                                                     group: closeGroup,
-                                                    selected: true,
                                                     text: this._msg["WindowPaneScreen.ConfigurationCloseDisable"],
                                                     events: {
                                                         action: Core.method(this, this._processConfigCloseEnable)
@@ -231,13 +232,13 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                                 this._maximizeEnableButton = new Echo.RadioButton({
                                                     group: maximizeGroup,
                                                     text: this._msg["WindowPaneScreen.ConfigurationMaximizeEnable"],
+                                                    selected: true,
                                                     events: {
                                                         action: Core.method(this, this._processConfigMaximizeEnable)
                                                     }
                                                 }),
                                                 new Echo.RadioButton({
                                                     group: maximizeGroup,
-                                                    selected: true,
                                                     text: this._msg["WindowPaneScreen.ConfigurationMaximizeDisable"],
                                                     events: {
                                                         action: Core.method(this, this._processConfigMaximizeEnable)
@@ -256,8 +257,8 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                                 }),
                                                 new Echo.RadioButton({
                                                     group: minimizeGroup,
-                                                    selected: true,
                                                     text: this._msg["WindowPaneScreen.ConfigurationMinimizeDisable"],
+                                                    selected: true,
                                                     events: {
                                                         action: Core.method(this, this._processConfigMinimizeEnable)
                                                     }
@@ -295,7 +296,7 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                     ]
                 }),
                 new Echo.WindowPane({
-                    styleName: "Default",
+                    styleName: "TransGreen",
                     title: this._msg["WindowPaneScreen.ModalTitle"],
                     closable: false,
                     positionX: "52%",
