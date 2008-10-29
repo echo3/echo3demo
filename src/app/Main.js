@@ -95,6 +95,12 @@ DemoApp = Core.extend(Echo.Application, {
             "lib/extras/Sync.CalendarSelect.js",
             "lib/extras/Application.ColorSelect.js",
             "lib/extras/Sync.ColorSelect.js",
+            "lib/extras/Application.Group.js",
+            "lib/extras/Sync.Group.js",
+            "lib/extras/Application.BorderPane.js",
+            "lib/extras/Sync.BorderPane.js",
+            "lib/extras/Application.ToolTipContainer.js",
+            "lib/extras/Sync.ToolTipContainer.js",
             "app/ExtrasWidgetsScreen.js"
         ],
     
