@@ -56,38 +56,26 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                             children: [
                                 new Echo.WindowPane({
                                     styleName: "GlassBlue2",
-                                    contentWidth: "19em",
-                                    contentHeight: "21em",
+                                    contentWidth: "17em",
+                                    contentHeight: "17em",
                                     movable: false,
                                     closable: false,
                                     resizable: false,
                                     title: this._msg["WindowPaneScreen.ChooseColor"],
-                                    positionX: 5,
-                                    positionY: 5,
+                                    positionX: 0,
+                                    positionY: 0,
                                     children: [
-                                        new Echo.SplitPane({
-                                            orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
-                                            autoPositioned: true,
-                                            children: [
-                                                new Echo.Row({
-                                                    styleName: "ControlPane",
-                                                    children: [
-                                                        new Echo.Button({
-                                                            styleName: "ControlPane.Button",
-                                                            text: this._msg["WindowPaneScreen.TabColorSetButton"],
-                                                            icon: "image/Icon24Yes.gif",
-                                                            events: {
-                                                                action: Core.method(this, this._processSetColor)
-                                                            }
-                                                        })
-                                                    ]
-                                                }),
-                                                this._colorSelect = new Extras.ColorSelect({
-                                                    layoutData: {
-                                                        insets: 10
+                                        this._colorSelect = new Extras.ColorSelect({
+                                            layoutData: {
+                                                insets: "1em"
+                                            },
+                                            events: {
+                                                property: Core.method(this, function(e) {
+                                                    if (e.propertyName = "color") {
+                                                        this._processSetColor(e);
                                                     }
                                                 })
-                                            ]
+                                            }
                                         })
                                     ]
                                 })
