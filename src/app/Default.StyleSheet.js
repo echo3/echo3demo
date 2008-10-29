@@ -170,18 +170,24 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             textAlignment: "center",
             textPosition: "bottom",
             rolloverEnabled: true,
-            rolloverBackground: "#5c5c5c",
+            rolloverBackgroundImage: "image/DemoSelectButtonRolloverBackground.png",
+            backgroundImage: "image/DemoSelectButtonBackground.png",
             foreground: "#ffffff",
             font: { size: "9pt" },
             iconTextMargin: 2,
             insets: 10,
             pressedBackground: "#4d4d4d",
             pressedEnabled: true,
-            border: "2px groove #3d3d3d",
-            pressedBorder: "2px inset #3d3d3d"
+            border: { 
+                top: "1px solid #0d0d0d",
+                left: "1px solid #0d0d0d",
+                bottom: "1px solid #3d3d3d",
+                right: "1px solid #3d3d3d"
+            },
+            pressedBorder: "1px inset #3d3d3d"
         },
         "Column": {
-            cellSpacing: 8
+            cellSpacing: 1
         }
     },
     "LaunchPanel.Selected": {
@@ -194,7 +200,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             font: { size: "9pt" },
             iconTextMargin: 2,
             insets: 10,
-            border: "2px groove #3d3d3d"
+            border: "1px outset #3d3d3d"
         }
     },
     "GlassBlue": {
