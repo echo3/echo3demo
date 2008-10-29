@@ -122,6 +122,13 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             titleForeground: "#ffffff",
             titleBackground: "#2f2f4f",
             titleInsets: "5px 10px",
+            controlsInsets: "-1px 5px",
+            closeIcon: "image/window/simple/ControlClose.png",
+            closeRolloverIcon: "image/window/simple/ControlCloseRollover.png",
+            maximizeIcon: "image/window/simple/ControlMaximize.png",
+            maximizeRolloverIcon: "image/window/simple/ControlMaximizeRollover.png",
+            minimizeIcon: "image/window/simple/ControlMinimize.png",
+            minimizeRolloverIcon: "image/window/simple/ControlMinimizeRollover.png",
             titleBackgroundImage: {
                 url: "image/window/simple/Header.png",
                 repeat: "repeat-x",
