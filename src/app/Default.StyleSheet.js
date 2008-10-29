@@ -171,12 +171,17 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             textPosition: "bottom",
             rolloverEnabled: true,
             rolloverBackgroundImage: "image/DemoSelectButtonRolloverBackground.png",
+            rolloverBorder: { 
+                top: "1px solid #1d1d1d",
+                left: "1px solid #1d1d1d",
+                bottom: "1px solid #5d5d5d",
+                right: "1px solid #5d5d5d"
+            },
             backgroundImage: "image/DemoSelectButtonBackground.png",
             foreground: "#ffffff",
             font: { size: "9pt" },
             iconTextMargin: 2,
             insets: 10,
-            pressedBackground: "#4d4d4d",
             pressedEnabled: true,
             border: { 
                 top: "1px solid #0d0d0d",
@@ -184,7 +189,13 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 bottom: "1px solid #3d3d3d",
                 right: "1px solid #3d3d3d"
             },
-            pressedBorder: "1px inset #3d3d3d"
+            pressedBackgroundImage: "image/DemoSelectButtonSelectedBackground.png",
+            pressedBorder: {
+                top: "1px solid #2b2b2b",
+                left: "1px solid #2b2b2b",
+                bottom: "1px solid #9e9e9e",
+                right: "1px solid #9e9e9e"
+            }
         },
         "Column": {
             cellSpacing: 1
@@ -200,7 +211,12 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             font: { size: "9pt" },
             iconTextMargin: 2,
             insets: 10,
-            border: "1px outset #3d3d3d"
+            border: { 
+                top: "1px solid #9e9e9e",
+                left: "1px solid #9e9e9e",
+                bottom: "1px solid #2b2b2b",
+                right: "1px solid #2b2b2b"
+            }
         }
     },
     "GlassBlue": {
