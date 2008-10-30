@@ -167,6 +167,21 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
         }
 
         var position = parentMenu.getSubMenuPosition(menuModel, subMenu.width, subMenu.height);
+        var windowBounds = new Core.Web.Measure.Bounds(document.body);
+        
+        if (position.x + subMenu.width > windowBounds.width) {
+            position.x = windowBounds.width - subMenu.width;
+            if (position.x < 0) {
+                position.x = 0;
+            }
+        }
+        if (position.y + subMenu.height > windowBounds.height) {
+            position.y = windowBounds.height - subMenu.height;
+            if (position.y < 0) {
+                position.y = 0;
+            }
+        }
+        
         subMenu.add(position.x, position.y);
         
         this.addMenu(subMenu);
@@ -491,10 +506,8 @@ Extras.Sync.Menu.RenderedMenu = Core.extend({
     
     getSubMenuPosition: function(menuModel, width, height) {
         var menuElement = this.itemElements[menuModel.id];
-        
         var itemBounds = new Core.Web.Measure.Bounds(menuElement);
         var menuBounds = new Core.Web.Measure.Bounds(this.element);
-        
         return { x: menuBounds.left + menuBounds.width, y: itemBounds.top };
     },
     
@@ -684,19 +697,7 @@ Extras.Sync.DropDownMenu = Core.extend(Extras.Sync.Menu, {
 
     getSubMenuPosition: function(menuModel, width, height) {
         var bounds = new Core.Web.Measure.Bounds(this.element);
-        var x = bounds.left;
-        var y = bounds.top + bounds.height;
-
-        var availableWidth = document.body.offsetWidth;
-        
-        if (x + width > availableWidth) {
-            x = availableWidth - width;
-            if (x < 0) {
-                x = 0;
-            }
-        }
-        
-        return { x: x, y: y };
+        return { x: bounds.left, y: bounds.top + bounds.height };
     },
     
     processAction: function(itemModel) {
@@ -944,19 +945,7 @@ Extras.Sync.MenuBarPane = Core.extend(Extras.Sync.Menu, {
         var containerBounds = new Core.Web.Measure.Bounds(this.element);
         var itemBounds = new Core.Web.Measure.Bounds(itemElement);
 
-        var x = itemBounds.left;
-        var y = containerBounds.top + containerBounds.height;
-
-        var availableWidth = document.body.offsetWidth;
-        
-        if (x + width > availableWidth) {
-            x = availableWidth - width;
-            if (x < 0) {
-                x = 0;
-            }
-        }
-        
-        return { x: x, y: y };
+        return { x: itemBounds.left, y: containerBounds.top + containerBounds.height };
     },
     
     _processClick: function(e) {
@@ -1023,6 +1012,7 @@ Extras.Sync.MenuBarPane = Core.extend(Extras.Sync.Menu, {
     renderMain: function(update) {
         var menuBarDiv = document.createElement("div");
         menuBarDiv.id = this.component.renderId;
+        menuBarDiv.style.cssText = "overflow:hidden;";
         
         Echo.Sync.Color.renderFB(this.component, menuBarDiv);
         var border = this.component.render("border", Extras.Sync.Menu._defaultBorder);

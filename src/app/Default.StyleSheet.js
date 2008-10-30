@@ -88,7 +88,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
         },
         "Extras.DropDownMenu": {
             animationTime: 350,
-            border: "0px solid #000000",
+            border: "1px solid #000000",
             backgroundImage: {
                 url: "image/LightBlueLineBackground.png",
                 y: "50%"

@@ -156,7 +156,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                         new Echo.Button({
                                                             styleName: "Default",
                                                             insets: "5px 10px",
-                                                            text: "A Button in a ToolTipContainer"
+                                                            text: "A Button in a ToolTipContainer (Roll the mouse over it!)"
                                                         }),
                                                         new Echo.Column({
                                                             background: "#ffffaf",
