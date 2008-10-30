@@ -118,11 +118,6 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                     cellSpacing: "1em",
                                                     children: [
                                                         new Echo.Label({
-                                                            text: "The extras library provides several types of menu components. " +
-                                                                  "All share a common model design, and optionally provide " + 
-                                                                  "settings and a fade-in effect."
-                                                        }),
-                                                        new Echo.Label({
                                                             text: "A MenuBarPane displays a conventional pull-down menu, such " +
                                                                   "as the one shown at the top of the screen."
                                                         }),
@@ -186,8 +181,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                     children: [
                                                         new Echo.Label({
                                                             text: "The ToolTipContainer component lets you place arbitrary " +
-                                                                  "components in a tool tip that appears when the user rolls " +
-                                                                  "the mouse over a component."
+                                                                  "components in a tool tip."
                                                         })
                                                     ]
                                                 })
@@ -228,7 +222,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                         }),
                                                         this._colorSelectLabel = new Echo.Label({
                                                             foreground: "#3f3f7f",
-                                                            text: "Adjusting the ColorSelect shown at left will change " +
+                                                            text: "Adjust the ColorSelect to change " +
                                                                   "the color of this text."
                                                         }),
                                                         new Echo.CheckBox({
