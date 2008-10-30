@@ -78,14 +78,28 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                                 })
                                                             }
                                                         }),
-                                                        new Extras.DropDownMenu({
-                                                            styleName: "Default",
-                                                            events: {
-                                                                init: Core.method(this, function(e) {
-                                                                    e.source.set("model",
-                                                                            this.application.workspace.createMenuModel());
+                                                        new Echo.Column({
+                                                            cellSpacing: 5,
+                                                            children: [
+                                                                this._dropDownMenu = new Extras.DropDownMenu({
+                                                                    styleName: "Default",
+                                                                    events: {
+                                                                        init: Core.method(this, function(e) {
+                                                                            e.source.set("model",
+                                                                                    this.application.workspace.createMenuModel());
+                                                                        })
+                                                                    }
+                                                                }),
+                                                                new Echo.CheckBox({
+                                                                    text: "Enable Selection in DropDownMenu",
+                                                                    events: {
+                                                                        action: Core.method(this, function(e) {
+                                                                            this._dropDownMenu.set("selectionEnabled",
+                                                                                    e.source.get("selected"));
+                                                                        })
+                                                                    }
                                                                 })
-                                                            }
+                                                            ]
                                                         }),
                                                         new Echo.Label({
                                                             font: {
@@ -115,6 +129,11 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                         new Echo.Label({
                                                             text: "A ContextMenu provides the capability to display a context " +
                                                                   "menu for any component."
+                                                        }),
+                                                        new Echo.Label({
+                                                            text: "DropDownMenu is a simple menu control with a small visual " +
+                                                                  "footprint.  It can optionally be used as a list selection " +
+                                                                  "component."
                                                         })
                                                     ]
                                                 })
