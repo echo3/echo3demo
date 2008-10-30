@@ -254,8 +254,8 @@ DemoApp = Core.extend(Echo.Application, {
                 ),
                 new DemoApp.Workspace.ScreenData(
                     this._msg["ExtrasWidgetsScreen.Title"], 
-                    "image/demoicon/ChartIcon16.gif", 
-                    "image/demoicon/ChartIcon64.gif",
+                    "image/demoicon/WidgetsIcon16.gif", 
+                    "image/demoicon/WidgetsIcon64.gif",
                     function(container) {
                         Core.Web.Library.exec(DemoApp.MODULE_DEMO_EXTRAS_WIDGETS, function() {
                             container.setContent(new DemoApp.ExtrasWidgetsScreen());
