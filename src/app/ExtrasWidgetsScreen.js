@@ -83,6 +83,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                             children: [
                                                                 this._dropDownMenu = new Extras.DropDownMenu({
                                                                     styleName: "Default",
+                                                                    selectionText: "Options",
                                                                     events: {
                                                                         init: Core.method(this, function(e) {
                                                                             e.source.set("model",

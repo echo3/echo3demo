@@ -733,26 +733,22 @@ Extras.Sync.DropDownMenu = Core.extend(Extras.Sync.Menu, {
     renderMain: function() {
         var dropDownDiv = document.createElement("div");
         dropDownDiv.id = this.component.renderId;
-        dropDownDiv.style.cursor = "pointer";
-        dropDownDiv.style.overflow = "hidden";
-        var width = this.component.render("width");
-        if (width) {
-            dropDownDiv.style.width = width.toString();
-        } else {
-            // if the width is not set, IE won't fire click events.
-            dropDownDiv.style.width = "100%";
-        }
+        dropDownDiv.style.cssText = "overflow:hidden;cursor:pointer;";
+        Echo.Sync.Color.renderFB(this.component, dropDownDiv);
+        Echo.Sync.FillImage.render(this.component.render("backgroundImage"), dropDownDiv); 
+        Echo.Sync.Border.render(this.component.render("border"), dropDownDiv); 
+
+        dropDownDiv.style.width = Echo.Sync.Extent.toCssValue(this.component.render("width", "100%"));
         var height = this.component.render("height");
         if (height) {
-            dropDownDiv.style.height = height.toString();
+            dropDownDiv.style.height =  Echo.Sync.Extent.toCssValue(height);
         }
-        Echo.Sync.Color.renderFB(this.component, dropDownDiv);
         
         var relativeContainerDiv = document.createElement("div");
         relativeContainerDiv.style.position = "relative";
         relativeContainerDiv.style.height = "100%";
-        //FIXME this was commented out...by whom, why?
-        //Echo.Sync.Insets.render(this.component.render("insets"), relativeContainerDiv, "padding");
+        
+        Echo.Sync.Insets.render(this.component.render("insets", "2px 5px"), relativeContainerDiv, "padding");
         relativeContainerDiv.appendChild(document.createTextNode("\u00a0"));
         
         var expandIcon = this.component.render("expandIcon", this.client.getResourceUrl("Extras", "image/menu/ArrowDown.gif"));
@@ -760,13 +756,14 @@ Extras.Sync.DropDownMenu = Core.extend(Extras.Sync.Menu, {
         
         var expandElement = document.createElement("span");
         expandElement.style.position = "absolute";
-        expandElement.style.height = "100%";
-        expandElement.style.top = "0px";
-        expandElement.style.right = "0px";
+        expandElement.style.top = "2px";
+        expandElement.style.right = "2px";
+        relativeContainerDiv.appendChild(expandElement);
+        
         var img = document.createElement("img");
+        img.style.verticalAlign = "middle";
         Echo.Sync.ImageReference.renderImg(expandIcon, img);
         expandElement.appendChild(img);
-        relativeContainerDiv.appendChild(expandElement);
         
         this._containerDiv = document.createElement("div");
         this._containerDiv.style.cssText = "position:absolute;top:0;left:0;right:" +
@@ -782,7 +779,6 @@ Extras.Sync.DropDownMenu = Core.extend(Extras.Sync.Menu, {
         } else {
             this._containerDiv.style.height = "100%";
         }
-        Echo.Sync.FillImage.render(this.component.render("backgroundImage"), this._containerDiv); 
         
         this._selectionSpan = document.createElement("div");
         this._selectionSpan.style.cssText = "width:100%;height:100%;overflow:hidden;white-space:nowrap;";

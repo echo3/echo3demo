@@ -77,23 +77,40 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
         },
         "Extras.ContextMenu": {
             animationTime: 350,
-            border: "0px solid #000000",
             backgroundImage: {
                 url: "image/LightBlueLineBackground.png",
                 y: "50%"
             },
             menuBackgroundIamge: "image/LightBlueLineBackground.png",
+            menuBorder: {
+                top: "1px solid #dfdfef",
+                left: "1px solid #dfdfef",
+                right: "1px solid #7f7f8f",
+                bottom: "1px solid #7f7f8f"
+            },
             menuOpacity: 80,
             selectionBackgroundImage: "image/ShadowBackgroundDarkBlue2.png"
         },
         "Extras.DropDownMenu": {
             animationTime: 350,
-            border: "1px solid #000000",
             backgroundImage: {
                 url: "image/LightBlueLineBackground.png",
                 y: "50%"
             },
+            border: {
+                top: "1px solid #dfdfef",
+                left: "1px solid #dfdfef",
+                right: "1px solid #7f7f8f",
+                bottom: "1px solid #7f7f8f"
+            },
+            insets: "2px 10px",
             menuBackgroundIamge: "image/LightBlueLineBackground.png",
+            menuBorder: {
+                top: "1px solid #dfdfef",
+                left: "1px solid #dfdfef",
+                right: "1px solid #7f7f8f",
+                bottom: "1px solid #7f7f8f"
+            },
             menuOpacity: 80,
             selectionBackgroundImage: "image/ShadowBackgroundDarkBlue2.png"
         },
