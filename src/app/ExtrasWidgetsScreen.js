@@ -50,6 +50,88 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                     ]
                                 }),
                                 new Extras.Group({
+                                    title: "Menu Components",
+                                    children: [
+                                        new Echo.Row({
+                                            cellSpacing: "1em",
+                                            children: [
+                                                new Echo.Column({
+                                                    layoutData: {
+                                                        alignment: "top"
+                                                    },
+                                                    insets: "1em",
+                                                    cellSpacing: "2em",
+                                                    children: [
+                                                        new Extras.ContextMenu({
+                                                            styleName: "Default",
+                                                            children: [
+                                                                new Echo.Button({
+                                                                    styleName: "Default",
+                                                                    insets: "5px 10px",
+                                                                    text: "A Button with a ContextMenu (Right-click it!)"
+                                                                })
+                                                            ],
+                                                            events: {
+                                                                init: Core.method(this, function(e) {
+                                                                    e.source.set("model",
+                                                                            this.application.workspace.createMenuModel());
+                                                                })
+                                                            }
+                                                        }),
+                                                        new Extras.DropDownMenu({
+                                                            styleName: "Default",
+                                                            events: {
+                                                                init: Core.method(this, function(e) {
+                                                                    e.source.set("model",
+                                                                            this.application.workspace.createMenuModel());
+                                                                })
+                                                            }
+                                                        }),
+                                                        new Echo.Label({
+                                                            font: {
+                                                                size: "8pt"
+                                                            },
+                                                            text: "Note: the example menu components above do not have " +
+                                                                  "configured event listeners, so selecting an option " +
+                                                                  "will cause no action."
+                                                        })
+                                                    ]
+                                                }),
+                                                new Echo.Column({
+                                                    layoutData: {
+                                                        alignment: "top"
+                                                    },
+                                                    cellSpacing: "1em",
+                                                    children: [
+                                                        new Echo.Label({
+                                                            text: "The extras library provides several types of menu components. " +
+                                                                  "All share a common model design, and optionally provide " + 
+                                                                  "settings and a fade-in effect."
+                                                        }),
+                                                        new Echo.Label({
+                                                            text: "A MenuBarPane displays a conventional pull-down menu, such " +
+                                                                  "as the one shown at the top of the screen."
+                                                        }),
+                                                        new Echo.Label({
+                                                            text: "A ContextMenu provides the capability to display a context " +
+                                                                  "menu for any component."
+                                                        })
+                                                    ]
+                                                })
+                                            ]
+                                        })
+                                    ]
+                                })
+                            ]
+                        }),
+                        new Echo.Column({
+                            layoutData: {
+                                alignment: "top"
+                            },
+                            cellSpacing: "1em",
+                            insets: "1em",
+                            children: [
+                                new Extras.Group({
                                     title: "ToolTipContainer",
                                     children: [
                                         new Echo.Row({
@@ -59,6 +141,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                     children: [
                                                         new Echo.Button({
                                                             styleName: "Default",
+                                                            insets: "5px 10px",
                                                             text: "A Button in a ToolTipContainer"
                                                         }),
                                                         new Echo.Column({
@@ -66,10 +149,10 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                             insets: "1ex",
                                                             border: "1px outset #ffffaf",
                                                             children: [
-                                                                new Echo.Label({
-                                                                     text: "This is a custom tool tip."
-                                                                }),
-                                                                new Echo.Label({
+                                                                new Echo.Button({
+                                                                     textPosition: "top",
+                                                                     alignment: "center",
+                                                                     icon: "image/demoicon/ChartIcon64.gif",
                                                                      text: "This is a custom tool tip."
                                                                 })
                                                             ]
@@ -92,16 +175,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                             ]
                                         })
                                     ]
-                                })
-                            ]
-                        }),
-                        new Echo.Column({
-                            layoutData: {
-                                alignment: "top"
-                            },
-                            cellSpacing: "1em",
-                            insets: "1em",
-                            children: [
+                                }),
                                 new Extras.Group({
                                     title: "ColorSelect",
                                     children: [

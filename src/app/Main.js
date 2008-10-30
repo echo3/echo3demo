@@ -130,6 +130,7 @@ DemoApp = Core.extend(Echo.Application, {
     },
     
     _sections: null,
+    workspace: null,
     
     $construct: function() {
         Echo.Application.call(this);
@@ -265,11 +266,11 @@ DemoApp = Core.extend(Echo.Application, {
             ])
         ];
         
-        var workspace = new DemoApp.Workspace(this._sections);
-        this.rootComponent.add(workspace);
+        this.workspace = new DemoApp.Workspace(this._sections);
+        this.rootComponent.add(this.workspace);
         
         // Edit/Enable the following line to launch a specific screen at startup.
-        workspace.launchScreen(this._sections[3].screens[3]);
+        this.workspace.launchScreen(this._sections[3].screens[3]);
     }
 });
 
@@ -675,7 +676,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             ]
         });
                 
-        this._menu.set("model", this._createMenuModel());
+        this._menu.set("model", this.createMenuModel());
         this._createLaunchPanel();
         
         this.launchScreen(this.getNextScreen());
@@ -708,7 +709,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         }
     },
     
-    _createMenuModel: function() {
+    createMenuModel: function() {
         var launchMenu = new Extras.MenuModel(null, this._msg["Menu.LaunchMenu"], null);
         var windowedLaunchMenu = new Extras.MenuModel(null, this._msg["Menu.StartWindowedDemoMenu"], null);
         

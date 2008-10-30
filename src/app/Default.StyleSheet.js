@@ -75,6 +75,28 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 y: "50%"
             }
         },
+        "Extras.ContextMenu": {
+            animationTime: 350,
+            border: "0px solid #000000",
+            backgroundImage: {
+                url: "image/LightBlueLineBackground.png",
+                y: "50%"
+            },
+            menuBackgroundIamge: "image/LightBlueLineBackground.png",
+            menuOpacity: 80,
+            selectionBackgroundImage: "image/ShadowBackgroundDarkBlue2.png"
+        },
+        "Extras.DropDownMenu": {
+            animationTime: 350,
+            border: "0px solid #000000",
+            backgroundImage: {
+                url: "image/LightBlueLineBackground.png",
+                y: "50%"
+            },
+            menuBackgroundIamge: "image/LightBlueLineBackground.png",
+            menuOpacity: 80,
+            selectionBackgroundImage: "image/ShadowBackgroundDarkBlue2.png"
+        },
         "Extras.MenuBarPane": {
             animationTime: 150,
             border: "0px solid #000000",
