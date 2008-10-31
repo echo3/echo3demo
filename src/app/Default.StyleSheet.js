@@ -83,7 +83,13 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 y: "50%"
             },
             selectedDateBackground: "#1579c7",
-            selectedDateBorder: "1px solid #1579c7",
+            selectedDateBackgroundImage: "image/CalendarSelectSelectedDateFill.png",
+            selectedDateBorder:  {
+                left: "1px solid #0e4f82",
+                top: "1px solid #0e4f82",
+                right: "1px solid #1472bc",
+                bottom: "1px solid #1472bc"
+            },
             rolloverDateBackground: "#ffffff",
             dateBackground: "#bcbcbc",
             dateBackgroundImage: {
