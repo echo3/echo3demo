@@ -231,39 +231,25 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
         return contentPane;
     },
     
+    _getDefaultIcon: function(name) {
+        return this.client.getResourceUrl("Extras", "image/richtext/" + name + ".gif");
+    },
+    
     /**
      * Returns default icon set map object.
      * @type object
      */
     _getDefaultIcons: function() {
-        return { 
-            alignmentCenter: this.client.getResourceUrl("Extras", "image/richtext/AlignCenter.gif"),
-            alignmentJustify: this.client.getResourceUrl("Extras", "image/richtext/AlignJustify.gif"),
-            alignmentLeft: this.client.getResourceUrl("Extras", "image/richtext/AlignLeft.gif"),
-            alignmentRight: this.client.getResourceUrl("Extras", "image/richtext/AlignRight.gif"),
-            background: this.client.getResourceUrl("Extras", "image/richtext/Background.gif"),
-            bold: this.client.getResourceUrl("Extras", "image/richtext/Bold.gif"),
-            bulletedList: this.client.getResourceUrl("Extras", "image/richtext/BulletedList.gif"),
-            cancel: this.client.getResourceUrl("Extras", "image/richtext/Cancel.gif"),
-            copy: this.client.getResourceUrl("Extras", "image/richtext/Copy.gif"),
-            cut: this.client.getResourceUrl("Extras", "image/richtext/Cut.gif"),
-            foreground: this.client.getResourceUrl("Extras", "image/richtext/Foreground.gif"),
-            horizontalRule: this.client.getResourceUrl("Extras", "image/richtext/HorizontalRule.gif"),
-            hyperlink: this.client.getResourceUrl("Extras", "image/richtext/Hyperlink.gif"),
-            image: this.client.getResourceUrl("Extras", "image/richtext/Image.gif"),
-            indent: this.client.getResourceUrl("Extras", "image/richtext/Indent.gif"),
-            italic: this.client.getResourceUrl("Extras", "image/richtext/Italic.gif"),
-            numberedList: this.client.getResourceUrl("Extras", "image/richtext/NumberedList.gif"),
-            ok: this.client.getResourceUrl("Extras", "image/richtext/Ok.gif"),
-            outdent: this.client.getResourceUrl("Extras", "image/richtext/Outdent.gif"),
-            paste: this.client.getResourceUrl("Extras", "image/richtext/Paste.gif"),
-            redo: this.client.getResourceUrl("Extras", "image/richtext/Redo.gif"),
-            subscript: this.client.getResourceUrl("Extras", "image/richtext/Subscript.gif"),
-            superscript: this.client.getResourceUrl("Extras", "image/richtext/Superscript.gif"),
-            table: this.client.getResourceUrl("Extras", "image/richtext/Table.gif"),
-            underline: this.client.getResourceUrl("Extras", "image/richtext/Underline.gif"),
-            undo: this.client.getResourceUrl("Extras", "image/richtext/Undo.gif")
-        };
+        var iconNames = [ "alignmentCenter", "alignmentJustify", "alignmentLeft", "alignmentRight",
+            "background", "bold", "bulletedList", "cancel", "copy", "cut", "foreground", "horizontalRule",
+            "hyperlink", "image", "ident", "italic", "numberedList", "ok", "outdent", "paste", "redo",
+            "subscript", "superscript", "table", "underline", "undo" ];
+        var defaultIcons = { };
+        for (var i = 0; i < iconNames.length; ++i) {
+            var iconResource = iconNames[i].charAt(0).toUpperCase() + iconNames[i].substring(1);
+            defaultIcons[iconNames[i]] = this.client.getResourceUrl("Extras", "image/richtext/" + iconResource + ".gif");
+        }
+        return defaultIcons;
     },
     
     /**
@@ -1244,40 +1230,34 @@ Extras.Sync.RichTextArea.InputPeer = Core.extend(Echo.Render.ComponentSync, {
             element = element.parentNode;
         }
         
-        var text = this.component._richTextArea.get("text");
-        
-        var contentDocument = this._iframe.contentWindow.document;
-        
-        var bodyStyleAttribute = "height:100%;width:100%;margin:0px;padding:0px;";
-        
+        var style = "height:100%;width:100%;margin:0px;padding:0px;";
         var foreground = this.component._richTextArea.render("foreground");
         if (foreground) {
-            bodyStyleAttribute += "color:" + foreground + ";";
+            style += "color:" + foreground + ";";
         }
-
         var background = this.component._richTextArea.render("background");
         if (background) {
-            bodyStyleAttribute += "background-color:" + background + ";";
+            style += "background-color:" + background + ";";
         }
-
         var backgroundImage = this.component._richTextArea.render("backgroundImage");
         if (backgroundImage) {
-            bodyStyleAttribute += "background-attachment: fixed;";
-            bodyStyleAttribute += "background-image:url(" + Echo.Sync.FillImage.getUrl(backgroundImage) + ");";
+            style += "background-attachment: fixed;";
+            style += "background-image:url(" + Echo.Sync.FillImage.getUrl(backgroundImage) + ");";
             var backgroundRepeat = Echo.Sync.FillImage.getRepeat(backgroundImage);
             if (backgroundRepeat) {
-                bodyStyleAttribute += "background-repeat:" + backgroundRepeat + ";";
+                style += "background-repeat:" + backgroundRepeat + ";";
             }
             var backgroundPosition = Echo.Sync.FillImage.getPosition(backgroundImage);
             if (backgroundPosition) {
-                bodyStyleAttribute += "background-position:" + backgroundPosition + ";";
+                style += "background-position:" + backgroundPosition + ";";
             }
         }
         
+        var text = this.component._richTextArea.get("text");
+        var contentDocument = this._iframe.contentWindow.document;
         contentDocument.open();
         contentDocument.write("<html><body tabindex=\"0\" width=\"100%\" height=\"100%\"" +
-                (bodyStyleAttribute ? (" style=\"" + bodyStyleAttribute + "\"") : "") +
-                ">" + (text == null ? "" : text) + "</body></html>");
+                (style ? (" style=\"" + style + "\"") : "") + ">" + (text == null ? "" : text) + "</body></html>");
         contentDocument.close();
         if (Core.Web.Env.BROWSER_MOZILLA && !Core.Web.Env.BROWSER_FIREFOX) {
             // workaround for Mozilla (not Firefox)
@@ -1289,14 +1269,11 @@ Extras.Sync.RichTextArea.InputPeer = Core.extend(Echo.Render.ComponentSync, {
             contentDocument.designMode = "on";
         }
         
-        Core.Web.Event.add(this._iframe.contentWindow.document, "keypress", 
-                Core.method(this, this._processKeyPress), false);
-        Core.Web.Event.add(this._iframe.contentWindow.document, "keyup", 
-                Core.method(this, this._processKeyUp), false);
-        Core.Web.Event.add(this._iframe.contentWindow.document, "mousedown", 
-                Core.method(this, this._processMouseDown), false);
-        Core.Web.Event.add(this._iframe.contentWindow.document, "mouseup", 
-                Core.method(this, this._processMouseUp), false);
+        Core.Web.Event.add(this._iframe.contentWindow.document, "keypress",  Core.method(this, this._processKeyPress), false);
+        Core.Web.Event.add(this._iframe.contentWindow.document, "keyup", Core.method(this, this._processKeyUp), false);
+        Core.Web.Event.add(this._iframe.contentWindow.document, "mousedown", Core.method(this, this._processMouseDown), false);
+        Core.Web.Event.add(this._iframe.contentWindow.document, "mouseup", Core.method(this, this._processMouseUp), false);
+
         this._contentDocumentRendered = true;
     },
     

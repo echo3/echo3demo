@@ -191,7 +191,7 @@ DemoApp.Messages = new Core.ResourceBundle({
     "JSDevelopmentScreen.CoreJS.2":                         "Writing code using CoreJS is not done at the expense of " +
                                                             "performance.  " +
                                                             "<span style=\"color: #ffffff;font-weight: bold;\">" +
-                                                            "Closures are not used</span> by the inheritance model, " +
+                                                            "The use of closures is minimized</span> by the inheritance model, " +
                                                             "eliminating a common source of reduced performance seen " +
                                                             "in JavaScript frameworks.",
     "JSDevelopmentScreen.LazyJS.WindowTitle":               "Example",
