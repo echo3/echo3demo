@@ -56,19 +56,17 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                             children: [
                                 new Echo.WindowPane({
                                     styleName: "GlassBlue2",
-                                    contentWidth: "17em",
-                                    contentHeight: "17em",
+                                    contentWidth: "19em",
+                                    contentHeight: "18em",
                                     movable: false,
                                     closable: false,
                                     resizable: false,
                                     title: this._msg["WindowPaneScreen.ChooseColor"],
                                     positionX: 0,
                                     positionY: 0,
+                                    insets: "1em",
                                     children: [
                                         this._colorSelect = new Extras.ColorSelect({
-                                            layoutData: {
-                                                insets: "1em"
-                                            },
                                             events: {
                                                 property: Core.method(this, function(e) {
                                                     if (e.propertyName = "color") {
