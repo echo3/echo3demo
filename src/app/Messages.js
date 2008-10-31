@@ -151,6 +151,38 @@ DemoApp.Messages = new Core.ResourceBundle({
                                                             "selection effects.",
 
     "ExtrasWidgetsScreen.Title":                            "Widgets",
+    "ExtrasWidgetsScreen.CalendarSelect.Title":             "CalendarSelect",
+    "ExtrasWidgetsScreen.CalendarSelect.Desc1":             "The CalendarSelect component provides the " +
+                                                            "capability to select dates from a visual representation of " + 
+                                                            "a calendar.",
+    "ExtrasWidgetsScreen.CalendarSelect.Desc2":             "It features animated transitions when selecting " +
+                                                            "a month or year.",
+    "ExtrasWidgetsScreen.Menu.Title":                       "Menu Components",
+    "ExtrasWidgetsScreen.Menu.ContextButton":               "A Button with a ContextMenu (Right-click it!)",
+    "ExtrasWidgetsScreen.Menu.DropDownButton":              "Options",
+    "ExtrasWidgetsScreen.Menu.DropDownSelection":           "Enable Selection in DropDownMenu",
+    "ExtrasWidgetsScreen.Menu.Note":                        "Note: the example menu components above do not have " +
+                                                            "configured event listeners, so selecting an option " +
+                                                            "will cause no action.",
+    "ExtrasWidgetsScreen.Menu.MenuBarPane.Desc":            "A MenuBarPane displays a conventional pull-down menu, such " +
+                                                            "as the one shown at the top of the screen.",
+    "ExtrasWidgetsScreen.Menu.ContextMenu.Desc":            "A ContextMenu provides the capability to display a context " +
+                                                            "menu for any component.",
+    "ExtrasWidgetsScreen.Menu.DropDownMenu.Desc":           "DropDownMenu is a simple menu control with a small visual " +
+                                                            "footprint.  It can optionally be used as a list selection " +
+                                                            "component.",
+    "ExtrasWidgetsScreen.ToolTip.Title":                    "ToolTipContainer",
+    "ExtrasWidgetsScreen.ToolTip.Button":                   "A Button in a ToolTipContainer (Roll the mouse over it!)",
+    "ExtrasWidgetsScreen.ToolTip.Tip":                      "This is a custom tool tip.",
+    "ExtrasWidgetsScreen.ToolTip.Desc":                     "The ToolTipContainer component lets you place arbitrary " +
+                                                            "components in a tool tip.",
+    "ExtrasWidgetsScreen.ColorSelect.Title":                "ColorSelect",
+    "ExtrasWidgetsScreen.ColorSelect.Desc":                 "The ColorSelect component enables a user " + 
+                                                            "to select an RGB color " +
+                                                            "quickly using a visual component.",
+    "ExtrasWidgetsScreen.ColorSelect.ChangeText":           "Adjust the ColorSelect to change " +
+                                                            "the color of this text.",
+    "ExtrasWidgetsScreen.ColorSelect.DisplayHex":           "Display Hex Color Value",
 
     "JavaDevelopmentScreen.Title":                          "Java Development",
     "JavaDevelopmentScreen.Text.1":                         "Echo3 applications can be built entirely in server-side " +

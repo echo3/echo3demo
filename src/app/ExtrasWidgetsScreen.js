@@ -18,7 +18,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                             cellSpacing: "1em",
                             children: [
                                 new Extras.Group({
-                                    title: "CalendarSelect",
+                                    title: this._msg["ExtrasWidgetsScreen.CalendarSelect.Title"],
                                     children: [
                                         new Echo.Row({
                                             cellSpacing: "1em",
@@ -36,13 +36,10 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                     cellSpacing: "1em",
                                                     children: [
                                                         new Echo.Label({
-                                                            text: "The CalendarSelect component provides the " +
-                                                                  "capability to select dates from a visual representation of " + 
-                                                                  "a calendar."
+                                                            text: this._msg["ExtrasWidgetsScreen.CalendarSelect.Desc1"]
                                                         }),
                                                         new Echo.Label({
-                                                            text: "It features animated transitions when selecting " +
-                                                                  "a month or year."
+                                                            text: this._msg["ExtrasWidgetsScreen.CalendarSelect.Desc2"]
                                                         })
                                                     ]
                                                 })
@@ -51,7 +48,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                     ]
                                 }),
                                 new Extras.Group({
-                                    title: "Menu Components",
+                                    title: this._msg["ExtrasWidgetsScreen.Menu.Title"],
                                     children: [
                                         new Echo.Row({
                                             cellSpacing: "1em",
@@ -69,7 +66,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                                 new Echo.Button({
                                                                     styleName: "Default",
                                                                     insets: "5px 10px",
-                                                                    text: "A Button with a ContextMenu (Right-click it!)"
+                                                                    text: this._msg["ExtrasWidgetsScreen.Menu.ContextButton"]
                                                                 })
                                                             ],
                                                             events: {
@@ -84,7 +81,8 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                             children: [
                                                                 this._dropDownMenu = new Extras.DropDownMenu({
                                                                     styleName: "Default",
-                                                                    selectionText: "Options",
+                                                                    selectionText: this._msg[
+                                                                            "ExtrasWidgetsScreen.Menu.DropDownButton"],
                                                                     events: {
                                                                         init: Core.method(this, function(e) {
                                                                             e.source.set("model",
@@ -93,7 +91,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                                     }
                                                                 }),
                                                                 new Echo.CheckBox({
-                                                                    text: "Enable Selection in DropDownMenu",
+                                                                    text: this._msg["ExtrasWidgetsScreen.Menu.DropDownSelection"],
                                                                     events: {
                                                                         action: Core.method(this, function(e) {
                                                                             this._dropDownMenu.set("selectionEnabled",
@@ -107,9 +105,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                             font: {
                                                                 size: "8pt"
                                                             },
-                                                            text: "Note: the example menu components above do not have " +
-                                                                  "configured event listeners, so selecting an option " +
-                                                                  "will cause no action."
+                                                            text: this._msg["ExtrasWidgetsScreen.Menu.Note"]
                                                         })
                                                     ]
                                                 }),
@@ -120,17 +116,13 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                     cellSpacing: "1em",
                                                     children: [
                                                         new Echo.Label({
-                                                            text: "A MenuBarPane displays a conventional pull-down menu, such " +
-                                                                  "as the one shown at the top of the screen."
+                                                            text: this._msg["ExtrasWidgetsScreen.Menu.MenuBarPane.Desc"]
                                                         }),
                                                         new Echo.Label({
-                                                            text: "A ContextMenu provides the capability to display a context " +
-                                                                  "menu for any component."
+                                                            text: this._msg["ExtrasWidgetsScreen.Menu.ContextMenu.Desc"]
                                                         }),
                                                         new Echo.Label({
-                                                            text: "DropDownMenu is a simple menu control with a small visual " +
-                                                                  "footprint.  It can optionally be used as a list selection " +
-                                                                  "component."
+                                                            text: this._msg["ExtrasWidgetsScreen.Menu.DropDownMenu.Desc"]
                                                         })
                                                     ]
                                                 })
@@ -148,7 +140,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                             insets: "1em",
                             children: [
                                 new Extras.Group({
-                                    title: "ToolTipContainer",
+                                    title: this._msg["ExtrasWidgetsScreen.ToolTip.Title"],
                                     children: [
                                         new Echo.Row({
                                             cellSpacing: "1em",
@@ -158,7 +150,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                         new Echo.Button({
                                                             styleName: "Default",
                                                             insets: "5px 10px",
-                                                            text: "A Button in a ToolTipContainer (Roll the mouse over it!)"
+                                                            text: this._msg["ExtrasWidgetsScreen.ToolTip.Button"]
                                                         }),
                                                         new Echo.Column({
                                                             background: "#ffffaf",
@@ -169,7 +161,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                                      textPosition: "top",
                                                                      alignment: "center",
                                                                      icon: "image/demoicon/ChartIcon64.gif",
-                                                                     text: "This is a custom tool tip."
+                                                                     text: this._msg["ExtrasWidgetsScreen.ToolTip.Tip"]
                                                                 })
                                                             ]
                                                         })
@@ -182,8 +174,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                     cellSpacing: "1em",
                                                     children: [
                                                         new Echo.Label({
-                                                            text: "The ToolTipContainer component lets you place arbitrary " +
-                                                                  "components in a tool tip."
+                                                            text: this._msg["ExtrasWidgetsScreen.ToolTip.Desc"]
                                                         })
                                                     ]
                                                 })
@@ -192,7 +183,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                     ]
                                 }),
                                 new Extras.Group({
-                                    title: "ColorSelect",
+                                    title: this._msg["ExtrasWidgetsScreen.ColorSelect.Title"],
                                     children: [
                                         new Echo.Row({
                                             cellSpacing: "1em",
@@ -218,17 +209,14 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                     cellSpacing: "1em",
                                                     children: [
                                                         new Echo.Label({
-                                                            text: "The ColorSelect component enables a user " + 
-                                                                    "to select an RGB color " +
-                                                                    "quickly using a visual component."
+                                                            text: this._msg["ExtrasWidgetsScreen.ColorSelect.Desc"]
                                                         }),
                                                         this._colorSelectLabel = new Echo.Label({
                                                             foreground: "#3f3f7f",
-                                                            text: "Adjust the ColorSelect to change " +
-                                                                  "the color of this text."
+                                                            text: this._msg["ExtrasWidgetsScreen.ColorSelect.ChangeText"]
                                                         }),
                                                         new Echo.CheckBox({
-                                                            text: "Display Hex Color Value",
+                                                            text: this._msg["ExtrasWidgetsScreen.ColorSelect.DisplayHex"],
                                                             selected: true,
                                                             events: {
                                                                 action: Core.method(this, function(e) {
