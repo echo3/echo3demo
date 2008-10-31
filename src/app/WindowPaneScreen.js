@@ -307,9 +307,6 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                             children: [
                                 new Echo.Label({
                                     text: this._msg["WindowPaneScreen.ModalText1"]
-                                }),
-                                new Echo.Label({
-                                    text: this._msg["WindowPaneScreen.ModalText2"]
                                 })
                             ]
                         })
