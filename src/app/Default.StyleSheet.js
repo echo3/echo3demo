@@ -196,8 +196,16 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 url: "image/SplitPaneHorizontalSeparatorLarge.png",
                 y: "50%"
             },
+            separatorHorizontalRolloverImage: {
+                url: "image/SplitPaneHorizontalSeparatorLargeRollover.png",
+                y: "50%"
+            },
             separatorVerticalImage: {
                 url: "image/SplitPaneVerticalSeparatorLarge.png",
+                x: "50%"
+            },
+            separatorVerticalRolloverImage: {
+                url: "image/SplitPaneVerticalSeparatorLargeRollover.png",
                 x: "50%"
             }
         }
