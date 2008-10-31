@@ -24,6 +24,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                             cellSpacing: "1em",
                                             children: [
                                                 new Extras.CalendarSelect({
+                                                    styleName: "Default",
                                                     layoutData: {
                                                         alignment: "top"
                                                     }
