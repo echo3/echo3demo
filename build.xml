@@ -33,6 +33,7 @@
             </filelist>
             <filelist dir="src/app/">
                 <file name="Main.js"/>
+                <file name="Util.js"/>
                 <file name="Default.StyleSheet.js"/>
                 <file name="Messages.js"/>
                 <file name="WelcomeScreen.js"/>
