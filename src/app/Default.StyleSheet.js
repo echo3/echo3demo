@@ -77,11 +77,17 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
         },
         "Extras.CalendarSelect": {
             background: "#6f87af",
+            dateBackground: "#bcbcbc",
+            dateBackgroundImage: {
+                url: "image/CalendarSelectGradient.png",
+                repeat: "repeat-x"
+            },
             headerForeground: "#ffffff",
             headerBackgroundImage: {
                 url: "image/CalendarHeaderBackground.png",
                 y: "50%"
             },
+            rolloverDateBackground: "#ffffff",
             selectedDateBackground: "#1579c7",
             selectedDateBackgroundImage: "image/CalendarSelectSelectedDateFill.png",
             selectedDateBorder:  {
@@ -89,12 +95,6 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 top: "1px solid #0e4f82",
                 right: "1px solid #1472bc",
                 bottom: "1px solid #1472bc"
-            },
-            rolloverDateBackground: "#ffffff",
-            dateBackground: "#bcbcbc",
-            dateBackgroundImage: {
-                url: "image/CalendarSelectGradient.png",
-                repeat: "repeat-x"
             }
         },
         "Extras.ContextMenu": {
