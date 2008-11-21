@@ -338,8 +338,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
     },
     
     _processRemoveTab: function(e) {
-        this._tabPane.remove(0);
-//        this._tabPane.remove(this._tabPane.getComponentCount() - 1);
+        this._tabPane.remove(this._tabPane.getComponentCount() - 1);
         this._addButton.setEnabled(true);
         this._removeButton.setEnabled(this._tabPane.getComponentCount() > 2);
     },
