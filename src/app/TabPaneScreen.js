@@ -333,7 +333,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                 })
             ]
         }));
-        this._addButton.setEnabled(this._tabPane.getComponentCount() < 5);
+        this._addButton.setEnabled(this._tabPane.getComponentCount() < 15);
         this._removeButton.setEnabled(true);
     },
     
