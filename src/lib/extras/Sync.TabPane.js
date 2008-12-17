@@ -136,6 +136,12 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
      */
     _totalTabWidth: 0,
     
+    /**
+     * Flag indicating whether the header size may need to be reconfigured (by invoking configureHeaderSize() in the next
+     * renderDisplay() execution.
+     */
+    _configureHeaderSizeRequired: false,
+    
     _scrollRunnable: null,
     
     scrollPosition: 0,
@@ -168,6 +174,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
     },
 
     _configureHeaderSize: function() {
+        this._configureHeaderSizeRequired = false;
         var borderSize = Echo.Sync.Border.getPixelSize(this._tabActiveBorder);
         var height = new Core.Web.Measure.Bounds(this._headerTabContainerDiv).height;
         
@@ -180,6 +187,12 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         }
         this._contentContainerDiv.style.left = "0";
         this._contentContainerDiv.style.right = "0";
+
+        Core.Web.VirtualPosition.redraw(this._contentContainerDiv);
+        Core.Web.VirtualPosition.redraw(this._headerContainerDiv);
+        for (i = 0; i < this._tabs.length; ++i) {
+            this._tabs[i]._renderDisplay();
+        }
     },
     
     /**
@@ -330,7 +343,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         this._contentContainerDiv = document.createElement("div");
         this._contentContainerDiv.style.position = "absolute";
         this._contentContainerDiv.style.overflow = "hidden";
-        Echo.Sync.Color.renderFB(this.component, this._contentContainerDiv);
+        Echo.Sync.renderComponentDefaults(this.component, this._contentContainerDiv);
         
         // Render Tabs
         var activeTabFound = false;
@@ -352,7 +365,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
             }
         }
 
-        this._configureHeaderSize();
+        this._configureHeaderSizeRequired = true;
         
         if (this._borderType == Extras.TabPane.BORDER_TYPE_NONE) {
             this._contentContainerDiv.style.border = "0 none";
@@ -384,9 +397,22 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         
         // Re-bound scroll position.
         this.setScrollPosition(this.scrollPosition);
-        
-        for (i = 0; i < this._tabs.length; ++i) {
-            this._tabs[i]._renderDisplay();
+
+        if (this._configureHeaderSizeRequired) {
+            this._configureHeaderSize();
+            
+            var imageListener = Core.method(this, function() {
+                if (this.component) { // Verify component still registered.
+                    this._configureHeaderSize();
+                }
+            });
+            Core.Web.Image.monitor(this._headerContainerDiv, imageListener);
+        } else {
+            // Only invoke renderDisplay on tabs if configureHeaderSize() invocation is not required,
+            // as configureHeaderSize() will do this work as well.
+            for (i = 0; i < this._tabs.length; ++i) {
+                this._tabs[i]._renderDisplay();
+            }
         }
     },
     
@@ -469,7 +495,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
             if ((activeTabRemoved || this._activeTabId == null) && this.component.children.length > 0) {
                 this._selectTab(this.component.children[0].renderId);
             }
-            this._configureHeaderSize();
+            this._configureHeaderSizeRequired = true;
         }
     
         if (fullRender) {
@@ -910,8 +936,10 @@ Extras.Sync.TabPane.Tab = Core.extend({
         
         // Render TD element to contain tab content.
         var centerTd = document.createElement("td");
-        centerTd.style.verticalAlign = "top";
         Echo.Sync.Insets.render(Extras.Sync.TabPane._defaultTabInsets, centerTd, "padding");
+        
+        var labelDiv = document.createElement("div");
+        centerTd.appendChild(labelDiv);
         
         var icon = layoutData ? layoutData.icon : null;
         var title = layoutData ? (layoutData.title ? layoutData.title : "*") : "*";
@@ -939,14 +967,18 @@ Extras.Sync.TabPane.Tab = Core.extend({
                 this._closeImageTd = this._renderCloseIcon();
                 tr.appendChild(this._closeImageTd);
             }
-            centerTd.appendChild(table);
+            labelDiv.appendChild(table);
         } else {
             // Render Text Only
-            centerTd.style.whiteSpace = "nowrap";
+            labelDiv.style.whiteSpace = "nowrap";
             Echo.Sync.Alignment.render(this._parent.component.render("tabAlignment", 
-                    Extras.Sync.TabPane._defaultTabAlignment), centerTd, true, this._parent.component);
-            centerTd.appendChild(document.createTextNode(title));
+                    Extras.Sync.TabPane._defaultTabAlignment), labelDiv, true, this._parent.component);
+            labelDiv.appendChild(document.createTextNode(title));
         }
+        if (this._parent.component.render("tabHeight")) {
+            Echo.Sync.Extent.render(this._parent.component.render("tabHeight"), labelDiv, "height", false, false);
+        }
+
         tabTr.appendChild(centerTd);
         this._centerTd = centerTd;
     

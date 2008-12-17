@@ -20,6 +20,9 @@ Echo.Sync.ArrayContainer = Core.extend(Echo.Render.ComponentSync, {
         case this.prevFocusKey:
         case this.nextFocusKey:
             var focusPrevious = e.keyCode == this.prevFocusKey;
+            if (this.invertFocusRtl && !this.component.getRenderLayoutDirection().isLeftToRight()) {
+                focusPrevious = !focusPrevious;
+            }
             var focusedComponent = this.component.application.getFocusedComponent();
             if (focusedComponent && focusedComponent.peer && focusedComponent.peer.getFocusFlags) {
                 var focusFlags = focusedComponent.peer.getFocusFlags();
@@ -177,9 +180,8 @@ Echo.Sync.Column = Core.extend(Echo.Sync.ArrayContainer, {
         this.element.style.outlineStyle = "none";
         this.element.tabIndex = "-1";
     
+        Echo.Sync.renderComponentDefaults(this.component, this.element);
         Echo.Sync.Border.render(this.component.render("border"), this.element);
-        Echo.Sync.Color.renderFB(this.component, this.element);
-        Echo.Sync.Font.render(this.component.render("font"), this.element);
         Echo.Sync.Insets.render(this.component.render("insets"), this.element, "padding");
     
         this.cellSpacing = Echo.Sync.Extent.toPixels(this.component.render("cellSpacing"), false);
@@ -245,14 +247,14 @@ Echo.Sync.Row = Core.extend(Echo.Sync.ArrayContainer, {
     prevFocusFlag: Echo.Render.ComponentSync.FOCUS_PERMIT_ARROW_LEFT,
     nextFocusKey: 39,
     nextFocusFlag: Echo.Render.ComponentSync.FOCUS_PERMIT_ARROW_RIGHT,
+    invertFocusRtl: true,
     
     renderAdd: function(update, parentElement) {
         this.element = Echo.Sync.Row._rowPrototype.cloneNode(true);
         this.element.id = this.component.renderId;
 
+        Echo.Sync.renderComponentDefaults(this.component, this.element);
         Echo.Sync.Border.render(this.component.render("border"), this.element);
-        Echo.Sync.Color.renderFB(this.component, this.element);
-        Echo.Sync.Font.render(this.component.render("font"), this.element);
         Echo.Sync.Insets.render(this.component.render("insets"), this.element, "padding");
         Echo.Sync.Alignment.render(this.component.render("alignment"), this.element, true, this.component);
         

@@ -44,13 +44,13 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
         this._div.style.height = "100%";
         this._div.style.overflow = "hidden";
         this._div.style.zIndex = "0";
-        Echo.Sync.Font.render(this.component.render("font"), this._div);
-        Echo.Sync.Color.render(this.component.render("foreground"), this._div, "color");
+        
+        Echo.Sync.renderComponentDefaults(this.component, this._div);
 
         var background = this.component.render("background");
         var backgroundImage = this.component.render("backgroundImage");
-        Echo.Sync.Color.render(background, this._div, "backgroundColor");
         Echo.Sync.FillImage.render(backgroundImage, this._div);
+        
         if (!background && !backgroundImage) {
             Echo.Sync.FillImage.render(this.client.getResourceUrl("Echo", "resource/Transparent.gif"), this._div);  
         }
@@ -77,6 +77,7 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
         childDiv.style.position = "absolute";
         if (child.floatingPane) {
             childDiv.style.zIndex = "1";
+            childDiv.style.left = childDiv.style.top = 0;
         } else {
             var insets = this.component.render("insets", 0);
             var pixelInsets = Echo.Sync.Insets.toPixels(insets);

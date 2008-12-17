@@ -22,6 +22,31 @@ Echo.Sync = {
             property = component.render(defaultPropertyName, defaultDefaultPropertyValue);
         }
         return property;
+    },
+    
+    /**
+     * Renders component foreground, background, font, and layout direction properties
+     * (if each is provided) to the specified element.  This is a performance/convenience method
+     * which combines capabilities found in Echo.Sync.Color/Font/LayoutDirection.
+     * 
+     * @param {Echo.Component} component the component
+     * @param {Element} element the target element
+     */
+    renderComponentDefaults: function(component, element) {
+        var color;
+        if ((color = component.render("foreground"))) {
+            element.style.color = color;
+        }
+        if ((color = component.render("background"))) {
+            element.style.backgroundColor = color;
+        }
+        var font = component.render("font");
+        if (font) {
+            Echo.Sync.Font.render(font, element);
+        }
+        if (component.getLayoutDirection()) {
+            element.dir = component.getLayoutDirection().isLeftToRight() ? "ltr" : "rtl";
+        }
     }
 };
 
@@ -29,11 +54,21 @@ Echo.Sync = {
  * Provides tools for rendering alignment properties.
  * @class
  */
-Echo.Sync.Alignment = { 
+Echo.Sync.Alignment = {
 
     _HORIZONTALS: { left: true, center: true, right: true, leading: true, trailing: true },
     _VERTICALS: { top: true, middle: true, bottom: true },
 
+    /**
+     * Returns the render-able horizontal component of an alignment property.  This method
+     * translates leading/trailing horizontal values to left/right based on the specified layout
+     * direction provider.  If a provider is no given, leading defaults to left and trailing to
+     * right.
+     * 
+     * @param {#Alignment} alignment the alignment
+     * @return the rendered horizontal component, i.e., "left", "center", "right", or null
+     * @type String
+     */
     getRenderedHorizontal: function(alignment, layoutDirectionProvider) {
         if (alignment == null) {
             return null;
@@ -54,6 +89,13 @@ Echo.Sync.Alignment = {
         }
     },
     
+    /**
+     * Returns the horizontal component of an alignment property.
+     * 
+     * @param {#Alignment} the alignment
+     * @return the horizontal component, i.e., "left", "center", "right", "leading", "trailing", or null
+     * @type String
+     */
     getHorizontal: function(alignment) {
         if (alignment == null) {
             return null;
@@ -65,6 +107,13 @@ Echo.Sync.Alignment = {
         }
     },
 
+    /**
+     * Returns the vertical component of an alignment property.
+     * 
+     * @param {#Alignment} the alignment
+     * @return the vertical component, i.e., "top", "middle", "bottom", or null 
+     * @type String
+     */
     getVertical: function(alignment) {
         if (alignment == null) {
             return null;
@@ -76,6 +125,16 @@ Echo.Sync.Alignment = {
         }
     },
 
+    /**
+     * Renders an alignment property to an element.
+     * 
+     * @param {#Alignment} alignment the alignment
+     * @param {Element} the target element
+     * @param {Boolean} renderToElement flag indicating whether the alignment state should be rendered to the element using
+     *        attributes (true) or CSS (false)
+     * @param layoutDirectionProvider an (optional) object providing a getRenderLayoutDirection() method to determine if the
+     *        element has a layout direction of left-to-right or right-to-left
+     */
     render: function(alignment, element, renderToElement, layoutDirectionProvider) {
         if (alignment == null) {
             return;
@@ -295,9 +354,19 @@ Echo.Sync.Color = {
         var red = Math.floor(colorInt / 0x10000) + r;
         var green = Math.floor(colorInt / 0x100) % 0x100 + g;
         var blue = colorInt % 0x100 + b;
-        return this._toHex(red, green, blue);
+        return this.toHex(red, green, blue);
     },
     
+    /**
+     * Blends two colors together.
+     * 
+     * @param {#Color} value1 the first color
+     * @param {#Color} value2 the second color
+     * @param {Number} ratio the blend ratio, where 0 represents the first color, 1 the second color, and 0.5 an equal blend
+     *        between the first and second colors
+     * @return the blended color
+     * @type #Color
+     */
     blend: function(value1, value2, ratio) {
         ratio = ratio < 0 ? 0 : (ratio > 1 ? 1 : ratio);
         var colorInt1 = parseInt(value1.substring(1), 16);
@@ -306,19 +375,40 @@ Echo.Sync.Color = {
         var green = Math.round(Math.floor(colorInt1 / 0x100) % 0x100 * (1 - ratio) + 
                 Math.floor(colorInt2 / 0x100) % 0x100 * ratio);
         var blue = Math.round((colorInt1 % 0x100) * (1 - ratio) + (colorInt2 % 0x100) * ratio);
-        return this._toHex(red, green, blue);
+        return this.toHex(red, green, blue);
     },
 
+    /**
+     * Renders a color to an element.
+     * 
+     * @param {#Color} color the color
+     * @param {#Element} element the target element
+     * @param {String} styleProperty the name of the style property, e.g., "color", "backgroundColor" 
+     */
     render: function(color, element, styleProperty) {
         if (color) {
             element.style[styleProperty] = color;
         }
     },
     
+    /**
+     * Renders a color to an element, clearing any existing value.
+     * 
+     * @param {#Color} color the color
+     * @param {#Element} element the target element
+     * @param {String} styleProperty the name of the style property, e.g., "color", "backgroundColor" 
+     */
     renderClear: function(color, element, styleProperty) {
         element.style[styleProperty] = color ? color : "";
     },
     
+    /**
+     * Renders the "foreground" and "background" color properties of a component to an element's "color" and
+     * "backgroundColor" properties.
+     * 
+     * @param {Echo.Component} component the component
+     * @param {Element} the target element 
+     */
     renderFB: function(component, element) { 
         var color;
         if ((color = component.render("foreground"))) {
@@ -329,7 +419,16 @@ Echo.Sync.Color = {
         }
     },
     
-    _toHex: function(red, green, blue) {
+    /**
+     * Converts red/green/blue integer values to a 6 digit hexadecimal string, preceded by a sharp, e.g. #1a2b3c.
+     * 
+     * @param {Number} red the red value, 0-255
+     * @param {Number} green the green value, 0-255
+     * @param {Number} blue the blue value, 0-255
+     * @return the hex string
+     * @type String
+     */
+    toHex: function(red, green, blue) {
         if (red < 0) {
             red = 0;
         } else if (red > 255) {
@@ -363,8 +462,18 @@ Echo.Sync.Extent = {
      */
     _PARSER: /^(-?\d+(?:\.\d+)?)(.+)?$/,
 
+    /**
+     * Regular expression to determine if an extent value is already formatted to pixel units.
+     */
     _FORMATTED_PIXEL_TEST: /^(-?\d+px *)$/,
     
+    /**
+     * Determines if an extent has percent units.
+     * 
+     * @param {#Extent} extent the Extent
+     * @return true if the extent has percent units
+     * @type Boolean
+     */
     isPercent: function(extent) {
         if (extent == null || typeof(extent) == "number") {
             return false;
@@ -377,6 +486,15 @@ Echo.Sync.Extent = {
         }
     },
     
+    /**
+     * Renders an extent value to an element.
+     *
+     * @param {#Extent} extent the Extent
+     * @param {Element} element the target element
+     * @param {String} styleAttribute the style attribute name, e.g., "padding-left", or "width"
+     * @param {Boolean} horizontal flag indicating whether the value is being rendered horizontally
+     * @param {Boolean} allowPercent flag indicating whether percent values should be rendered
+     */
     render: function(extent, element, styleAttribute, horizontal, allowPercent) {
         var cssValue = Echo.Sync.Extent.toCssValue(extent, horizontal, allowPercent);
         if (cssValue !== "") {
@@ -384,6 +502,15 @@ Echo.Sync.Extent = {
         }
     },
 
+    /**
+     * Returns a CSS representation of an extent value.
+     * 
+     * @param {#Extent} extent the Extent
+     * @param {Boolean} horizontal flag indicating whether the value is being rendered horizontally
+     * @param {Boolean} allowPercent flag indicating whether percent values should be rendered
+     * @return the rendered CSS value or the empty string ("") if no value could be determined (null will never be returned)
+     * @type String
+     */
     toCssValue: function(extent, horizontal, allowPercent) {
         switch(typeof(extent)) {
             case "number":
@@ -404,6 +531,13 @@ Echo.Sync.Extent = {
         return "";
     },
 
+    /**
+     * Converts an extent value to pixels.
+     * 
+     * @param {#Extent} extent the Extent
+     * @param {Boolean} horizontal flag indicating whether the value is being rendered horizontally
+     * @type Number
+     */
     toPixels: function(extent, horizontal) {
         if (extent == null) {
             return 0;
@@ -432,8 +566,18 @@ Echo.Sync.FillImage = {
         "repeat": "repeat"
     },
 
+    /**
+     * Flag indicating that the Internet Explorer 6-specific PNG alpha filter should be used to render PNG alpha (transparency).
+     */
     FLAG_ENABLE_IE_PNG_ALPHA_FILTER: 0x1,
     
+    /**
+     * Determines the background-position CSS attribute of a FillImage.
+     * 
+     * @param {#FillImage} fillImage the FillImage
+     * @return the appropriate CSS background-position attribute, or null if it is not specified
+     * @type String
+     */
     getPosition: function(fillImage) {
         if (fillImage.x || fillImage.y) {
             var x, y;
@@ -453,6 +597,13 @@ Echo.Sync.FillImage = {
         }
     },
     
+    /**
+     * Determines the background-repeat CSS attribute of a FillImage.
+     * 
+     * @param {#FillImage} fillImage the FillImage
+     * @return the appropriate CSS background-repeat attribute, or null if it is not specified/invalid
+     * @type String
+     */
     getRepeat: function(fillImage) {
         if (this._REPEAT_VALUES[fillImage.repeat]) {
             return this._REPEAT_VALUES[fillImage.repeat]; 
@@ -461,6 +612,13 @@ Echo.Sync.FillImage = {
         }
     },
     
+    /**
+     * Returns the URL of a FillImage.
+     * 
+     * @param {#FillImage} fillImage the FillImage
+     * @return the URL
+     * @type String
+     */
     getUrl: function(fillImage) {
         if (fillImage == null) {
             return null;
@@ -468,6 +626,16 @@ Echo.Sync.FillImage = {
         return typeof(fillImage) == "object" ? fillImage.url : fillImage;
     },
     
+    /**
+     * Renders a FillImage to an element.
+     * 
+     * @param {#FillImage} fillImage the FillImage (may be null)
+     * @param {Element} element the target element
+     * @param flags (optional) the rendering flags, one or more of the following values:
+     *        <ul>
+     *         <li><code>FLAG_ENABLE_IE_PNG_ALPHA_FILTER</code></li>
+     *        <ul>
+     */
     render: function(fillImage, element, flags) {
         if (fillImage == null) {
             // No image specified, do nothing.
@@ -498,6 +666,16 @@ Echo.Sync.FillImage = {
         }
     },
     
+    /**
+     * Renders a FillImage to an element, clearing any existing value.
+     * 
+     * @param {#FillImage} fillImage the FillImage (may be null)
+     * @param {Element} element the target element
+     * @param flags (optional) the rendering flags, one or more of the following values:
+     *        <ul>
+     *         <li><code>FLAG_ENABLE_IE_PNG_ALPHA_FILTER</code></li>
+     *        <ul>
+     */
     renderClear: function(fillImage, element, flags) {
         if (fillImage) {
             this.render(fillImage, element, flags);
@@ -515,6 +693,12 @@ Echo.Sync.FillImage = {
  */
 Echo.Sync.Font = { 
 
+    /**
+     * Renders a Font property to an element.
+     * 
+     * @param {#Font} font the font
+     * @param {Element} element the target element
+     */
     render: function(font, element) {
         if (!font) {
             return;
@@ -545,6 +729,12 @@ Echo.Sync.Font = {
         }
     },
     
+    /**
+     * Renders a Font property to an element, clearing any previously set font first.
+     * 
+     * @param {#Font} font the font
+     * @param {Element} element the target element
+     */
     renderClear: function(font, element) {
         if (font) {
             this.render(font, element);
@@ -579,10 +769,23 @@ Echo.Sync.Font = {
  */
 Echo.Sync.ImageReference = {
 
+    /**
+     * Returns the URL of an image reference object.
+     * 
+     * @param {#ImageReference} imageReference the image reference (may be null)
+     * @return the URL
+     * @type String
+     */
     getUrl: function(imageReference) {
         return imageReference ? (typeof(imageReference) == "string" ? imageReference : imageReference.url) : null;
     },
 
+    /**
+     * Renders an image reference object to an IMG element.
+     * 
+     * @param {#ImageReference} imageReference the image reference
+     * @param {Element} imgElement the IMG element.
+     */
     renderImg: function(imageReference, imgElement) {
         if (!imageReference) {
             return;
@@ -627,6 +830,13 @@ Echo.Sync.Insets = {
         4: [0, 1, 2, 3] 
     },
 
+    /**
+     * Renders an insets property to an element.
+     * 
+     * @param {#Insets} insets the insets property
+     * @param {Element} the target element
+     * @param {String} the style attribute name, e.g., "padding" or "margin" 
+     */
     render: function(insets, element, styleAttribute) {
         switch(typeof(insets)) {
             case "number":
@@ -644,6 +854,13 @@ Echo.Sync.Insets = {
         }
     },
     
+    /**
+     * Generates a CSS value for an insets property.
+     * 
+     * @param {#Insets} insets the insets property
+     * @return the CSS value
+     * @type String
+     */
     toCssValue: function(insets) {
         switch(typeof(insets)) {
             case "number":
@@ -661,6 +878,12 @@ Echo.Sync.Insets = {
         return "";
     },
     
+    /**
+     * Returns an object representing the pixel dimensions of a insets property.
+     * 
+     * @param {#Insets} insets the insets property
+     * @return an object containing top, bottom, left, and right values representing the pixel sizes of the insets property
+     */
     toPixels: function(insets) {
         if (insets == null) {
             return this._ZERO;
@@ -776,6 +999,24 @@ Echo.Sync.FloatingPaneManager = Core.extend({
         this._listeners.removeListener("zIndex", l);
     }
 });
+
+/**
+ * Provides tools for rendering layout direction properties. 
+ */
+Echo.Sync.LayoutDirection = {
+
+    /**
+     * Renders a layout direction property to an element.
+     * 
+     * @param {Echo.LayoutDirection} layoutDirection the layoutDirection property (may be null)
+     * @param {Element} element the target element
+     */
+    render: function(layoutDirection, element) {
+        if (layoutDirection) {
+            element.dir = layoutDirection.isLeftToRight() ? "ltr" : "rtl";
+        }
+    }
+};
 
 /**
  * Renders a table with two or three cells, suitable for laying out buttons, labels, 

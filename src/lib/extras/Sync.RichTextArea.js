@@ -5,12 +5,18 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
 
     $static: {
     
+        /**
+         * Default enabled feature set.
+         */
         defaultFeatures: {
             menu: true, toolbar: true, undo: true, clipboard: true, alignment: true, foreground: true, background: true,
             list: true, table: true, image: true, horizontalRule: true, hyperlink: true, subscript: true, 
             bold: true, italic: true, underline: true, strikethrough: true, paragraphStyle: true, indent: true
         },
 
+        /**
+         * Default localization strings.
+         */
         resource: new Core.ResourceBundle({
             "ColorDialog.Title.Foreground":     "Text Color",
             "ColorDialog.Title.Background":     "Highlight Color",
@@ -91,6 +97,10 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
     },
 
     $virtual: {
+    
+        /**
+         * Creates/returns the icon set for this RichTextArea.
+         */
         getIcons: function() {
             var icons = this._getDefaultIcons();
             var customIcons = this.component.get("icons");
@@ -143,7 +153,8 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
          * Event handler for user request (from menu/toolbar) to set the background color.
          */
         processSetBackground: function(e) {
-            var colorDialog = new Extras.Sync.RichTextArea.ColorDialog(this.component, true);
+            var colorDialog = new Extras.Sync.RichTextArea.ColorDialog(this.component, true,
+                    this._toolbarButtons.background.get("color"));
             colorDialog.addListener("colorSelect", Core.method(this, function(e) {
                 if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
                     Core.Web.Scheduler.run(Core.method(this, function() {
@@ -152,6 +163,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
                 } else {
                     this.execCommand("hilitecolor", e.data);
                 }
+                this._toolbarButtons.background.set("color", e.data);
                 this.focusDocument();
             }));
             this._openDialog(colorDialog);
@@ -161,9 +173,11 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
          * Event handler for user request (from menu/toolbar) to set the foreground color.
          */
         processSetForeground: function(e) {
-            var colorDialog = new Extras.Sync.RichTextArea.ColorDialog(this.component, false);
+            var colorDialog = new Extras.Sync.RichTextArea.ColorDialog(this.component, false,
+                    this._toolbarButtons.foreground.get("color"));
             colorDialog.addListener("colorSelect", Core.method(this, function(e) {
                 this.execCommand("forecolor", e.data);
+                this._toolbarButtons.foreground.set("color", e.data);
                 this.focusDocument();
             }));
             this._openDialog(colorDialog);
@@ -181,9 +195,14 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
      */
     _paneRender: false,
     
+    _toolbarButtons: null,
+    
+    _styleSelect: null,
+    
     $construct: function() {
         this._processComponentInsertHtmlRef = Core.method(this, this._processComponentInsertHtml);
         this._processDialogCloseRef = Core.method(this, this._processDialogClose);
+        this._toolbarButtons = { };
     },
     
     _addComponentListeners: function() {
@@ -229,27 +248,6 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
         cursor.add(this._richTextInput);
         
         return contentPane;
-    },
-    
-    _getDefaultIcon: function(name) {
-        return this.client.getResourceUrl("Extras", "image/richtext/" + name + ".gif");
-    },
-    
-    /**
-     * Returns default icon set map object.
-     * @type object
-     */
-    _getDefaultIcons: function() {
-        var iconNames = [ "alignmentCenter", "alignmentJustify", "alignmentLeft", "alignmentRight",
-            "background", "bold", "bulletedList", "cancel", "copy", "cut", "foreground", "horizontalRule",
-            "hyperlink", "image", "ident", "italic", "numberedList", "ok", "outdent", "paste", "redo",
-            "subscript", "superscript", "table", "underline", "undo" ];
-        var defaultIcons = { };
-        for (var i = 0; i < iconNames.length; ++i) {
-            var iconResource = iconNames[i].charAt(0).toUpperCase() + iconNames[i].substring(1);
-            defaultIcons[iconNames[i]] = this.client.getResourceUrl("Extras", "image/richtext/" + iconResource + ".gif");
-        }
-        return defaultIcons;
     },
     
     /**
@@ -406,7 +404,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
      * @type Echo.Component
      */
     _createToolbar: function() {
-        var row;
+        var row, button;
         var features = this.component.render("features", Extras.Sync.RichTextArea.defaultFeatures);
         var controlsRow = new Echo.Row({
             layoutData: {
@@ -416,6 +414,30 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
             cellSpacing: 10,
             insets: 2
         });
+        
+        // Style Dropdown.
+        if (features.paragraphStyle) {
+            var actionListener = Core.method(this, function(e) {
+                var style = this._styleSelect.get("selectedId");
+                this._richTextInput.peer.execCommand("formatblock", "<" + style + ">");
+            });
+            this._styleSelect = new Echo.SelectField({
+                items: [
+                    { id: "p", text: this._msg["Menu.Normal"] },
+                    { id: "pre", text: this._msg["Menu.Preformatted"] },
+                    { id: "h1", text: this._msg["Menu.Heading1"] },
+                    { id: "h2", text: this._msg["Menu.Heading2"] },
+                    { id: "h3", text: this._msg["Menu.Heading3"] },
+                    { id: "h4", text: this._msg["Menu.Heading4"] },
+                    { id: "h5", text: this._msg["Menu.Heading5"] },
+                    { id: "h6", text: this._msg["Menu.Heading6"] }
+                ],
+                events: {
+                    action: actionListener
+                }
+            });
+            controlsRow.add(this._styleSelect);
+        }
 
         // Undo/Redo Tools
         if (features.undo) {
@@ -431,15 +453,21 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
         if (features.bold || features.italic || features.underline) {
             row = new Echo.Row();
             if (features.bold) {
-                row.add(this._createToolbarButton("B", this._icons.bold, this._msg["Menu.Bold"], this._processCommand, "bold"));
+                button = this._createToolbarButton("B", this._icons.bold, this._msg["Menu.Bold"], this._processCommand, "bold");
+                button.set("toggle", true);
+                row.add(button);
             }
             if (features.italic) {
-                row.add(this._createToolbarButton("I", this._icons.italic, this._msg["Menu.Italic"], 
-                        this._processCommand, "italic"));
+                button = this._createToolbarButton("I", this._icons.italic, this._msg["Menu.Italic"], 
+                        this._processCommand, "italic");
+                button.set("toggle", true);
+                row.add(button);
             }
             if (features.underline) {
-                row.add(this._createToolbarButton("U", this._icons.underline, this._msg["Menu.Underline"], 
-                        this._processCommand, "underline"));
+                button = this._createToolbarButton("U", this._icons.underline, this._msg["Menu.Underline"], 
+                        this._processCommand, "underline");
+                button.set("toggle", true);
+                row.add(button);
             }
             controlsRow.add(row);
         }
@@ -477,11 +505,11 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
             row = new Echo.Row();
             if (features.foreground) {
                 row.add(this._createToolbarButton("FG", this._icons.foreground, this._msg["Menu.SetForeground"], 
-                        this.processSetForeground));
+                        this.processSetForeground, "foreground"));
             }
             if (features.background) {
                 row.add(this._createToolbarButton("BG", this._icons.background, this._msg["Menu.SetBackground"], 
-                        this.processSetBackground));
+                        this.processSetBackground, "background"));
             }
             controlsRow.add(row);
         }
@@ -518,7 +546,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
     },
     
     _createToolbarButton: function(text, icon, toolTipText, eventMethod, actionCommand) {
-        var button = new Echo.Button({
+        var button = new Extras.Sync.RichTextArea.ToolbarButton({
             actionCommand: actionCommand,
             styleName: this.component.render("toolbarButtonStyleName"),
             text: icon ? null : text,
@@ -528,6 +556,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
         if (eventMethod) {
             button.addListener("action", Core.method(this, eventMethod));
         }
+        this._toolbarButtons[actionCommand] = button;
         return button;
     },
     
@@ -541,6 +570,27 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
     
     getDomainElement: function() { 
         return this._mainDiv;
+    },
+    
+    _getDefaultIcon: function(name) {
+        return this.client.getResourceUrl("Extras", "image/richtext/" + name + ".gif");
+    },
+    
+    /**
+     * Returns default icon set map object.
+     * @type Object
+     */
+    _getDefaultIcons: function() {
+        var iconNames = [ "alignmentCenter", "alignmentJustify", "alignmentLeft", "alignmentRight",
+            "background", "bold", "bulletedList", "cancel", "copy", "cut", "foreground", "horizontalRule",
+            "hyperlink", "image", "ident", "italic", "numberedList", "ok", "outdent", "paste", "redo",
+            "subscript", "superscript", "table", "underline", "undo" ];
+        var defaultIcons = { };
+        for (var i = 0; i < iconNames.length; ++i) {
+            var iconResource = iconNames[i].charAt(0).toUpperCase() + iconNames[i].substring(1);
+            defaultIcons[iconNames[i]] = this.client.getResourceUrl("Extras", "image/richtext/" + iconResource + ".gif");
+        }
+        return defaultIcons;
     },
     
     insertHtml: function(html) {
@@ -570,11 +620,6 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
         this.component.application.setFocusedComponent(this);
     },
     
-    _processCommand: function(e) {
-        this.execCommand(e.actionCommand);
-        this.focusDocument();
-    },
-    
     _openDialog: function(dialogWindow) {
         // Activate overlay pane (if required).
         var contentPane;
@@ -594,6 +639,11 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
         // Add parent-change listener to dialog so that overlay pane can be
         // deactivated when necessary.
         dialogWindow.addListener("parent", this._processDialogCloseRef);
+    },
+    
+    _processCommand: function(e) {
+        this.execCommand(e.actionCommand);
+        this.focusDocument();
     },
     
     _processComponentInsertHtml: function(e) {
@@ -707,6 +757,28 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
         Echo.Render.renderComponentDispose(update, update.parent);
         containerElement.removeChild(element);
         this.renderAdd(update, containerElement);
+    },
+    
+    _updateIndicators: function() {
+        var style = this._richTextInput.peer._getCursorStyle();
+        if (this._toolbarButtons.bold) {
+            this._toolbarButtons.bold.set("pressed", style.bold);
+        }
+        if (this._toolbarButtons.italic) {
+            this._toolbarButtons.italic.set("pressed", style.italic);
+        }
+        if (this._toolbarButtons.underline) {
+            this._toolbarButtons.underline.set("pressed", style.underline);
+        }
+        if (this._toolbarButtons.foreground) {
+            this._toolbarButtons.foreground.set("color", style.foreground || "#000000");
+        }
+        if (this._toolbarButtons.background) {
+            this._toolbarButtons.background.set("color", style.background || "#ffffff");
+        }
+        if (this._styleSelect) {
+            this._styleSelect.set("selectedId", style.paragraphStyle);
+        }
     }
 });
 
@@ -837,7 +909,7 @@ Extras.Sync.RichTextArea.ColorDialog = Core.extend(Extras.Sync.RichTextArea.Abst
         ]
     },
     
-    $construct: function(richTextArea, setBackground) {
+    $construct: function(richTextArea, setBackground, initialColor) {
         Extras.Sync.RichTextArea.AbstractDialog.call(this, richTextArea,
                 Extras.Sync.RichTextArea.AbstractDialog.TYPE_OK_CANCEL, 
                 {
@@ -858,6 +930,7 @@ Extras.Sync.RichTextArea.ColorDialog = Core.extend(Extras.Sync.RichTextArea.Abst
                                             setBackground ? "ColorDialog.PromptBackground" : "ColorDialog.PromptForeground"]
                                 }),
                                 this._colorSelect = new Extras.ColorSelect({
+                                    color: initialColor,
                                     displayValue: true
                                 })
                             ]
@@ -1055,6 +1128,25 @@ Extras.Sync.RichTextArea.InputPeer = Core.extend(Echo.Render.ComponentSync, {
     $load: function() {
         Echo.Render.registerPeer("Extras.RichTextInput", this);
     },
+    
+    $static: {
+        _CSS_BOLD: /font-weight\:\s*bold/i,
+        _CSS_FOREGROUND_TEST: /^-?color\:/i,
+        _CSS_FOREGROUND_RGB: /^-?color\:\s*rgb\s*\(\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})/i,
+        _CSS_BACKGROUND_TEST: /background-color\:/i,
+        _CSS_BACKGROUND_RGB: /background-color\:\s*rgb\s*\(\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})/i,
+        _CSS_ITALIC: /font-style\:\s*italic/i,
+        _CSS_UNDERLINE: /text-decoration\:\s*underline/i,
+        
+        /**
+         * Key codes which may result in cursor navigating into new style, requiring an update of the style indicators.
+         */
+        _NAVIGATION_KEY_CODES: {
+            38: 1, 40: 1, 37: 1, 39: 1, 33: 1, 34: 1, 36: 1, 35: 1, 8: 1, 46: 1
+        }
+    },
+    
+    _cursorStyleUpdateRequired: false,
 
     /**
      * {Boolean} Flag indicating whether the parent component of the associated RichTextArea is a pane, 
@@ -1076,7 +1168,11 @@ Extras.Sync.RichTextArea.InputPeer = Core.extend(Echo.Render.ComponentSync, {
         this._loadRange();
         this._iframe.contentWindow.document.execCommand(commandName, false, value);
         this._storeData();
+        
         this._forceIERedraw();
+        
+        // Flag that cursor style update is required.  Some browsers will not render nodes until text is inserted.
+        this._cursorStyleUpdateRequired = true;
     },
     
     focusDocument: function() {
@@ -1107,6 +1203,71 @@ Extras.Sync.RichTextArea.InputPeer = Core.extend(Echo.Render.ComponentSync, {
         }
     },
     
+    _getCursorStyle: function() {
+        var selection = this._getSelection();
+        var style = { };
+
+        var node = selection.node;
+        while (node) { 
+            if (node.nodeType == 1) {
+                switch (node.nodeName.toLowerCase()) {
+                case "b": case "strong":
+                    style.bold = true;
+                    break;
+                case "i": case "em":
+                    style.italic = true;
+                    break;
+                case "u":
+                    style.underline = true;
+                    break;
+                case "h1": case "h2": case "h3": case "h4": case "h5": case "h6": case "p": case "pre":
+                    if (!style.paragraphStyle) {
+                        style.paragraphStyle = node.nodeName.toLowerCase();
+                    }
+                    break;
+                }
+            
+                var css = node.style.cssText;
+                style.bold |= Extras.Sync.RichTextArea.InputPeer._CSS_BOLD.test(css);
+                style.italic |= Extras.Sync.RichTextArea.InputPeer._CSS_ITALIC.test(css);
+                style.underline |= Extras.Sync.RichTextArea.InputPeer._CSS_UNDERLINE.test(css);
+                
+                if (!style.foreground && Extras.Sync.RichTextArea.InputPeer._CSS_FOREGROUND_TEST.test(css)) {
+                    var rgb = Extras.Sync.RichTextArea.InputPeer._CSS_FOREGROUND_RGB.exec(css);
+                    if (rgb) {
+                        style.foreground = Echo.Sync.Color.toHex(
+                                parseInt(rgb[1], 10), parseInt(rgb[2], 10), parseInt(rgb[3], 10));
+                    }
+                }
+
+                if (!style.background && Extras.Sync.RichTextArea.InputPeer._CSS_BACKGROUND_TEST.test(css)) {
+                    var rgb = Extras.Sync.RichTextArea.InputPeer._CSS_BACKGROUND_RGB.exec(css);
+                    if (rgb) {
+                        style.background = Echo.Sync.Color.toHex(
+                                parseInt(rgb[1], 10), parseInt(rgb[2], 10), parseInt(rgb[3], 10));
+                    }
+                }
+            }
+            node = node.parentNode;
+        }
+        
+        return style;
+    },
+    
+    _getSelection: function() {
+        if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
+            var textRange = this._iframe.contentWindow.document.selection.createRange();
+            return {
+                node: textRange.parentElement()
+            };
+        } else {
+            var selection = this._iframe.contentWindow.getSelection();
+            return {
+                node: selection ? selection.anchorNode : null
+            }
+        }
+    },
+    
     _insertHtml: function(html) {
         if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
             if (!this._selectionRange) {
@@ -1114,9 +1275,12 @@ Extras.Sync.RichTextArea.InputPeer = Core.extend(Echo.Render.ComponentSync, {
             }
             this._selectionRange.select();
             this._selectionRange.pasteHTML(html);
+            this._notifyCursorStyleChange();
+            this._storeData();
         } else {
             this.execCommand("inserthtml", html);
         }
+        
         this.focusDocument();
         this._forceIERedraw();
     },
@@ -1137,6 +1301,7 @@ Extras.Sync.RichTextArea.InputPeer = Core.extend(Echo.Render.ComponentSync, {
         this._renderedHtml = html;
         //FIXME always grabbing focus, this may be undesired...necessary to maintain focus though.
         this.renderFocus();
+        this.component._richTextArea.peer._updateIndicators();
     },
     
     _loadRange: function() {
@@ -1145,6 +1310,13 @@ Extras.Sync.RichTextArea.InputPeer = Core.extend(Echo.Render.ComponentSync, {
                 this._selectionRange.select();
             }
         }
+    },
+    
+    _notifyCursorStyleChange: function() {
+        this._cursorStyleUpdateRequired = false;
+        Core.Web.Scheduler.run(Core.method(this, function() {
+            this.component._richTextArea.peer._updateIndicators();
+        }));
     },
     
     _processProperty: function(e) {
@@ -1171,9 +1343,13 @@ Extras.Sync.RichTextArea.InputPeer = Core.extend(Echo.Render.ComponentSync, {
         }
         
         this.component._richTextArea.peer._markFocused();
-    
+        
         this._storeData();
         this._storeRange();
+        
+        if (this._cursorStyleUpdateRequired || Extras.Sync.RichTextArea.InputPeer._NAVIGATION_KEY_CODES[e.keyCode]) {
+            this._notifyCursorStyleChange();
+        }
         
         if (this._fireAction) {
             this._fireAction = false;
@@ -1195,6 +1371,8 @@ Extras.Sync.RichTextArea.InputPeer = Core.extend(Echo.Render.ComponentSync, {
         }
 
         this._storeRange();
+        
+        this._notifyCursorStyleChange();
     },
     
     renderAdd: function(update, parentElement) {
@@ -1412,5 +1590,130 @@ Extras.Sync.RichTextArea.TableDialog = Core.extend(
         }
         this.parent.remove(this);
         this.fireEvent({type: "tableInsert", source: this, data: data});
+    }
+});
+
+Extras.Sync.RichTextArea.ToolbarButton = Core.extend(Echo.Button, {
+
+    $load: function() {
+        Echo.ComponentFactory.registerType("Extras.RichTextToolbarButton", this);
+    },
+    
+    componentType: "Extras.RichTextToolbarButton",
+    
+    doAction: function() {
+        if (this.render("toggle")) {
+            this.set("pressed", !this.get("pressed"));
+        } 
+        this.fireEvent({ source: this, type: "action", actionCommand: this.render("actionCommand") });
+    }
+});
+
+Extras.Sync.RichTextArea.ToolbarButtonPeer = Core.extend(Echo.Render.ComponentSync, {
+
+    $load: function() {
+        Echo.Render.registerPeer("Extras.RichTextToolbarButton", this);
+    },
+    
+    _div: null,
+
+    _processClick: function(e) {
+        if (!this.client || !this.client.verifyInput(this.component)) {
+            return true;
+        }
+        this.component.application.setFocusedComponent(this.component);
+        this.component.doAction();
+    },
+    
+    _processRolloverEnter: function(e) {
+        if (!this.client || !this.client.verifyInput(this.component)) {
+            return true;
+        }
+        this._renderButtonState(true);
+    },
+
+    _processRolloverExit: function(e) {
+        this._renderButtonState(false);
+    },
+
+    renderAdd: function(update, parentElement) {
+        var icon = this.component.render("icon");
+        
+        this._div = document.createElement("div");
+        this._div.style.cssText = "position:relative;";
+        
+        this._renderButtonState(false);
+        if (this.component.render("color")) {
+            this._renderColor();
+        }
+        
+        Echo.Sync.Insets.render(this.component.render("insets"), this._div, "padding");
+        
+        if (icon) {
+            var imgElement = document.createElement("img");
+            Echo.Sync.ImageReference.renderImg(icon, imgElement);
+            this._div.appendChild(imgElement);
+        }
+        
+        Core.Web.Event.add(this._div, "click", Core.method(this, this._processClick), false);
+        Core.Web.Event.add(this._div, "mouseover", Core.method(this, this._processRolloverEnter), false);
+        Core.Web.Event.add(this._div, "mouseout", Core.method(this, this._processRolloverExit), false);
+        
+        parentElement.appendChild(this._div);
+    },
+       
+    _renderButtonState: function(rolloverState) {
+        var foreground = this.component.render("foreground");
+        var background = this.component.render("background");
+        var border = this.component.render("border");
+        var backgroundImage = this.component.render("backgroundImage");
+        
+        // Apply pressed effect.
+        if (this.component.render("pressed")) {
+            foreground = this.component.render("pressedForeground", foreground);
+            background = this.component.render("presssedBackground", background);
+            border = this.component.render("pressedBorder", border);
+            backgroundImage = this.component.render("pressedBackgroundImage", backgroundImage)
+        }
+        
+        // Apply rollover effect.
+        if (rolloverState) {
+            foreground = this.component.render("rolloverForeground", foreground);
+            background = this.component.render("rolloverBackground", background);
+            backgroundImage = this.component.render("rolloverBackgroundImage", backgroundImage)
+        }
+                        
+        Echo.Sync.Color.renderClear(foreground, this._div, "color");
+        Echo.Sync.Color.renderClear(background, this._div, "backgroundColor");
+        Echo.Sync.Border.renderClear(border, this._div);
+        Echo.Sync.FillImage.renderClear(backgroundImage, this._div);
+    },
+    
+    _renderColor: function() {
+        var color = this.component.render("color");
+        if (!this._colorDiv) {
+            this._colorDiv = document.createElement("div");
+            this._colorDiv.style.cssText = "position:absolute;bottom:0;left:0;right:0;height:5px;line-height:0px;font-size:1px;";
+            if (Core.Web.Env.BROWSER_INTERNET_EXPLORER && Core.Web.Env.BROWSER_VERSION_MAJOR === 6) {
+                this._colorDiv.style.width = "16px";
+            }
+            this._colorDiv.style.backgroundColor = color || "#ffffff";
+            this._div.appendChild(this._colorDiv);
+        }
+    },
+    
+    renderDispose: function(update) {
+        Core.Web.Event.removeAll(this._div);
+        this._div = null;
+        this._colorDiv = null;
+    },
+    
+    renderUpdate: function(update) {
+        var element = this._div;
+        var containerElement = element.parentNode;
+        Echo.Render.renderComponentDispose(update, update.parent);
+        containerElement.removeChild(element);
+        this.renderAdd(update, containerElement);
+        return true;
     }
 });

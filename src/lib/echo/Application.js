@@ -1169,6 +1169,9 @@ Echo.Component = Core.extend({
      */
     set: function(name, newValue) {
         var oldValue = this._localStyle[name];
+        if (oldValue === newValue) {
+            return;
+        }
         this._localStyle[name] = newValue;
         if (this._listenerList && this._listenerList.hasListeners("property")) {
             this._listenerList.fireEvent({type: "property", source: this, propertyName: name, 
@@ -1204,6 +1207,9 @@ Echo.Component = Core.extend({
         var oldValue = null;
         if (valueArray) {
             oldValue = valueArray[index];
+            if (oldValue === newValue) {
+                return;
+            }
         } else {
             valueArray = [];
             this._localStyle[name] = valueArray;
@@ -2675,7 +2681,7 @@ Echo.Column = Core.extend(Echo.Component, {
 
 /**
  * Composite component.
- * A single-child container that provides no rendering properties.
+ * A single-child container that provides no rendering properties (other than those specified in Component).
  */
 Echo.Composite = Core.extend(Echo.Component, {
 
@@ -3050,6 +3056,8 @@ Echo.PasswordField = Core.extend(Echo.TextField, {
  * @sp {#ImageReference} closeIcon the close button icon
  * @sp {#Insets} closeIconInsets the inset margin around the close button icon
  * @sp {#ImageReference} closeRolloverIcon the close button rollover icon
+ * @sp {#Extent} contentHeight the height of the content region of the window
+ * @sp {#Extent} contentWidth the width of the content region of the window
  * @sp {#Insets} controlsInsets the inset margin around the controls area
  * @sp {#Extent} controlsSpacing the spacing between controls in the controls area
  * @sp {#Extent} height the outside height of the window, including its border
