@@ -82,6 +82,8 @@ DemoApp = Core.extend(Echo.Application, {
         MODULE_DEMO_RICHTEXTAREA: [
             "lib/echo/Sync.Grid.js",
             "lib/echo/Arc.js",
+            "lib/echo/Sync.Composite.js",
+            "lib/echo/Sync.List.js",
             "lib/echo/Sync.TextComponent.js",
             "lib/extras/Application.ColorSelect.js",
             "lib/extras/Sync.ColorSelect.js",
