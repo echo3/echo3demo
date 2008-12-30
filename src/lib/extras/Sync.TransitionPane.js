@@ -34,7 +34,7 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
     },
     
     doImmediateTransition: function() {
-        this._removeOldContent();
+        this.removeOldContent();
         if (this.childDiv) {
             this.showContent();
         }
@@ -46,20 +46,30 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
         case Extras.TransitionPane.TYPE_FADE:
             this._transitionClass = Extras.Sync.TransitionPane.FadeOpacityTransition;
             break;
+        case Extras.TransitionPane.TYPE_FADE_TO_BLACK:
+        case Extras.TransitionPane.TYPE_FADE_TO_WHITE:
+            this._transitionClass = Extras.Sync.TransitionPane.FadeOpacityColorTransition;
+            break;
         case Extras.TransitionPane.TYPE_CAMERA_PAN_DOWN:
         case Extras.TransitionPane.TYPE_CAMERA_PAN_LEFT:
         case Extras.TransitionPane.TYPE_CAMERA_PAN_RIGHT:
         case Extras.TransitionPane.TYPE_CAMERA_PAN_UP:
             this._transitionClass = Extras.Sync.TransitionPane.CameraPanTransition;
             break;
-
+        case Extras.TransitionPane.TYPE_BLIND_BLACK_IN:
+        case Extras.TransitionPane.TYPE_BLIND_BLACK_OUT:
+            this._transitionClass = Extras.Sync.TransitionPane.BlindTransition;
+            break;
         default:
             this._transitionClass = null;
             this._duration = null;
         }
     },
     
-    _removeOldContent: function() {
+    /**
+     * Removes old content: remove oldChildDiv from parent, set oldChildDiv to null.
+     */
+    removeOldContent: function() {
         if (this.oldChildDiv) {
             this.contentDiv.removeChild(this.oldChildDiv);
             this.oldChildDiv = null;
@@ -72,6 +82,9 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
     
+    /**
+     * Shows new content.
+     */
     showContent: function() {
         if (this.childDiv) {
             this.childDiv.style.visibility = "visible";
@@ -170,7 +183,7 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
     
     _transitionStart: function() {
         this._transition = new this._transitionClass(this);
-        this._transition.duration = this.component.render("duration", this._transition.duration);
+        this._transition.runTime = this.component.render("duration", this._transition.runTime);
         this._transition.start(Core.method(this, this._transitionFinish));
     },
     
@@ -182,7 +195,7 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
         }
         
         // Remove content which was transitioned from.
-        this._removeOldContent();
+        this.removeOldContent();
         
         // Refocus current focused component if it is within TransitionPane.
         if (this.component && this.component.application) {
@@ -221,6 +234,67 @@ Extras.Sync.TransitionPane.Transition = Core.extend(Extras.Sync.Animation, {
     $construct: function(transitionPane) {
         this.transitionPane = transitionPane;
     }
+});
+
+Extras.Sync.TransitionPane.BlindTransition = Core.extend(Extras.Sync.TransitionPane.Transition, {
+
+    runTime: 700,
+    _maskDiv: null,
+    _stepCount: 14,
+    _swapStep: null,
+    _reverse: false,
+    
+    complete: function(abort) {
+        this._maskDiv.parentNode.removeChild(this._maskDiv);
+    },
+    
+    init: function() {
+        this._swapStep = Math.floor(this._stepCount) / 2 + 1;
+        this._reverse = this.transitionPane.type === Extras.TransitionPane.TYPE_BLIND_BLACK_OUT;
+
+        this._maskDiv = document.createElement("div");
+        this._maskDiv.style.cssText = "position:absolute;width:100%;height:100%;z-index:32767;";
+        this.transitionPane.contentDiv.appendChild(this._maskDiv);
+    },
+
+    step: function(progress) {
+        var currentStep = Math.ceil(progress * this._stepCount);
+        if (currentStep === 0) {
+            currentStep = 1;
+        }
+        if (currentStep === this._renderedStep) {
+            // No need to update, already current.
+            return;
+        }
+        var url = this.transitionPane.client.getResourceUrl("Extras", 
+                "image/transitionpane/blindblack/Frame" + currentStep + ".gif");
+        this._maskDiv.style.backgroundImage = "url(" + url + ")";
+        
+        if (currentStep < this._swapStep) {
+            if (this.transitionPane.oldChildDiv) {
+                if (this._reverse) {
+                    this.transitionPane.oldChildDiv.style.top = currentStep + "px";
+                } else {
+                    this.transitionPane.oldChildDiv.style.top = (0 - currentStep) + "px";
+                }
+            }
+        } else {
+            if (this._renderedStep < this._swapStep) {
+                // blind is crossing horizontal, swap content.
+                this.transitionPane.showContent();
+                this.transitionPane.removeOldContent();
+            }
+            if (this.transitionPane.childDiv) {
+                if (this._reverse) {
+                    this.transitionPane.childDiv.style.top = (currentStep - this._stepCount) + "px";
+                } else {
+                    this.transitionPane.childDiv.style.top = (this._stepCount - currentStep) + "px";
+                }
+            }
+        }
+
+        this._renderedStep = currentStep;
+    }    
 });
 
 Extras.Sync.TransitionPane.CameraPanTransition = Core.extend(
@@ -290,8 +364,7 @@ Extras.Sync.TransitionPane.CameraPanTransition = Core.extend(
     }
 });
 
-Extras.Sync.TransitionPane.FadeOpacityTransition = Core.extend(
-        Extras.Sync.TransitionPane.Transition, {
+Extras.Sync.TransitionPane.FadeOpacityTransition = Core.extend(Extras.Sync.TransitionPane.Transition, {
     
     runTime: 1000,
     
@@ -333,6 +406,48 @@ Extras.Sync.TransitionPane.FadeOpacityTransition = Core.extend(
             } else {
                 this.transitionPane.oldChildDiv.style.opacity = 1 - progress;
             }
+        }
+    }
+});
+
+Extras.Sync.TransitionPane.FadeOpacityColorTransition = Core.extend(Extras.Sync.TransitionPane.Transition, {
+
+    runTime: 1000,
+    _maskDiv: null,
+    _swapped: false,
+    
+    complete: function(abort) {
+        this._maskDiv.parentNode.removeChild(this._maskDiv);
+    },
+    
+    init: function() {
+        this._maskDiv = document.createElement("div");
+        this._maskDiv.style.cssText = "position:absolute;width:100%;height:100%;z-index:32767;";
+        if (Core.Web.Env.PROPRIETARY_IE_OPACITY_FILTER_REQUIRED) {
+            this._maskDiv.style.filter = "alpha(opacity=0)";
+        } else {
+            this._maskDiv.style.opacity = 0;
+        }
+        if (this.transitionPane.type === Extras.TransitionPane.TYPE_FADE_TO_WHITE) {
+            this._maskDiv.style.backgroundColor = "#ffffff";
+        } else {
+            this._maskDiv.style.backgroundColor = "#000000";
+        }
+        this.transitionPane.contentDiv.appendChild(this._maskDiv);
+    },
+
+    step: function(progress) {
+        var opacity = 1 - Math.abs(progress * 2 - 1);
+        if (progress > 0.5 && !this._swapped) {
+            this.transitionPane.showContent();
+            this.transitionPane.removeOldContent();
+            this._swapped = true;
+        }
+        if (Core.Web.Env.PROPRIETARY_IE_OPACITY_FILTER_REQUIRED) {
+            var percent = Math.floor(opacity * 100);
+            this._maskDiv.style.filter = "alpha(opacity=" + percent + ")";
+        } else {
+            this._maskDiv.style.opacity = opacity;
         }
     }
 });

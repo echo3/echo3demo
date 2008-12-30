@@ -74,11 +74,15 @@ Echo.Serial = {
      * the properties 'component' (the component instance) and 'event' (the event
      * type as a string).
      * 
-     * @param client the containing client
-     * @param cElement the 'c' DOM element to deserialize
+     * @param client {Echo.Client} the containing client
+     * @param cElement {Element} the 'c' DOM element to deserialize
+     * @param propertyMap (optional) a mapping between property identifiers and property values for referenced properties 
+     *        (properties which were rendered elsewhere in the document and are potentially referenced by multiple components)
+     * @param styleMap (optional) a mapping between style identifiers and style values for referenced styles (styles which were 
+     *        rendered elsewhere in the document and are potentially referenced by multiple components)
      * @return the instantiated component.
      */
-    loadComponent: function(client, cElement, referenceMap) {
+    loadComponent: function(client, cElement, propertyMap, styleMap) {
         if (!cElement.nodeName == "c") {
             throw new Error("Element is not a component.");
         }
@@ -92,26 +96,29 @@ Echo.Serial = {
         while (element) {
             if (element.nodeType == 1) {
                 switch (element.nodeName) {
-                case "c": // Child Component
-                    var childComponent = this.loadComponent(client, element, referenceMap);
+                case "c": // Child component
+                    var childComponent = this.loadComponent(client, element, propertyMap, styleMap);
                     component.add(childComponent);
                     break;
                 case "p": // Property
-                    this.loadProperty(client, element, component, styleData, referenceMap);
+                    this.loadProperty(client, element, component, styleData, propertyMap);
                     break;
-                case "s": // Style name update.
+                case "s": // Style name
                     component.setStyleName(element.firstChild ? element.firstChild.nodeValue : null);
+                    break;
+                case "sr": // Style reference
+                    component.setStyle(styleMap ? styleMap[element.firstChild.nodeValue] : null);
                     break;
                 case "e": // Event
                     this._loadComponentEvent(client, element, component);
                     break;
-                case "en": // Enabled state update.
+                case "en": // Enabled state
                     component.setEnabled(element.firstChild.nodeValue == "true");
                     break;
-                case "locale": // Locale update.
+                case "locale": // Locale
                     component.setLocale(element.firstChild ? element.firstChild.nodeValue : null);
                     break;
-                case "dir": // Layout direction update.
+                case "dir": // Layout direction
                     component.setLayoutDirection(element.firstChild ?
                             (element.firstChild.nodeValue == "rtl" ? Echo.LayoutDirection.RTL : Echo.LayoutDirection.LTR) : null);
                 }
@@ -131,16 +138,18 @@ Echo.Serial = {
      * Deserializes an XML representation of a property into an instance,
      * and assigns it to the specified object.
      * 
-     * @param client the containing client
+     * @param {Echo.Client} client the containing client
      * @param {Element} pElement the property element to parse
      * @param object the object on which the properties should be set (this object
      *        must contain set() and setIndex() methods
      * @param styleData (optional) an associative array on which properties can
      *        be directly set
-     * @param referenceMap (optional) an associative array containing previously
-     *        loaded reference-based properties
+     * @param propertyMap (optional) a mapping between property identifiers and property values for referenced properties 
+     *        (properties which were rendered elsewhere in the document and are potentially referenced by multiple components)
+     * @param styleMap (optional) a mapping between style identifiers and style values for referenced styles (styles which were 
+     *        rendered elsewhere in the document and are potentially referenced by multiple components)
      */
-    loadProperty: function(client, pElement, object, styleData, referenceMap) {
+    loadProperty: function(client, pElement, object, styleData, propertyMap) {
         var name = pElement.getAttribute("n");
         var type = pElement.getAttribute("t");
         var index = pElement.getAttribute("x");
@@ -154,10 +163,10 @@ Echo.Serial = {
             }
             value = translator.toProperty(client, pElement);
         } else {
-            if (referenceMap) {
+            if (propertyMap) {
                 var propertyReference = pElement.getAttribute("r");
                 if (propertyReference) {
-                    value = referenceMap[propertyReference];
+                    value = propertyMap[propertyReference];
                 } else {
                     value = Echo.Serial.String.toProperty(client, pElement);
                 }
@@ -200,8 +209,12 @@ Echo.Serial = {
     /**
      * Deserializes an XML representation of a style sheet into a
      * StyleSheet instance.
+     * 
+     * @param {Echo.Client} client the client instance
+     * @param {Element} ssElement the "ss" element representing the root of the style sheet
+     * @param propertyMap the (optional) property map containing referenced property information
      */
-    loadStyleSheet: function(client, ssElement, referenceMap) {
+    loadStyleSheet: function(client, ssElement, propertyMap) {
         var styleSheet = new Echo.StyleSheet();
         
         var ssChild = ssElement.firstChild;
@@ -213,7 +226,7 @@ Echo.Serial = {
                     while (sChild) {
                         if (sChild.nodeType == 1) {
                             if (sChild.nodeName == "p") {
-                                this.loadProperty(client, sChild, null, style, referenceMap);
+                                this.loadProperty(client, sChild, null, style, propertyMap);
                             }
                         }
                         sChild = sChild.nextSibling;
@@ -228,6 +241,10 @@ Echo.Serial = {
     
     /**
      * Serializes a property value into an XML representation.
+     * 
+     * @param {Echo.Client} client the client instance
+     * @param {Element} pElement the "p" element representing the property
+     * @param value the value to render to the "p" element
      */
     storeProperty: function(client, pElement, value) {
         if (value == null) {

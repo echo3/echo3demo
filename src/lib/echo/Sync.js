@@ -470,7 +470,12 @@ Echo.Sync.Extent = {
     /**
      * Regular expression to determine if an extent value is already formatted to pixel units.
      */
-    _FORMATTED_PIXEL_TEST: /^(-?\d+px *)$/,
+    _FORMATTED_INT_PIXEL_TEST: /^(-?\d+px *)$/,
+    
+    /**
+     * Regular expression to determine if an extent value is already formatted to pixel units.
+     */
+    _FORMATTED_DECIMAL_PIXEL_TEST: /^(-?\d+(.\d+)?px *)$/,
     
     /**
      * Determines if an extent has percent units.
@@ -519,10 +524,12 @@ Echo.Sync.Extent = {
     toCssValue: function(extent, horizontal, allowPercent) {
         switch(typeof(extent)) {
             case "number":
-                return extent + "px";
+                return Math.round(extent) + "px";
             case "string":
-                if (this._FORMATTED_PIXEL_TEST.test(extent)) {
+                if (this._FORMATTED_INT_PIXEL_TEST.test(extent)) {
                     return extent;
+                } else if (this._FORMATTED_DECIMAL_PIXEL_TEST.test(extent)) {
+                    return Math.round(parseFloat(extent)) + "px";
                 } else {
                     if (allowPercent && this.isPercent(extent)) {
                         return extent;
@@ -842,7 +849,7 @@ Echo.Sync.Insets = {
     render: function(insets, element, styleAttribute) {
         switch(typeof(insets)) {
             case "number":
-                element.style[styleAttribute] = insets + "px";
+                element.style[styleAttribute] = Math.round(insets) + "px";
                 break;
             case "string":
                 if (this._FORMATTED_PIXEL_INSETS.test(insets)) {
@@ -890,6 +897,7 @@ Echo.Sync.Insets = {
         if (insets == null) {
             return this._ZERO;
         } else if (typeof(insets) == "number") {
+            insets = Math.round(insets);
             return { top: insets, right: insets, bottom: insets, left: insets };
         }
         

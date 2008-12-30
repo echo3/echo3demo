@@ -40,7 +40,6 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
     _focused: false,
     
     _renderStyle: function() {
-        var container = this._container ? this._container : this._input;
         if (this.component.isRenderEnabled()) {
             Echo.Sync.renderComponentDefaults(this.component, this._input);
             Echo.Sync.Border.render(this.component.render("border"), this._input);
@@ -148,9 +147,10 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
             if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
                 // Add default windows scroll bar width to border size for Internet Explorer browsers.
                 if (this._container) {
-                    this._container.style.width = this._adjustPercentWidth(100, 16, this._input.parentNode.offsetWidth) + "%";
+                    this._container.style.width = this._adjustPercentWidth(100, Core.Web.Measure.SCROLL_WIDTH, 
+                            this._input.parentNode.offsetWidth) + "%";
                 } else {
-                    borderSize += 16;
+                    borderSize += Core.Web.Measure.SCROLL_WIDTH;
                 }
             }
             this._input.style.width = this._adjustPercentWidth(parseInt(width, 10), borderSize, 
