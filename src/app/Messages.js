@@ -87,6 +87,7 @@ DemoApp.Messages = new Core.ResourceBundle({
     "Menu.ViewSourceStyleSheet":                            "View Source Code of Default.StyleSheet.js",
     "Menu.ViewSourceMessages":                              "View Source Code of Messages.js",
     "Menu.ViewSourceHtml":                                  "View Source Code of HTML",
+    "Menu.Locale":                                          "Locale",
     "Menu.About":                                           "About",
 
     "Menu.WindowPaneStyle":                                 "Windowed Demo Border",

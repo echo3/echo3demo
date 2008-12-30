@@ -80,6 +80,7 @@ DemoApp = Core.extend(Echo.Application, {
         ],
         
         MODULE_DEMO_RICHTEXTAREA: [
+            "lib/echo/Sync.List.js",
             "lib/echo/Sync.Grid.js",
             "lib/echo/Arc.js",
             "lib/echo/Sync.Composite.js",
@@ -105,6 +106,10 @@ DemoApp = Core.extend(Echo.Application, {
             "lib/extras/Sync.ToolTipContainer.js",
             "app/ExtrasWidgetsScreen.js"
         ],
+        
+        LOCALE_MODULES: {
+            "1337": true
+        },
     
         pref: {
             transitionsEnabled: true,
@@ -114,7 +119,7 @@ DemoApp = Core.extend(Echo.Application, {
         },
         
         getMessages: function() {
-            return DemoApp.Messages.get();
+            return DemoApp.Messages.get(DemoApp.locale);
         },
         
         init: function() {
@@ -128,7 +133,9 @@ DemoApp = Core.extend(Echo.Application, {
             client.addResourcePath("Extras", "lib/extras/");
             app.setStyleSheet(DemoApp.StyleSheet);
             client.init();
-        }
+        },
+        
+        locale: null
     },
     
     _sections: null,
@@ -272,7 +279,7 @@ DemoApp = Core.extend(Echo.Application, {
         this.rootComponent.add(this.workspace);
         
         // Edit/Enable the following line to launch a specific screen at startup.
-        //this.workspace.launchScreen(this._sections[1].screens[0]);
+        //this.workspace.launchScreen(this._sections[3].screens[2]);
     }
 });
 
@@ -549,6 +556,10 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                 ]),
                 new Extras.SeparatorModel(),
                 new Extras.OptionModel("preferences", this._msg["Menu.Preferences"], "image/Icon16Preferences.gif"),
+                new Extras.MenuModel(null, this._msg["Menu.Locale"], null, [
+                    new Extras.OptionModel("locale.en", "English/US", null),
+                    new Extras.OptionModel("locale.1337", "1337", null)
+                ]),
                 new Extras.SeparatorModel(),
                 new Extras.OptionModel("download", this._msg["Menu.Download"], "image/Icon16Download.gif")
             ]),
@@ -689,6 +700,9 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             } else if (e.modelId.substring(0,2) == "W:") {
                 screen = this._screenMap[e.modelId.substring(2)];
                 this._launchScreenWindowed(screen);
+            } else if (e.modelId.substring(0,7) == "locale.") {
+                var locale = e.modelId.substring(7);
+                this._setLocale(locale);
             }
             break;
         }
@@ -707,6 +721,15 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
     setContent: function(content) {
         this._contentArea.removeAll();
         this._contentArea.add(content);
+    },
+    
+    _setLocale: function(locale) {
+        DemoApp.locale = locale;
+        if (locale in DemoApp.LOCALE_MODULES) {
+            Core.Web.Library.exec(["app/Messages." + locale + ".js"], function() {
+                // FIXME. Redraw.
+            });
+        }
     },
     
     setTransition: function(type, overridePreferences) {
