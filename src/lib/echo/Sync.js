@@ -12,6 +12,20 @@
  */
 Echo.Sync = { 
 
+    /**
+     * Retrieves an "effect-specific" property from a component (e.g., a rollover background) if it
+     * is available, or otherwise returns the default (non-effect) property value.
+     * 
+     * @param {Echo.Component} component the component to query
+     * @param {String} defaultPropertyName the name of the default (non-effect) property, e.g., "background"
+     * @param {String} effectPropertyName the name of the effect property, e.g., "rolloverBackground"
+     * @param {Boolean} effectState flag indicating whether the effect is enabled (if the effect is not enabled,
+     *        the default (non-effect) value will always be returned)
+     * @param defaultDefaultPropertyValue (optional) the default (non-effect) property value (this value will be returned
+     *        if no other value can be determined for the property)
+     * @param defaultEffectPropertyValue (optional) the default effect property value (this value will be returned if the
+     *        effectState is true and no value has been specifically set for the effect property) 
+     */
     getEffectProperty: function(component, defaultPropertyName, effectPropertyName, effectState,
             defaultDefaultPropertyValue, effectDefaultPropertyValue) {
         var property;
@@ -188,7 +202,8 @@ Echo.Sync.Border = {
     _PARSER: new RegExp("^(-?\\d+(?:px|pt|pc|cm|mm|in|em|ex))?(?:^|$|(?= )) ?(none|hidden|dotted|dashed|solid|" +
             "double|groove|ridge|inset|outset)?(?:^|$|(?= )) ?(#[0-9a-fA-F]{6})?$"),
             
-    _TEST_EXTENT_PX: /^(-?\d+px*)$/,
+    /** Regular expression to test whether an extent string is a properly formatted integer pixel value. */
+    _TEST_EXTENT_PX: /^-?\d+px$/,
     
     /**
      * Creates a border property from a size, style, and color.
@@ -388,11 +403,11 @@ Echo.Sync.Color = {
      * 
      * @param {#Color} color the color
      * @param {#Element} element the target element
-     * @param {String} styleProperty the name of the style property, e.g., "color", "backgroundColor" 
+     * @param {String} styleAttribute the name of the style attribute, e.g., "color", "backgroundColor" 
      */
-    render: function(color, element, styleProperty) {
+    render: function(color, element, styleAttribute) {
         if (color) {
-            element.style[styleProperty] = color;
+            element.style[styleAttribute] = color;
         }
     },
     
@@ -401,10 +416,10 @@ Echo.Sync.Color = {
      * 
      * @param {#Color} color the color
      * @param {#Element} element the target element
-     * @param {String} styleProperty the name of the style property, e.g., "color", "backgroundColor" 
+     * @param {String} styleAttribute the name of the style attribute, e.g., "color", "backgroundColor" 
      */
-    renderClear: function(color, element, styleProperty) {
-        element.style[styleProperty] = color ? color : "";
+    renderClear: function(color, element, styleAttribute) {
+        element.style[styleAttribute] = color ? color : "";
     },
     
     /**
@@ -523,22 +538,22 @@ Echo.Sync.Extent = {
      */
     toCssValue: function(extent, horizontal, allowPercent) {
         switch(typeof(extent)) {
-            case "number":
-                return Math.round(extent) + "px";
-            case "string":
-                if (this._FORMATTED_INT_PIXEL_TEST.test(extent)) {
+        case "number":
+            return Math.round(extent) + "px";
+        case "string":
+            if (this._FORMATTED_INT_PIXEL_TEST.test(extent)) {
+                return extent;
+            } else if (this._FORMATTED_DECIMAL_PIXEL_TEST.test(extent)) {
+                return Math.round(parseFloat(extent)) + "px";
+            } else {
+                if (allowPercent && this.isPercent(extent)) {
                     return extent;
-                } else if (this._FORMATTED_DECIMAL_PIXEL_TEST.test(extent)) {
-                    return Math.round(parseFloat(extent)) + "px";
                 } else {
-                    if (allowPercent && this.isPercent(extent)) {
-                        return extent;
-                    } else {
-                        var pixels = this.toPixels(extent, horizontal);
-                        return pixels == null ? "" : this.toPixels(extent, horizontal) + "px";
-                    }
+                    var pixels = this.toPixels(extent, horizontal);
+                    return pixels == null ? "" : this.toPixels(extent, horizontal) + "px";
                 }
-                break;
+            }
+            break;
         }
         return "";
     },
@@ -848,18 +863,18 @@ Echo.Sync.Insets = {
      */
     render: function(insets, element, styleAttribute) {
         switch(typeof(insets)) {
-            case "number":
-                element.style[styleAttribute] = Math.round(insets) + "px";
-                break;
-            case "string":
-                if (this._FORMATTED_PIXEL_INSETS.test(insets)) {
-                    element.style[styleAttribute] = insets;
-                } else {
-                    var pixelInsets = this.toPixels(insets);
-                    element.style[styleAttribute] = pixelInsets.top + "px " + pixelInsets.right + "px " +
-                            pixelInsets.bottom + "px " + pixelInsets.left + "px";
-                }
-                break;
+        case "number":
+            element.style[styleAttribute] = Math.round(insets) + "px";
+            break;
+        case "string":
+            if (this._FORMATTED_PIXEL_INSETS.test(insets)) {
+                element.style[styleAttribute] = insets;
+            } else {
+                var pixelInsets = this.toPixels(insets);
+                element.style[styleAttribute] = pixelInsets.top + "px " + pixelInsets.right + "px " +
+                        pixelInsets.bottom + "px " + pixelInsets.left + "px";
+            }
+            break;
         }
     },
     
@@ -872,17 +887,17 @@ Echo.Sync.Insets = {
      */
     toCssValue: function(insets) {
         switch(typeof(insets)) {
-            case "number":
-                return insets + "px";
-            case "string":
-                if (this._FORMATTED_PIXEL_INSETS.test(insets)) {
-                    return insets;
-                } else {
-                    var pixelInsets = this.toPixels(insets);
-                    return pixelInsets.top + "px " + pixelInsets.right + "px " +
-                            pixelInsets.bottom + "px " + pixelInsets.left + "px";
-                }
-                break;
+        case "number":
+            return insets + "px";
+        case "string":
+            if (this._FORMATTED_PIXEL_INSETS.test(insets)) {
+                return insets;
+            } else {
+                var pixelInsets = this.toPixels(insets);
+                return pixelInsets.top + "px " + pixelInsets.right + "px " +
+                        pixelInsets.bottom + "px " + pixelInsets.left + "px";
+            }
+            break;
         }
         return "";
     },
@@ -911,104 +926,6 @@ Echo.Sync.Insets = {
         };
     }
 };
-
-/**
- * Manages floating windows, e.g., window panes in a content pane.
- * Provides listener facility to receive notifications when the panes are raised or lowered,
- * such that floating panes may adjust their z-indices appropriately for correct display.
- * Registered listeners will be notified when one or more z-indices have changed.
- * @class
- */
-Echo.Sync.FloatingPaneManager = Core.extend({
-
-    /**
-     * Creates a new Floating Pane Manager.
-     */
-    $construct: function() {
-        this._floatingPanes = null;
-        this._listeners = null;
-    },
-    
-    /**
-     * Adds a floating pane to be managed, or, if the floating pane already exists,
-     * raises it to the top.
-     * The floating pane will be placed above all others, at the highest z-index.
-     * 
-     * @param {String} renderId the id of the floating pane
-     * @return the initial z-index of the added floating pane
-     */
-    add: function(renderId) {
-        if (!this._floatingPanes) {
-            this._floatingPanes = [];
-        }
-        Core.Arrays.remove(this._floatingPanes, renderId);
-        this._floatingPanes.push(renderId);
-        this._fireZIndexEvent();
-        return this._floatingPanes.length;
-    },
-    
-    /**
-     * Adds a z-index listener.  
-     * 
-     * @param {Function} the listener to add
-     */
-    addZIndexListener: function(l) {
-        if (!this._listeners) {
-            this._listeners = new Core.ListenerList();
-        }
-        this._listeners.addListener("zIndex", l);
-    },
-    
-    /**
-     * Notifies listeners of a z-index change.
-     */
-    _fireZIndexEvent: function() {
-        if (this._listeners) {
-            this._listeners.fireEvent({type: "zIndex", source: this});
-        }
-    },
-    
-    /**
-     * Returns the z-index of the floating pane with the specified id.
-     * -1 is returned if the pane is not registered.
-     * 
-     * @param {String} renderId the id of the floating pane
-     * @return the z-index
-     */
-    getIndex: function(renderId) {
-        if (this._floatingPanes) {
-            var index = Core.Arrays.indexOf(this._floatingPanes, renderId);
-            return index == -1 ? -1 : index + 1;
-        } else {
-            return -1;
-        }
-    },
-    
-    /**
-     * Removes a floating pane from being managed.
-     * 
-     * @param {String} renderId the id of the floating pane
-     */
-    remove: function(renderId) {
-        if (!this._floatingPanes) {
-            return;
-        }
-        Core.Arrays.remove(this._floatingPanes, renderId);
-        this._fireZIndexEvent();
-    },
-    
-    /**
-     * Removes a z-index listener.
-     * 
-     * @param {Function} the listener to remove
-     */
-    removeZIndexListener: function(l) {
-        if (!this._listeners) {
-            return;
-        }
-        this._listeners.removeListener("zIndex", l);
-    }
-});
 
 /**
  * Provides tools for rendering layout direction properties. 

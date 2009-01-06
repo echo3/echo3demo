@@ -23,8 +23,6 @@ Echo.Render = {
 
     /**
      * Mapping between component type names and instantiable peer classes.
-     * 
-     * @type Object
      */
     _peers: {},
     
@@ -36,7 +34,7 @@ Echo.Render = {
      */
     _disposedComponents: null,
     
-    //FIXME.  Scrollbar position tracking code in SplitPane appears to suggest that
+    //FIXME  Scrollbar position tracking code in SplitPane appears to suggest that
     // disposed states are not in good shape....SplitPane is being disposed when
     // parent contentPane is redrawn.
     
@@ -102,10 +100,6 @@ Echo.Render = {
         return depth;
     },
     
-    getPeerClass: function(component) {
-        return Echo.Render._peers[component.componentType];
-    },
-    
     /**
      * Creates a component synchronization peer for a component.
      * The peer will be stored in the "peer" property of the component.
@@ -116,9 +110,8 @@ Echo.Render = {
      */
     _loadPeer: function(client, component) {
         if (component.peer) {
+            // If peer already loaded, do nothing.
             return;
-    // FIXME. which behavior is correct for this scenario: ignore or fail?    
-    //        throw new Error("Peer already installed: " + component);
         }
         
         var peerClass = Echo.Render._peers[component.componentType];
@@ -587,12 +580,19 @@ Echo.Render.ComponentSync = Core.extend({
  */
 Echo.Render.RootSync = Core.extend(Echo.Render.ComponentSync, { 
 
+    $load: function() {
+        Echo.Render.registerPeer("Root", this);
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
         throw new Error("Unsupported operation: renderAdd().");
     },
     
+    /** @see Echo.Render.ComponentSync#renderDispose */
     renderDispose: function(update) { },
     
+    /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
         var fullRender = false;
         if (update.hasAddedChildren() || update.hasRemovedChildren()) {
@@ -626,4 +626,3 @@ Echo.Render.RootSync = Core.extend(Echo.Render.ComponentSync, {
     }
 });
 
-Echo.Render.registerPeer("Root", Echo.Render.RootSync);

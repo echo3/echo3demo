@@ -3,81 +3,38 @@
  */
 Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
 
-    $static: {
-    
-        DEFAULT_BACKGROUND: "#ffffff",
-        
-        /**
-         * Sort method to order floating panes, first by z-index and then by position within container component.
-         * Lower indices of sorted array should appear below higher indices.
-         */
-        _zIndexSort: function(a, b) {
-            var aIndex = a.render("zIndex", 0);
-            var bIndex = b.render("zIndex", 0);
-            if (aIndex === bIndex) {
-                return a.parent.indexOf(a) - b.parent.indexOf(b);
-            } else {
-                return aIndex - bIndex;
-            }
-        }
-    },
-
     $load: function() {
         Echo.Render.registerPeer("ContentPane", this);
     },
     
-    /**
-     * Flag indicating floating pane state has changed (floating panes have been added).
-     */
-    _floatingPanesChanged: false,
+    /** Array of child floating panes components, organized by z-index. */
+    _floatingPaneStack: null,
     
-    /**
-     * Floating pane manager instance.
-     * 
-     * @type Echo.Sync.FloatingPaneManager
-     */
-    _floatingPaneManager: null,
+    /** Flag indicating that the rendered z-indices are not synchronized with the order of <code>_floatingPaneStack</code>. */
+    _zIndexRenderRequired: false,
 
+    /** Constructor. */
     $construct: function() {
-        this._floatingPaneManager = null;
+        this._floatingPaneStack = [];
     },
     
     /**
-     * Returns array of floating panes, sorted first by z-index and then by position within container component.
-     * Lower indices in returned array should appear below higher indices.
+     * Raises a floating pane child to the top.
+     * 
+     * @param {Echo.Component} the child component to raise
      */
-    _getOrderedFloatingPanes: function() {
-        var floatingPanes = [];
-        for (var i = 0; i < this.component.children.length; ++i) {
-            if (this.component.children[i].floatingPane) {
-                floatingPanes.push(this.component.children[i]);
-            }
-        }
-        floatingPanes.sort(Echo.Sync.ContentPane._zIndexSort);
-        return floatingPanes;
-    },
-    
-    /**
-     * Processes a z-index change as reported by the floating pane manager.
-     * Updates CSS style of floating pane DIV appropriately.
-     */
-    _processZIndexChanged: function(e) {
-        for (var i = 0; i < this.component.children.length; ++i) {
-            if (!this.component.children[i].floatingPane) {
-                continue;
-            }
-            var index = this._floatingPaneManager.getIndex(this.component.children[i].renderId);
-            var childElement = this._childIdToElementMap[this.component.children[i].renderId];
-            if (childElement) {
-                childElement.style.zIndex = index + 1;
-            }
-        }
-    },
-    
     raise: function(child) {
-        this._floatingPaneManager.add(child.renderId);
+        if (this._floatingPaneStack[this._floatingPaneStack.length - 1] == child) {
+            // Already on top, do nothing.
+            return;
+        }
+        Core.Arrays.remove(this._floatingPaneStack, child);
+        this._floatingPaneStack.push(child);
+        this._renderFloatingPaneZIndices();
+        this._storeFloatingPaneZIndices();
     },
     
+    /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
         var i;
         
@@ -114,19 +71,44 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
         
         parentElement.appendChild(this._div);
 
-        if (this._floatingPanesChanged) {
-            this._updateFloatingPanes();
+        if (this._zIndexRenderRequired) {
+            this._renderFloatingPaneZIndices();
         }
     },
 
+    /**
+     * Renders the addition of a child component.
+     * 
+     * @param {Echo.Update.ComponentUpdate} the update
+     * @param {Echo.Component} child the child component to add
+     */
     _renderAddChild: function(update, child) {
         var childDiv = document.createElement("div");
         this._childIdToElementMap[child.renderId] = childDiv;
         childDiv.style.position = "absolute";
         if (child.floatingPane) {
+            var zIndex = child.render("zIndex");
+            if (zIndex != null) {
+                var added = false;
+                var i = 0;
+                
+                while (i < this._floatingPaneStack.length && !added) {
+                    var testZIndex = this._floatingPaneStack[i].render("zIndex");
+                    if (testZIndex != null && testZIndex > zIndex) {
+                        this._floatingPaneStack.splice(i, 0, child);
+                        added = true;
+                    }
+                    ++i;
+                }
+                if (!added) {
+                    this._floatingPaneStack.push(child);
+                }
+            } else {
+                this._floatingPaneStack.push(child);
+            }
             childDiv.style.zIndex = "1";
             childDiv.style.left = childDiv.style.top = 0;
-            this._floatingPanesChanged = true;
+            this._zIndexRenderRequired = true;
         } else {
             var insets = this.component.render("insets", 0);
             var pixelInsets = Echo.Sync.Insets.toPixels(insets);
@@ -155,26 +137,7 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
         this._div.appendChild(childDiv);
     },
     
-    renderDispose: function(update) {
-        this._floatingPaneManager = null;
-        this._childIdToElementMap = null;
-        this._div = null;
-    },
-    
-    _renderRemoveChild: function(update, child) {
-        if (child.floatingPane && this._floatingPaneManager) {
-            this._floatingPaneManager.remove(child.renderId);
-        }
-        
-        var childDiv = this._childIdToElementMap[child.renderId];
-        if (!childDiv) {
-            // Child never rendered.
-            return;
-        }
-        childDiv.parentNode.removeChild(childDiv);
-        delete this._childIdToElementMap[child.renderId];
-    },
-    
+    /** @see Echo.Render.ComponentSync#renderDisplay */
     renderDisplay: function() {
         var child = this._div.firstChild;
         while (child) {
@@ -237,7 +200,46 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
             }
         }
     },
+
+    /** @see Echo.Render.ComponentSync#renderDispose */
+    renderDispose: function(update) {
+        this._childIdToElementMap = null;
+        this._div = null;
+    },
     
+    /** 
+     * Updates the rendered CSS z-index attribute of all floating panes based on their positions in 
+     * <code>_floatingPaneStack.</code>. 
+     */ 
+    _renderFloatingPaneZIndices: function() {
+        for (var i = 0; i < this._floatingPaneStack.length; ++i) {
+            var childElement = this._childIdToElementMap[this._floatingPaneStack[i].renderId];
+            childElement.style.zIndex = 2 + i;
+        }
+        this._zIndexRenderRequired = false;
+    },
+
+    /**
+     * Renders the removal of a child component.
+     * 
+     * @param {Echo.Update.ComponentUpdate} the update
+     * @param {Echo.Component} child the child component to remove
+     */
+    _renderRemoveChild: function(update, child) {
+        if (child.floatingPane) {
+            Core.Arrays.remove(this._floatingPaneStack, child);
+        }
+        
+        var childDiv = this._childIdToElementMap[child.renderId];
+        if (!childDiv) {
+            // Child never rendered.
+            return;
+        }
+        childDiv.parentNode.removeChild(childDiv);
+        delete this._childIdToElementMap[child.renderId];
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
         var i, fullRender = false;
         if (update.hasUpdatedProperties() || update.hasUpdatedLayoutDataChildren()) {
@@ -253,7 +255,6 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
             }
             var addedChildren = update.getAddedChildren();
 
-            // FIXME experimental, nonfinal API
             update.renderContext.displayRequired = [];
             
             if (addedChildren) {
@@ -270,12 +271,13 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
                     }
                 }
 
-                if (this._floatingPanesChanged) {
-                    this._updateFloatingPanes();
+                if (this._zIndexRenderRequired) {
+                    this._renderFloatingPaneZIndices();
                 }
             }
         }
         if (fullRender) {
+            this._floatingPaneStack = [];
             var element = this._div;
             var containerElement = element.parentNode;
             Echo.Render.renderComponentDispose(update, update.parent);
@@ -286,23 +288,10 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
         return fullRender;
     },
     
-    /**
-     * Processes an update where floating panes have been added.
-     */
-    _updateFloatingPanes: function() {
-        // Lazily-create floating pane manager.
-        if (!this._floatingPaneManager) {
-            this._floatingPaneManager = new Echo.Sync.FloatingPaneManager();
-            this._floatingPaneManager.addZIndexListener(Core.method(this, this._processZIndexChanged));
+    /** Sets "zIndex" property on all child components based on their positions within the <code>_floatingPaneStack</code>. */
+    _storeFloatingPaneZIndices: function() {
+        for (var i = 0; i < this._floatingPaneStack.length; ++i) {
+            this._floatingPaneStack[i].set("zIndex", i);
         }
-
-        // Retrive z-index/child-index sorted foating panes.
-        var floatingPanes = this._getOrderedFloatingPanes();
-        for (i = 0; i < floatingPanes.length; ++i) {
-            this._floatingPaneManager.add(floatingPanes[i].renderId);
-        }
-        
-        // Update status flag as floating pane changes have been processed.
-        this._floatingPanesChanged = false;
     }
 });
