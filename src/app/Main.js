@@ -726,9 +726,10 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
     _setLocale: function(locale) {
         DemoApp.locale = locale;
         if (locale in DemoApp.LOCALE_MODULES) {
-            Core.Web.Library.exec(["app/Messages." + locale + ".js"], function() {
-                // FIXME. Redraw.
-            });
+            Core.Web.Library.exec(["app/Messages." + locale + ".js"], Core.method(this, function() {
+                this.application.setLocale(locale);
+                // FIXME. Recreate UI.
+            }));
         }
     },
     

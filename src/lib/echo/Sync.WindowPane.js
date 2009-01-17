@@ -4,14 +4,17 @@
 Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
 
     $static: {
-        DEFAULT_TITLE_BACKGROUND: "#abcdef",
-        DEFAULT_TITLE_INSETS: "5px 10px",
-        ADJUSTMENT_OPACITY: 0.75,
-        
-        /** Array mapping CSS cursor types to indices of the _borderDivs property. */
+    
+        /** 
+         * Array mapping CSS cursor types to indices of the _borderDivs property.
+         * @type Array 
+         */
         CURSORS: ["nw-resize", "n-resize", "ne-resize", "w-resize", "e-resize", "sw-resize", "s-resize", "se-resize"],
         
-        /** Array mapping fill image border properties to indices of the _borderDivs property. */
+        /** 
+         * Array mapping fill image border properties to indices of the _borderDivs property.
+         * @type Array 
+         */
         FIB_POSITIONS: ["topLeft", "top", "topRight", "left", "right", "bottomLeft", "bottom", "bottomRight"],
         
         /** Map containing properties whose update can be rendered without replacing component. */
@@ -29,9 +32,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         /** 
          * Map containing position/size-related properties whose update can be rendered by moving/resizing the window.
          */
-        PARTIAL_PROPERTIES_POSITION_SIZE: { positionX: true, positionY: true, width: true, height: true },
-        
-        adjustOpacity: false
+        PARTIAL_PROPERTIES_POSITION_SIZE: { positionX: true, positionY: true, width: true, height: true }
     },
     
     $load: function() {
@@ -73,17 +74,45 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
      */
     _containerSize: null,
 
+    /**
+     * Method reference to <code>_processBorderMouseMove()</code>.
+     * @type Function
+     */
     _processBorderMouseMoveRef: null,
+
+    /**
+     * Method reference to <code>_processBorderMouseUp()</code>.
+     * @type Function
+     */
     _processBorderMouseUpRef: null,
+
+    /**
+     * Method reference to <code>_processTitleBarMouseMove()</code>.
+     * @type Function
+     */
     _processTitleBarMouseMoveRef: null,
+
+    /**
+     * Method reference to <code>_processTitleBarMouseUp()</code>.
+     * @type Function
+     */
     _processTitleBarMouseUpRef: null,
+
+    /**
+     * Array of control icon DOM elements.
+     * @type Array
+     */
     _controlIcons: null,
     
     /**
      * Overlay DIV which covers other elements (such as IFRAMEs) when dragging which may otherwise suppress events.
+     * @type Element
      */
     _overlay: null,
 
+    /**
+     * Creates a <code>Echo.Sync.WindowPane<code>.
+     */
     $construct: function() {
         this._processBorderMouseMoveRef = Core.method(this, this._processBorderMouseMove);
         this._processBorderMouseUpRef = Core.method(this, this._processBorderMouseUp);
@@ -94,24 +123,33 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     /**
      * Converts the x/y/width/height coordinates of a window pane to pixel values.
      * The _containerSize instance property is used to calculate percent-based values.
+     * Percentage values are converted based on size of container.   
+     * 
+     * @param bounds object containing bounds to convert, an object containing extent values in x, y, width (or contentWidth), 
+     *        and height (or contentHeight) properties
+     * @return a bounds object containing those bounds converted to pixels, with integer x, y, width, and height properties
      */
     _coordinatesToPixels: function(bounds) {
         var pxBounds = {};
         if (bounds.width != null) {
+            // Calculate width based on outside width.
             pxBounds.width = Math.round(Echo.Sync.Extent.isPercent(bounds.width) ?
                     (parseInt(bounds.width, 10) * this._containerSize.width / 100) :
                     Echo.Sync.Extent.toPixels(bounds.width, true));
         } else if (bounds.contentWidth != null) {
+            // Calculate width based on inside (content) width.
             pxBounds.contentWidth = Math.round(Echo.Sync.Extent.isPercent(bounds.contentWidth) ?
                     (parseInt(bounds.contentWidth, 10) * this._containerSize.width / 100) :
                     Echo.Sync.Extent.toPixels(bounds.contentWidth, true));
             pxBounds.width = this._contentInsets.left + this._contentInsets.right + pxBounds.contentWidth;
         }
         if (bounds.height != null) {
+            // Calculate height based on outside height.
             pxBounds.height = Math.round(Echo.Sync.Extent.isPercent(bounds.height) ?
                     (parseInt(bounds.height, 10) * this._containerSize.height / 100) :
                     Echo.Sync.Extent.toPixels(bounds.height, false));
         } else if (bounds.contentHeight != null) {
+            // Calculate height based on inside (content) height.
             pxBounds.contentHeight = Math.round(Echo.Sync.Extent.isPercent(bounds.contentHeight) ?
                     (parseInt(bounds.contentHeight, 10) * this._containerSize.height / 100) :
                     Echo.Sync.Extent.toPixels(bounds.contentHeight, false));
@@ -147,14 +185,16 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
                 this._requested.contentHeight ? null : Echo.WindowPane.DEFAULT_HEIGHT);
     },
 
+    /**
+     * Determines size of container and stores in this._containerSize property.
+     */
     _loadContainerSize: function() {
-        //FIXME. the "parentnode.parentnode" business needs to go.
-        this._containerSize = new Core.Web.Measure.Bounds(this._div.parentNode.parentNode);
+        this._containerSize = this.component.parent.peer.getSize();
     },
     
     /**
-     * Adds an overlay DIV at maximum z-index to cover any objects that will not provide move mouseup freedback.
-     */ 
+     * Adds an overlay DIV at maximum z-index to cover any objects that will not provide mouseup feedback (e.g., IFRAMEs).
+     */
     _overlayAdd: function() {
         if (this._overlay) {
             return;
@@ -176,6 +216,9 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         this._overlay = null;
     },
     
+    /**
+     * Processes a mouse-down event on the window border (resize drag).
+     */
     _processBorderMouseDown: function(e) {
         if (!this.client || !this.client.verifyInput(this.component)) {
             return true;
@@ -209,15 +252,13 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
             
         Core.Web.Event.add(document.body, "mousemove", this._processBorderMouseMoveRef, true);
         Core.Web.Event.add(document.body, "mouseup", this._processBorderMouseUpRef, true);
-    
-        // Reduce opacity.   
-        if (Echo.Sync.WindowPane.adjustOpacity) {
-            this._div.style.opacity = Echo.Sync.WindowPane.ADJUSTMENT_OPACITY;
-        }
     },
     
+    /**
+     * Processes a mouse-move event on the window border (resize drag).
+     */
     _processBorderMouseMove: function(e) {
-        this.setBounds({
+        this._setBounds({
             x: this._resizeIncrement.x == -1 ? this._dragInit.x + e.clientX - this._dragOrigin.x : null,
             y: this._resizeIncrement.y == -1 ? this._dragInit.y + e.clientY - this._dragOrigin.y : null,
             width: this._dragInit.width + (this._resizeIncrement.x * (e.clientX - this._dragOrigin.x)),
@@ -225,14 +266,14 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         }, true);
     },
 
+    /**
+     * Processes a mouse-up event on the window border (resize drag).
+     */
     _processBorderMouseUp: function(e) {
         Core.Web.DOM.preventEventDefault(e);
         
         Core.Web.dragInProgress = false;
         this._overlayRemove();
-    
-        // Set opaque.
-        this._div.style.opacity = 1;
     
         this._removeBorderListeners();
         
@@ -253,6 +294,9 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         Echo.Render.notifyResize(this.component);
     },
     
+    /**
+     * Processes a click event on the window controls (i.e. close/maximize/minimize). 
+     */
     _processControlClick: function(e) {
         if (!this.client || !this.client.verifyInput(this.component)) {
             return true;
@@ -271,6 +315,9 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
     
+    /**
+     * Processes a mouse rollover enter event on a specific window control button. 
+     */
     _processControlRolloverEnter: function(e) {
         if (!this.client || !this.client.verifyInput(this.component)) {
             return true;
@@ -278,10 +325,16 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         Echo.Sync.ImageReference.renderImg(e.registeredTarget._controlData.rolloverIcon, e.registeredTarget.firstChild);
     },
     
+    /**
+     * Processes a mouse rollover exit event on a specific window control button. 
+     */
     _processControlRolloverExit: function(e) {
         Echo.Sync.ImageReference.renderImg(e.registeredTarget._controlData.icon, e.registeredTarget.firstChild);
     },
     
+    /**
+     * Processes a key down event in the window.
+     */
     _processKeyDown: function(e) {
         if (e.keyCode == 27) {
             this.component.userClose();
@@ -291,6 +344,9 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         return true;
     },
 
+    /**
+     * Processes a key press event in the window.
+     */
     _processKeyPress: function(e) {
         if (e.keyCode == 27) {
             Core.Web.DOM.preventEventDefault(e);
@@ -299,6 +355,9 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         return true;
     },
     
+    /**
+     * Processes a (captured) focus click within the window region.
+     */
     _processFocusClick: function(e) { 
         if (!this.client || !this.client.verifyInput(this.component)) {
             return true;
@@ -307,6 +366,9 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         return true;
     },
     
+    /**
+     * Processes a mouse down event on the window title bar (move drag).
+     */
     _processTitleBarMouseDown: function(e) {
         if (!this.client || !this.client.verifyInput(this.component)) {
             return true;
@@ -333,28 +395,26 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         this._dragInit = { x: this._rendered.x, y: this._rendered.y };
         this._dragOrigin = { x: e.clientX, y: e.clientY };
     
-        // Reduce opacity.   
-        if (Echo.Sync.WindowPane.adjustOpacity) {
-            this._div.style.opacity = Echo.Sync.WindowPane.ADJUSTMENT_OPACITY;
-        }
-        
         Core.Web.Event.add(document.body, "mousemove", this._processTitleBarMouseMoveRef, true);
         Core.Web.Event.add(document.body, "mouseup", this._processTitleBarMouseUpRef, true);
     },
     
+    /**
+     * Processes a mouse move event on the window title bar (move drag).
+     */
     _processTitleBarMouseMove: function(e) {
-        this.setBounds({
+        this._setBounds({
             x: this._dragInit.x + e.clientX - this._dragOrigin.x, 
             y: this._dragInit.y + e.clientY - this._dragOrigin.y
         }, true);
     },
     
+    /**
+     * Processes a mouse up event on the window title bar (move drag).
+     */
     _processTitleBarMouseUp: function(e) {
         Core.Web.dragInProgress = false;
         this._overlayRemove();
-    
-        // Set opaque.
-        this._div.style.opacity = 1;
     
         this._removeTitleBarListeners();
     
@@ -365,7 +425,11 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         this._requested.y = this._rendered.y;
     },
     
-    redraw: function() {
+    /**
+     * Repositions and resizes the window based on the current bounds specified in this._rendered.
+     * Performs no operation if this._rendered does not have width/height data.
+     */
+    _redraw: function() {
         if (this._rendered.width <= 0 || this._rendered.height <= 0) {
             // Do not render if window does not have set dimensions.
             return;
@@ -398,16 +462,23 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         Core.Web.VirtualPosition.redraw(this._maskDiv);
     },
     
+    /**
+     * Removes mouseup/mousemove listeners from border.  Invoked after resize drag has completed/on dispose.
+     */
     _removeBorderListeners: function() {
         Core.Web.Event.remove(document.body, "mousemove", this._processBorderMouseMoveRef, true);
         Core.Web.Event.remove(document.body, "mouseup", this._processBorderMouseUpRef, true);
     },
     
+    /**
+     * Removes mouseup/mousemove listeners from title bar.  Invoked after move drag has completed/on dispose.
+     */
     _removeTitleBarListeners: function() {
         Core.Web.Event.remove(document.body, "mousemove", this._processTitleBarMouseMoveRef, true);
         Core.Web.Event.remove(document.body, "mouseup", this._processTitleBarMouseUpRef, true);
     },
     
+    /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
         // Create main component DIV.
         this._div = document.createElement("div");
@@ -584,7 +655,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         titleTextDiv.style.whiteSpace = "nowrap";
         Echo.Sync.Font.render(this.component.render("titleFont"), titleTextDiv);
         Echo.Sync.Insets.render(this.component.render("titleInsets", 
-                Echo.Sync.WindowPane.DEFAULT_TITLE_INSETS), titleTextDiv, "padding");
+                Echo.WindowPane.DEFAULT_TITLE_INSETS), titleTextDiv, "padding");
         titleTextDiv.appendChild(document.createTextNode(title ? title : "\u00a0"));
         this._titleBarDiv.appendChild(titleTextDiv);
         
@@ -623,7 +694,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         }
     
         if (!titleBackground && !titleBackgroundImage) {
-            this._titleBarDiv.style.backgroundColor = Echo.Sync.WindowPane.DEFAULT_TITLE_BACKGROUND;
+            this._titleBarDiv.style.backgroundColor = Echo.WindowPane.DEFAULT_TITLE_BACKGROUND;
         }
         
         if (hasControlIcons) {
@@ -678,6 +749,16 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
                 Core.method(this, this._processFocusClick), true);
     },
 
+    /**
+     * Renders a specific control button icon.
+     * 
+     * @param {String} name the name of the control icon, used for both event identification and to
+     *        retrieve icon property names from component (e.g., a value "close" will cause
+     *        "closeIcon" and "closeRolloverIcon" properties of component to be used)
+     * @param {#ImageReference} defaultIcon the default icon image to use in the event none is specified
+     *        by the component
+     * @param {String} altText the alternate text to display if no icon is available (and defaultIcon is null)
+     */
     _renderControlIcon: function(name, defaultIcon, altText) {
         var controlDiv = document.createElement("div"),
             icon = this.component.render(name + "Icon", defaultIcon),
@@ -716,6 +797,15 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         };
     },
     
+    /** @see Echo.Render.ComponentSync#renderDisplay */
+    renderDisplay: function() {
+        this._loadContainerSize();
+        this._setBounds(this._requested, false);
+        Core.Web.VirtualPosition.redraw(this._contentDiv);
+        Core.Web.VirtualPosition.redraw(this._maskDiv);
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderDispose */
     renderDispose: function(update) {
         this._overlayRemove();
         this._renderDisposeFrame();
@@ -751,17 +841,12 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         
     },
     
-    renderDisplay: function() {
-        this._loadContainerSize();
-        this.setBounds(this._requested, false);
-        Core.Web.VirtualPosition.redraw(this._contentDiv);
-        Core.Web.VirtualPosition.redraw(this._maskDiv);
-    },
-    
+    /** @see Echo.Render.ComponentSync#renderFocus */
     renderFocus: function() {
         Core.Web.DOM.focusElement(this._div);
     },
     
+    /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
         if (update.hasAddedChildren() || update.hasRemovedChildren()) {
             // Children added/removed: perform full render.
@@ -800,9 +885,14 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     },
     
     /**
+     * Sets the bounds of the window.  Constrains the specified bounds to within the available area.
+     * Invokes _redraw().
      * 
+     * @param bounds an object containing extent properties x, y, width, and height
+     * @param {Boolean} userAdjusting flag indicating whether this bounds adjustment is a result of the user moving/resizing
+     *        the window (true) or is programmatic (false)
      */
-    setBounds: function(bounds, userAdjusting) {
+    _setBounds: function(bounds, userAdjusting) {
         var c = this._coordinatesToPixels(bounds);
         
         if (this._rendered == null) {
@@ -861,6 +951,6 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
             this._rendered.y = Math.round(c.y);
         }
 
-        this.redraw();
+        this._redraw();
     }
 });

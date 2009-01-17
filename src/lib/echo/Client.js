@@ -7,12 +7,6 @@ Echo.Client = Core.extend({
     $static: {
     
         /**
-         * Flag for verifyInput() flags parameter, indicating that input is 
-         * a property update.
-         */
-        FLAG_INPUT_PROPERTY: 0x1,
-
-        /**
          * Global array containing all active client instances in the current browser window.
          * @type Array
          */
@@ -67,11 +61,15 @@ Echo.Client = Core.extend({
      */
     _inputRestrictionCount: 0,
     
+    /** 
+     * Echo.Component renderId-to-restriction listener mapping.
+     */
+    _inputRestrictionListeners: null,
+    
     /**
      * Id (String) map containing input restrictions.
      * Values are booleans, true indicating property updates are NOT restricted, and false
      * indicated all updates are restricted.
-     * @type Object
      */
     _inputRescriptionMap: null,
     
@@ -135,27 +133,13 @@ Echo.Client = Core.extend({
          * 
          * @param {Echo.Component} component optional parameter indicating the component to query (if omitted, only the
          *        application's readiness state will be investigated)
-         * @param {Number} flags optional flags describing the type of input, one or more of the following flags
-         *        ORed together:
-         *        <ul>
-         *         <li><code>FLAG_INPUT_PROPERTY</code></li>
-         *        </ul>
-         * @return true if the application/component are ready to receive the input
+         * @return true if the application/component are ready to receive input
          * @type Boolean
          */
-        verifyInput: function(component, flags) {
+        verifyInput: function(component) {
             // Check for input restrictions.
             if (this._inputRestrictionCount !== 0) {
-                if (!flags & Echo.Client.FLAG_INPUT_PROPERTY) {
-                    // Input is not a property update, automatically return false if any input restrictions present.
-                    return false;
-                }
-                for (var x in this._inputRestrictionMap) {
-                    if (this._inputRestrictionMap[x] === false) {
-                        // Input restriction set to false, indicating no updates, not even property updates.
-                        return false;
-                    }
-                }
+                return false;
             }
         
             if (component) {
@@ -208,16 +192,54 @@ Echo.Client = Core.extend({
      * Registers a new input restriction.  Input will be restricted until this and all other
      * input restrictions are removed.
      *
-     * @param {Boolean} allowPropertyUpdates flag indicating whether property updates should be
-     *        allowed (if true) or whether all input should be restricted (if false)
      * @return a handle identifier for the input restriction, which will be used to unregister
      *         the restriction by invoking removeInputRestriction()
      */
-    createInputRestriction: function(allowPropertyUpdates) {
+    createInputRestriction: function() {
         var id = (++this._lastInputRestrictionId).toString();
         ++this._inputRestrictionCount;
-        this._inputRestrictionMap[id] = allowPropertyUpdates;
+        this._inputRestrictionMap[id] = true;
         return id;
+    },
+    
+    /**
+     * Handles an application failure, refusing future input and displaying an error message over the entirety of the domain 
+     * element.
+     * 
+     * @param {String} msg the message to display (a generic message will be used if omitted) 
+     */
+    fail: function(msg) {
+        // Block future input.
+        this.createInputRestriction(false);
+        
+        // Default message.
+        msg = msg || "This application has been stopped due to an error. Press the reload or refresh button.";
+        
+        // Darken screen.
+        if (!Core.Web.Env.NOT_SUPPORTED_CSS_OPACITY) {
+            var blackoutDiv = document.createElement("div");
+            blackoutDiv.style.cssText = "position:absolute;z-index:32766;width:100%;height:100%;background-color:#000000;"
+                    + "opacity:0.75;"
+            this.domainElement.appendChild(blackoutDiv);
+        }
+
+        // Display fail message.
+        var div = document.createElement("div");
+        div.style.cssText = "position:absolute;z-index:32767;width:100%;height:100%;"
+        this.domainElement.appendChild(div);
+        var msgDiv = document.createElement("div");
+        msgDiv.style.cssText = "border:#5f1f1f outset 1px;background-color:#5f1f1f;color:#ffffff;padding:2px 10px;";
+        msgDiv.appendChild(document.createTextNode(msg));
+        div.appendChild(msgDiv);
+        var xDiv = document.createElement("div");
+        xDiv.style.cssText = "color:red;line-height:90%;font-size:" + 
+                (new Core.Web.Measure.Bounds(this.domainElement).height || 100) + 
+                "px;text-align:center;overflow:hidden;";
+        xDiv.appendChild(document.createTextNode("X"));
+        div.appendChild(xDiv);
+        
+        // Attempt to dispose.
+        this.dispose();
     },
     
     /**
@@ -249,6 +271,33 @@ Echo.Client = Core.extend({
     },
     
     /**
+     * Processes updates to the component hierarchy.
+     * Invokes <code>Echo.Render.processUpdates()</code>.
+     */
+    processUpdates: function() {
+        var ir = null;
+        try {
+            ir = this.createInputRestriction();
+            Echo.Render.processUpdates(this);
+        } finally {
+            this.removeInputRestriction(ir);
+        }
+    },
+    
+    /**
+     * Registers a listener to be notified when all input restrictions have been removed.
+     * 
+     * @param {Echo.Component} component the component for which the restriction listener is being registered
+     * @param {Function} l the method to notify when all input restrictions have been cleared 
+     */
+    registerRestrictionListener: function(component, l) {
+        if (!this._inputRestrictionListeners) {
+            this._inputRestrictionListeners = { };
+        }
+        this._inputRestrictionListeners[component.renderId] = l;
+    },
+    
+    /**
      * Removes an input restriction.
      *
      * @param {String} id the id (handle) of the input restriction to remove
@@ -259,6 +308,14 @@ Echo.Client = Core.extend({
         }
         delete this._inputRestrictionMap[id];
         --this._inputRestrictionCount;
+        
+        if (this._inputRestrictionCount == 0 && this._inputRestrictionListeners) {
+            // Last input restriction removed: notify input restriction listeners.
+            for (var x in this._inputRestrictionListeners) {
+                this._inputRestrictionListeners[x]();
+            }
+            this._inputRestrictionListeners = null;
+        }
     },
     
     /**
@@ -267,12 +324,7 @@ Echo.Client = Core.extend({
      * @param e the DOM resize event
      */
     _windowResizeListener: function(e) {
-        if (Core.Web.Env.QUIRK_OPERA_WINDOW_RESIZE_POSITIONING) {
-            // FIXME Opera currently fails to redraw screen in certain scenarios.
-            Echo.Render.notifyResize(this.application.rootComponent);
-        } else {
-            Echo.Render.notifyResize(this.application.rootComponent);
-        }
+        Echo.Render.notifyResize(this.application.rootComponent);
     }
 });
 

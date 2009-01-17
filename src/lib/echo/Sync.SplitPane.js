@@ -11,13 +11,57 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
          */
         ChildPane: Core.extend({
         
+            /** 
+             * Minimum pixel size of the child pane.
+             * @type Number
+             */
             minimumSize: 0,
+            
+            /** 
+             * Maximum pixel size of the child pane.
+             * @type Number
+             */
             maximumSize: null,
+            
+            /**
+             * The child pane <code>Echo.Component</code> instance.
+             * @type Echo.Component
+             */
             component: null,
+            
+            /**
+             * The value of the child pane <code>Echo.Component</code>'s <code>layoutData</code> property.
+             */
             layoutData: null,
+            
+            /** 
+             * Horizontal scroll position, in pixels.
+             * @type Number.
+             */
             scrollLeft: 0,
-            scrolltop: 0,
+
+            /** 
+             * Vertical scroll position, in pixels.
+             * @type Number.
+             */
+            scrollTop: 0,
+            
+            /** 
+             * Flag indicating that scroll position should be reset on next renderDisplay() invocation.
+             * @type Boolean
+             */
+            scrollRequired: false,
+            
+            /**
+             * Flag indicating whether sizing information is permanent (fixed pixel-based) or variable (percent-based).
+             * @type Boolean
+             */
             _permanentSizes: false,
+            
+            /**
+             * The SplitPane component rendering peer using this <code>ChildPane</code> object.
+             * @type Echo.Sync.SplitPane
+             */
             _peer: null,
         
             /**
@@ -70,11 +114,21 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
                 }
             },
             
+            /**
+             * Update pane DIV element's scroll positions to reflect those stored in this object.
+             *  
+             * @param paneDiv the pane's DIV element
+             */
             loadScrollPositions: function(paneDiv) {
                 paneDiv.scrollLeft = this.scrollLeft;
                 paneDiv.scrollTop = this.scrollTop;
             },
             
+            /**
+             * Retrieve scroll bar positions from pane DIV element and store in this object.
+             * 
+             * @param paneDiv the pane's DIV element
+             */
             storeScrollPositions: function(paneDiv) {
                 this.scrollLeft = paneDiv.scrollLeft;
                 this.scrollTop = paneDiv.scrollTop;
@@ -91,18 +145,35 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
      * @type Array
      */
     _childPanes: null,
+    
+    /**
+     * Array containing the elements of the first and second child pane DIVs.  This array always has two elements.
+     * @type Array
+     */
     _paneDivs: null,
+    
+    /**
+     * The rendered separator DIV element.
+     * @type Element
+     */
     _separatorDiv: null,
+    
+    /**
+     * Flag indicating whether separator is to be automatically positioned.
+     * @type Boolean
+     */
     _autoPositioned: false,
 
     /**
      * Overlay DIV which covers other elements (such as IFRAMEs) when dragging which may otherwise suppress events.
+     * @type Element
      */
     _overlay: null,
     
     /**
      * Flag indicating whether the renderDisplay() method must be invoked on this peer 
      * (and descendant component peers).
+     * @type Number
      */
     _redisplayRequired: false,
     
@@ -125,10 +196,24 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
      */
     _rendered: null,
 
+    /**
+     * Method reference to this._processSeparatorMouseMove().
+     * @type Function
+     */
     _processSeparatorMouseMoveRef: null,
+
+    /**
+     * Method reference to this._processSeparatorMouseUp().
+     * @type Function
+     */
     _processSeparatorMouseUpRef: null,
-    _processImageLoadRef: null,
-    _initialAutoSizeComplete: null,
+
+    /**
+     * Flag indicating whether initial automatic sizing operation (which occurs on first invocation of 
+     * <code>renderDisplay()</code> after <code>renderAdd()</code>) has been completed.
+     * @type Boolean
+     */
+    _initialAutoSizeComplete: false,
     
     /**
      * The rendered size of the SplitPane outer DIV.  This value is lazily loaded by
@@ -137,6 +222,7 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
      */
     _size: null,
 
+    /** Constructor. */
     $construct: function() {
         this._childPanes = new Array(2);
         this._paneDivs = new Array(2);
@@ -203,6 +289,8 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
     /**
      * Calculates the preferred rendered size of the SplitPane by measuring the sizes of its content and/or
      * invoking getPreferredSize() on its content (if supported).
+     * 
+     * @see Echo.Render.ComponnetSync#getPreferredSize
      */
     getPreferredSize: function(dimension) {
         if (this.component.children.length === 0) {
@@ -274,7 +362,8 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
     /**
      * Retrieves the (potentially cached) dimensions of the SplitPane outer DIV.
      * 
-     * @return {Core.Web.Measure.Bounds} the dimensions
+     * @return the dimensions
+     * @type Core.Web.Measure.Bounds
      */
     _getSize: function() {
         if (!this._size) {
@@ -367,6 +456,7 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
     
     /**
      * Adds an overlay DIV at maximum z-index to cover any objects that will not provide move mouseup freedback.
+     * @see #_overlayRemove
      */ 
     _overlayAdd: function() {
         if (this._overlay) {
@@ -380,6 +470,7 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
     
     /**
      * Removes the overlay DIV.
+     * @see #_overlayAdd
      */
     _overlayRemove: function() {
         if (!this._overlay) {
@@ -389,6 +480,7 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         this._overlay = null;
     },
     
+    /** Processes a key press event. */
     _processKeyPress: function(e) {
         var focusPrevious,
             focusedComponent,
@@ -437,6 +529,7 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         return true;
     }, 
     
+    /** Processes a mouse down event on a SplitPane separator that is about to be dragged. */
     _processSeparatorMouseDown: function(e) {
         if (!this.client || !this.client.verifyInput(this.component)) {
             return true;
@@ -458,6 +551,7 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         this._overlayAdd();
     },
     
+    /** Processes a mouse move event on a SplitPane separator that is being dragged. */
     _processSeparatorMouseMove: function(e) {
         var mousePosition = this._orientationVertical ? e.clientY : e.clientX;
         this._rendered = this._getBoundedSeparatorPosition(this._orientationTopLeft ?
@@ -466,6 +560,7 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         this._redraw(this._rendered);
     },
     
+    /** Processes a mouse up event on a SplitPane separator that was being dragged. */
     _processSeparatorMouseUp: function(e) {
         Core.Web.DOM.preventEventDefault(e);
         
@@ -488,6 +583,7 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         Echo.Render.notifyResize(this.component);
     },
     
+    /** Processes a mouse rollover enter event on the SplitPane separator. */
     _processSeparatorRolloverEnter: function(e) {
         if (!this.client || !this.client.verifyInput(this.component)) {
             return true;
@@ -500,6 +596,7 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
     
+    /** Processes a mouse rollover exit event on the SplitPane separator. */
     _processSeparatorRolloverExit: function(e) {
         if (this._separatorRolloverImage) {
             Echo.Sync.FillImage.renderClear(this._separatorImage, this._separatorDiv, 0);
@@ -544,9 +641,9 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
     },
     
     /**
-     * renderAdd() implementation.
      * Adds basic structure of SplitPane to DOM, but much work is delayed for initial invocation
      * of renderDisplay().
+     * @see Echo.Render.ComponentSync#renderAdd
      */
     renderAdd: function(update, parentElement) {
         this._initialAutoSizeComplete = false;
@@ -612,6 +709,13 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
     
+    /**
+     * Renders the addition of a child.
+     * 
+     * @param {Echo.Update.ComponentUpdate} update the update
+     * @param {Echo.Component} child the added child
+     * @param {Number} index the index of the child within the SplitPane 
+     */
     _renderAddChild: function(update, child, index) {
         var childIndex = this.component.indexOf(child);
         var paneDiv = document.createElement("div");
@@ -663,12 +767,13 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         this._splitPaneDiv.appendChild(paneDiv);
     
         if (this._childPanes[index] && this._childPanes[index].component == child) {
-            this._childPanes[index].loadScrollPositions(paneDiv);
+            this._childPanes[index].scrollRequired = true;
         } else {
             this._childPanes[index] = new Echo.Sync.SplitPane.ChildPane(this, child);
         }
     },
     
+    /** @see Echo.Render.ComponentSync#renderDisplay */
     renderDisplay: function() {
         Core.Web.VirtualPosition.redraw(this._splitPaneDiv);
         Core.Web.VirtualPosition.redraw(this._paneDivs[0]);
@@ -739,8 +844,17 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         // IE Virtual positioning updates.
         Core.Web.VirtualPosition.redraw(this._paneDivs[0]);
         Core.Web.VirtualPosition.redraw(this._paneDivs[1]);
+
+        // Update scroll bar positions for scenario where pane has been disposed and redrawn.
+        for (var i = 0; i < this._childPanes.length; ++i) {
+            if (this._childPanes[i] && this._childPanes[i].scrollRequired && this._paneDivs[i]) {
+                this._childPanes[i].loadScrollPositions(this._paneDivs[i]);
+                this._childPanes[i].scrollRequired = false;
+            }
+        }
     },
     
+    /** @see Echo.Render.ComponentSync#renderDispose */
     renderDispose: function(update) {
         this._overlayRemove();
 
@@ -763,6 +877,12 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         this._splitPaneDiv = null;
     },
     
+    /**
+     * Renders the removal a single child component.
+     * 
+     * @param {Echo.Update.ComponentUpdate} update the update
+     * @param {Echo.Component} child the removed child
+     */
     _renderRemoveChild: function(update, child) {
         var index;
         if (this._childPanes[0] && this._childPanes[0].component == child) {
@@ -780,6 +900,7 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         this._paneDivs[index] = null;
     },
         
+    /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
         var fullRender = false,
             i;

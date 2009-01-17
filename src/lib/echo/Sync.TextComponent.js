@@ -13,6 +13,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
     
         /**
          * Array containing properties that may be updated without full re-render.
+         * @type Array
          */
         _supportedPartialProperties: ["text", "editable"]
     },
@@ -35,15 +36,20 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
     
     /**
      * The rendered "input" element (may be a textarea).
+     * @type Element
      */
     _input: null,
     
+    /**
+     * Container element which wraps the input element.
+     * This element is only rendered for text areas, to mitigate IE "growing" text area bug.
+     * @type Element
+     */
     _container: null,
-    
-    _text: null,
     
     /**
      * Actual focus state of component, based on received DOM focus/blur events.
+     * @type Boolean
      */
     _focused: false,
     
@@ -97,6 +103,10 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
     
     /**
      * Reduces a percentage width by a number of pixels based on the container size.
+     * 
+     * @param {Number} percentValue the percent span
+     * @param {Number} reducePixels the number of pixels by which the percent span should be reduced
+     * @param {Number} containerPixels the size of the container element 
      */
     _adjustPercentWidth: function(percentValue, reducePixels, containerPixels) {
         var value = (100 - Math.ceil(100 * reducePixels / containerPixels)) * percentValue / 100;
@@ -108,68 +118,62 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
      */
     _processBlur: function(e) {
         this._focused = false;
-        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
-            return true;
-        }
-        this.sanitizeInput();
-        this.component.set("text", e.registeredTarget.value);
+        return this._storeValue();
     },
     
     /**
-     * Processes a mouse click event.
-     * Notifies application of focus.
+     * Processes a mouse click event. Notifies application of focus.
      */
     _processClick: function(e) {
-        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component)) {
             return true;
         }
         this.component.application.setFocusedComponent(this.component);
     },
 
     /**
-     * Processes a focus event.
-     * Notifies application of focus.
+     * Processes a focus event. Notifies application of focus.
      */
     _processFocus: function(e) {
         this._focused = true;
-        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component)) {
             return true;
         }
         this.component.application.setFocusedComponent(this.component);
     },
     
     /**
-     * Processes a key press event.  
-     * Prevents input when client is not ready. 
+     * Processes a key press event.  Prevents input when client is not ready. 
      */
     _processKeyPress: function(e) {
-        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
-            Core.Web.DOM.preventEventDefault(e);
-            return true;
-        }
+        return this._storeValue(e);
     },
     
     /**
      * Processes a key up event.  
-     * Prevents input when client is not ready, sanitizes input.  Stores updated form value in <code>Component</code> instance.
      */
     _processKeyUp: function(e) {
-        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
-            Core.Web.DOM.preventEventDefault(e);
-            return true;
+        return this._storeValue(e);
+    },
+    
+    /**
+     * Event listener to process input after client input restrictions have been cleared. 
+     */
+    _processRestrictionsClear: function() {
+        if (!this.client) {
+            // Component has been disposed, do nothing.
+            return;
         }
-        this.sanitizeInput();
-        
-        // Store last updated text in local value, to ensure that we do not attempt to
-        // reset it to this value in renderUpdate() and miss any characters that were
-        // typed between repaints.
-        this._text = e.registeredTarget.value;
-        
-        this.component.set("text", this._text);
-        if (e.keyCode == 13) {
-            this.component.doAction();
+
+        if (!this.client.verifyInput(this.component) || this._input.readOnly) {
+            // Client is unwilling to accept input or component has been made read-only:
+            // Reset value of text field to text property of component.
+            this._input.value = this.component.get("text");
+            return;
         }
-        return true;
+
+        // All-clear, store current text value.
+        this.component.set("text", this._input.value);
     },
 
     /** @see Echo.Render.ComponentSync#renderDisplay */
@@ -227,8 +231,12 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
         } else {
             if (update.hasUpdatedProperties()) {
                 var textUpdate = update.getUpdatedProperty("text");
-                if (textUpdate && textUpdate.newValue != this._text) {
-                    this._input.value = textUpdate.newValue == null ? "" : textUpdate.newValue;
+                if (textUpdate) {
+                    // Update text value, but only if server-provided property differs from client.
+                    var newValue = textUpdate.newValue == null ? "" : textUpdate.newValue;
+                    if (newValue != this.component.get("text")) {
+                        this._input.value = newValue;
+                    }
                 }
                 var editableUpdate = update.getUpdatedProperty("editable");
                 if (editableUpdate != null) {
@@ -237,10 +245,47 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
             }
         }
         
-        // Store text in local value.
-        this._text = this.component.get("text");
-        
         return false; // Child elements not supported: safe to return false.
+    },
+
+    /**
+     * Stores the current value of the input field, if the client will allow it.
+     * If the client will not allow it, but the component itself is active, registers
+     * a restriction listener to be notified when the client is clear of input restrictions
+     * to store the value later.
+     * 
+     * @param keyEvent the user keyboard event which triggered the value storage request (optional)
+     */
+    _storeValue: function(keyEvent) {
+        if (!this.client) {
+            return true;
+        }
+
+        this.sanitizeInput();
+        
+        if (!this.client.verifyInput(this.component)) {
+            if (!this.component.isActive()) {
+                // Component is unwilling to receive input, prevent the input and return.
+                if (keyEvent) {
+                    Core.Web.DOM.preventEventDefault(keyEvent);
+                }
+                return true;
+            }
+            
+            // Component is willing to receive input, but client is not ready:  
+            // Register listener to be notified when client input restrictions have been removed, 
+            // but allow the change to be reflected in the text field temporarily.
+            this.client.registerRestrictionListener(this.component, Core.method(this, this._processRestrictionsClear)); 
+            return true;
+        }
+
+        // Component and client are ready to receive input, set the component property and/or fire action event.
+        this.component.set("text", this._input.value);
+        if (keyEvent && keyEvent.keyCode == 13) {
+            this.component.doAction();
+        }
+
+        return true;
     }
 });
 
@@ -267,7 +312,7 @@ Echo.Sync.TextArea = Core.extend(Echo.Sync.TextComponent, {
         this._input.style.overflow = "auto";
         this._addEventHandlers(this._input);
         if (this.component.get("text")) {
-            this._text = this._input.value = this.component.get("text");
+            this._input.value = this.component.get("text");
         }
         this._container.appendChild(this._input);
         parentElement.appendChild(this._container);
@@ -285,7 +330,10 @@ Echo.Sync.TextField = Core.extend(Echo.Sync.TextComponent, {
     
     $virtual: {
         
-        /** Input element type, either "text" or "password" */
+        /** 
+         * Input element type, either "text" or "password"
+         * @type String 
+         */
         _type: "text"
     },
 
@@ -309,7 +357,7 @@ Echo.Sync.TextField = Core.extend(Echo.Sync.TextComponent, {
         this._renderStyle(this._input);
         this._addEventHandlers(this._input);
         if (this.component.get("text")) {
-            this._text = this._input.value = this.component.get("text");
+            this._input.value = this.component.get("text");
         }
         parentElement.appendChild(this._input);
     },

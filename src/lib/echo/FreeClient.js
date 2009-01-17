@@ -13,16 +13,25 @@
  */ 
 Echo.FreeClient = Core.extend(Echo.Client, {
 
-    /** Method reference to <code>_processUpdate()</code> */
+    /** 
+     * Method reference to <code>_processUpdate()</code> 
+     * @type Function
+     */
     _processUpdateRef: null,
     
-    /** Method reference to <code>_doRender()</code> */
+    /** 
+     * Method reference to <code>_doRender()</code> 
+     * @type Function
+     */
     _doRenderRef: null,
     
     /** Resource package name to base URL mapping for resource paths. */
     _resourcePaths: null,
     
-    /** Flag indicating that a runnable has been enqueued to invoke _doRender(). */
+    /** 
+     * Flag indicating that a runnable has been enqueued to invoke _doRender(). 
+     * @type Boolean
+     */
     _renderPending: false,
 
     /**
@@ -45,8 +54,8 @@ Echo.FreeClient = Core.extend(Echo.Client, {
      * URLs with the specified <code>baseUrl</code> prepended to the resource name provided in the
      * call to <code>getResourceUrl()</code>.
      *
-     * @param packageName the resource package name
-     * @param baseUrl the base URL to prepend to resources in the specified package
+     * @param {String} packageName the resource package name
+     * @param {String} baseUrl the base URL to prepend to resources in the specified package
      */
     addResourcePath: function(packageName, baseUrl) {
         if (!this._resourcePaths) {
@@ -74,7 +83,7 @@ Echo.FreeClient = Core.extend(Echo.Client, {
             // Only execute updates in the event client has not been deconfigured, which can
             // occur before auto-update fires if other operations were scheduled for immediate
             // execution.
-            Echo.Render.processUpdates(this);
+            this.processUpdates();
             this._renderPending = false;
         }
     },
@@ -97,12 +106,10 @@ Echo.FreeClient = Core.extend(Echo.Client, {
         this.application.updateManager.addUpdateListener(this._processUpdateRef);
     },
     
-    //FIXME This method is asynchronous, first autoupdate might want to wait on it being completed.
-    // This currently causes occassional bugginess in the freeclient test app (race).
     /**
      * Loads an XML style sheet into the client application from a URL.
      * 
-     * @param url the URL from which the StyleSheet should be fetched.
+     * @param {String} url the URL from which the StyleSheet should be fetched.
      */
     loadStyleSheet: function(url) {
         var conn = new Core.Web.HttpConnection(url, "GET");
@@ -111,10 +118,9 @@ Echo.FreeClient = Core.extend(Echo.Client, {
     },
     
     /**
-     * Event listener invoked when a StyleSheet fetched via
-     * loadStyleSheet() has been retrieved.
+     * Event listener invoked when a StyleSheet fetched via loadStyleSheet() has been retrieved.
      * 
-     * @param {Event} e the HttpConnection response event
+     * @param e the HttpConnection response event
      */
     _processStyleSheet: function(e) {
         if (!e.valid) {

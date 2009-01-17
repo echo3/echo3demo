@@ -5,6 +5,13 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
 
     $static: {
 
+        /**
+         * Creates a prototype rendering of the basic DOM structure of a Grid which may be cloned
+         * for enhanced rendering performance.
+         * 
+         * @return the prototype DOM hierarchy
+         * @type Element
+         */
         _createPrototypeTable: function() {
             var table = document.createElement("table");
             table.style.outlineStyle = "none";
@@ -19,11 +26,56 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
             return table;
         },
         
+        /**
+         * Performs processing on layout of grid, determining rendered cell sizes, and
+         * eliminating conflicting row/column spans.
+         * 
+         * This object describes coordinates in terms of x and y, rather than column/row.
+         * The translation between x/y and column/row varies based on the grid's orientation.
+         * For horizontally oriented grids, the x-axis represents columns and the y-axis rows.
+         * For vertically oriented grids, the x-axis represents rows and the y-axis columns.
+         */
         Processor: Core.extend({
         
             $static: {
             
+                /**
+                 * Representation of a single cell of the grid.
+                 */
                 Cell: Core.extend({
+                    
+                    /** 
+                     * The number of cells spanned in the x direction
+                     * @type Number
+                     */
+                    xSpan: null,
+                    
+                    /** 
+                     * The number of cells spanned in the y direction. 
+                     * @type Number
+                     */
+                    ySpan: null,
+                    
+                    /** 
+                     * The index of the child component within the Grid parent. 
+                     * @type Number
+                     */
+                    index: null,
+                    
+                    /** 
+                     * The child component.
+                     * @type Echo.Component 
+                     */
+                    component: null,
+                    
+                    /**
+                     * Creates a new cell.
+                     * 
+                     * @param {Echo.Component} component the component
+                     * @param {Number} index the index of the component within the Grid parent
+                     * @param {Number} xSpan the number of cells spanned in the x direction
+                     * @param {Number} ySpan the number of cells spanned in the y direction
+                     */
                     $construct: function(component, index, xSpan, ySpan) {
                         this.component = component;
                         this.index = index;
@@ -32,7 +84,56 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
                     }
                 })
             },
-        
+            
+            /**
+             * Two dimensional array which contains <code>Cell</code>s.
+             * Each index of this array contains an array which represents a y-index of the grid.
+             * Each index in a contained arrays represents a cell of the grid.
+             * @type Array
+             */
+            cellArrays: null,
+            
+            /**
+             * The Grid being rendered.
+             * @type Echo.Grid
+             */
+            grid: null,
+            
+            /** 
+             * The size of the grid's x-axis.
+             * @type Number
+             */ 
+            gridXSize: null,
+            
+            /** 
+             * The size of the grid's x-axis.
+             * @type Number
+             */ 
+            gridYSize: null,
+            
+            /**
+             * Array of extents representing cell sizes on x-axis.
+             * @type Array
+             */
+            xExtents: null,
+            
+            /**
+             * Array of extents representing cell sizes on y-axis.
+             * @type Array
+             */
+            yExtents: null,
+            
+            /**
+             * Flag indicating whether the grid is horizontally oriented.
+             * @type Boolean
+             */
+            horizontalOrientation: null,
+            
+            /**
+             * Creates a new Processor instance.
+             * 
+             * @param {Echo.Grid} grid the supported grid
+             */
             $construct: function(grid) {
                 this.grid = grid;
                 this.cellArrays = [];
@@ -46,6 +147,7 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
                     return;
                 }
             
+                
                 this.renderCellMatrix(cells);
                 
                 this.calculateExtents();
@@ -54,10 +156,37 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
                 this.reduceX();
             },
             
+            /**
+             * Adds two extents.
+             * 
+             * @param {#Extent} a the first extent
+             * @param {#Extent} b the second extent
+             * @param {Boolean} flag indicating whether extents are horizontal
+             * @return the sum of the extents
+             * @type #Extent
+             */
+            addExtents: function(a, b, horizontal) {
+                var ap = Echo.Sync.Extent.isPercent(a), bp = Echo.Sync.Extent.isPercent(b);
+                if (ap || bp) {
+                    if (ap && bp) {
+                        // Both are percents, add them.
+                        return (parseFloat(ap) + parseFloat(bp)) + "%";
+                    } else {
+                        // One extent is percent, the other is not: return the percent extent.
+                        return ap ? a : b;
+                    }
+                } else {
+                    return Echo.Sync.Extent.toPixels(a) + Echo.Sync.Extent.toPixels(b);
+                }
+            },
+            
+            /**
+             * Calculates sizes of columns and rows.
+             */
             calculateExtents: function() {
-                var i;
-                var xProperty = this.horizontalOrientation ? "columnWidth" : "rowHeight";
-                var yProperty = this.horizontalOrientation ? "rowHeight" : "columnWidth";
+                var i,
+                    xProperty = this.horizontalOrientation ? "columnWidth" : "rowHeight",
+                    yProperty = this.horizontalOrientation ? "rowHeight" : "columnWidth";
                 
                 this.xExtents = [];
                 for (i = 0; i < this.gridXSize; ++i) {
@@ -70,6 +199,12 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
                 }
             },
             
+            /**
+             * Creates array of <code>Cell</code> instances representing child components of the grid.
+             * 
+             * @return the array of <code>Cell</code> instances
+             * @type Array
+             */
             createCells: function() {
                 var childCount = this.grid.getComponentCount();
                 if (childCount === 0) {
@@ -98,7 +233,7 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
              * 
              * @param {Integer} y the y-index
              * @return the array of cells.
-             * @type {Array}
+             * @type Array
              */
             _getCellArray: function(y) {
                 while (y >= this.cellArrays.length) {
@@ -175,7 +310,7 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
                     return;
                 }
                 
-                for (var removedX = this.gridXSize - 1; removedX >= 0; --removedX) {
+                for (var removedX = this.gridXSize - 1; removedX >= 1; --removedX) {
                     if (!xRemoves[removedX]) {
                         continue;
                     }
@@ -187,12 +322,14 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
                                 --this.cellArrays[y][removedX - 1].xSpan;
                             }
                         }
-                        for (x = removedX; x < this.gridXSize - 1; ++x) {
-                            this.cellArrays[y][x] = this.cellArrays[y][x + 1];
-                        }
+                        this.cellArrays[y].splice(removedX, 1);
                     }
                     
-                    //FIXME. Add extent-size recalc.
+                    var removedXExtent = this.xExtents.splice(removedX, 1);
+                    if (removedXExtent) {
+                        this.xExtents[removedX - 1] = this.addExtents(this.xExtents[removedX - 1], removedXExtent,
+                                this.horizontalOrientation ? true : false);
+                    }
                     
                     --this.gridXSize;
                 }
@@ -256,13 +393,25 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
                     // Remove the duplicate cell array.
                     this.cellArrays.splice(removedY, 1);
                     
-                    //FIXME. insert code here for extent adjustment.
+                    // Remove size data for removed row, add value to previous if necessary.
+                    var removedYExtent = this.yExtents.splice(removedY, 1);
+                    if (removedYExtent) {
+                        this.yExtents[removedY - 1] = this.addExtents(this.yExtents[removedY - 1], removedYExtent,
+                                this.horizontalOrientation ? false : true);
+                    }
                     
                     // Decrement the grid size to reflect cell array removal.
                     --this.gridYSize;
                 }
             },
             
+            /**
+             * Iterates over cells to create the cell matrix, adjusting column and row spans as of cells to ensure
+             * that no overlap occurs between column and row spans.
+             * Additionally determines actual y-size of grid.   
+             * 
+             * @param {Array} cells array of <code>Echo.Sync.Grid.Processor.Cell</code> instances 
+             */
             renderCellMatrix: function(cells) {
                 this.gridXSize = parseInt(this.grid.render("size", 2), 10);
                 var x = 0, 
@@ -337,10 +486,21 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
         Echo.Render.registerPeer("Grid", this);
     },
     
+    /**
+     * The number of columns.
+     * @type Number
+     */
     _columnCount: null,
     
+    /**
+     * The number of rows.
+     * @type Number
+     */
     _rowCount: null,
     
+    /**
+     * Processes a key press event (for focus navigation amongst child cells.
+     */
     _processKeyPress: function(e) { 
         var focusPrevious,
             focusedComponent,
@@ -386,6 +546,7 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
         return true;
     },
 
+    /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
         var gridProcessor = new Echo.Sync.Grid.Processor(this.component),
             defaultInsets = Echo.Sync.Insets.toCssValue(this.component.render("insets", 0)),
@@ -397,6 +558,7 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
         
         this._columnCount = gridProcessor.getColumnCount();
         this._rowCount = gridProcessor.getRowCount();
+        
         this._table = Echo.Sync.Grid._prototypeTable.cloneNode(true);
         this._table.id = this.component.renderId;
         
@@ -404,11 +566,13 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
         Echo.Sync.Border.render(defaultBorder, this._table);
         this._table.style.padding = defaultInsets;
         
+        // Render percent widths using measuring for IE to avoid potential horizontal scrollbars.
         if (width && Core.Web.Env.QUIRK_IE_TABLE_PERCENT_WIDTH_SCROLLBAR_ERROR && Echo.Sync.Extent.isPercent(width)) {
             this._renderPercentWidthByMeasure = parseInt(width, 10);
             width = null;
         }
         
+        // Set overall width/height.
         if (width) {
             if (Echo.Sync.Extent.isPercent(width)) {
                 this._table.style.width = width;
@@ -416,7 +580,6 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
                 this._table.style.width = Echo.Sync.Extent.toCssValue(width, true);
             }
         }
-        
         if (height) {
             if (Echo.Sync.Extent.isPercent(height)) {
                 this._table.style.height = height;
@@ -424,7 +587,8 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
                 this._table.style.height = Echo.Sync.Extent.toCssValue(height, false);
             }
         }
-        
+
+        // Render column widths into colgroup element.
         var colGroup = this._table.firstChild;
         for (columnIndex = 0; columnIndex < this._columnCount; ++columnIndex) {
             var col = document.createElement("col");
@@ -460,6 +624,7 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
         tdPrototype.style.padding = defaultInsets;
         tdPrototype.style.overflow = "hidden";
         
+        // Render grid layout.
         for (var rowIndex = 0; rowIndex < this._rowCount; ++rowIndex) {
             tr = document.createElement("tr");
             height = gridProcessor.yExtents[rowIndex];
@@ -511,12 +676,7 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
         parentElement.appendChild(this._table);
     },
     
-    renderDispose: function(update) {
-        Core.Web.Event.removeAll(this._table);
-        this._table = null;
-        this._renderPercentWidthByMeasure = null;
-    },
-    
+    /** @see Echo.Render.ComponentSync#renderDisplay */
     renderDisplay: function() {
         if (this._renderPercentWidthByMeasure) {
             this._table.style.width = "";
@@ -535,6 +695,14 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
         }
     },
     
+    /** @see Echo.Render.ComponentSync#renderDispose */
+    renderDispose: function(update) {
+        Core.Web.Event.removeAll(this._table);
+        this._table = null;
+        this._renderPercentWidthByMeasure = null;
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
         var element = this._table;
         var containerElement = element.parentNode;

@@ -1,29 +1,55 @@
 /**
- * Abstract base class for SELECT-element based list components.
+ * Abstract base class for rendering SELECT-element based list components.
  */
 Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
 
     $static: {
-        DEFAULT_DIV_HEIGHT: "6em",
-        DEFAULT_DIV_BORDER: "1px solid",
+    
+        /** 
+         * Alternate rendering: default border style.
+         * @type #Border
+         */
+        DEFAULT_DIV_BORDER: "1px solid #7f7f7f",
+        
+        /** 
+         * Alternate rendering: default selected item background.
+         * @type #Color
+         */
         DEFAULT_SELECTED_BACKGROUND: "#0a246a",
+        
+        /** 
+         * Alternate rendering: default selected item foreground.
+         * @type #Color
+         */
         DEFAULT_SELECTED_FOREGROUND: "#ffffff"
     },
 
-    $abstract: true,
-    
-    $virtual: {
-        listBox: false
+    $abstract: {
+        
+        /**
+         * Flag indicating whether the component should be rendered as a list box (true) or select field (false).
+         * @type Boolean
+         */
+        listBox: null
     },
-
+    
+    /**
+     * Flag indicating that one or more of the items in the list component has been rendered with a selected appearance.
+     * @type Boolean
+     */
     _hasRenderedSelectedItems: false,
     
+    /**
+     * Flag indicating whether multiple selection is allowed (for listboxes).
+     * @type Boolean
+     */
     _multipleSelect: false,
     
     /**
      * Flag indicating that selection should be determined based on "selectedId"
-     * property rather than "selection" property.  this flag is enabled when
+     * property rather than "selection" property.  This flag is enabled when
      * "selectedId" is updated and disabled when an item is selected by the user.
+     * @type Boolean
      */
     _selectedIdPriority: false,
 
@@ -31,18 +57,71 @@ Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
      * Flag indicating that component will be rendered as a DHTML-based ListBox.
      * This form of rendering is necessary on Internet Explorer 6 browsers due to unstable
      * code in this web browser when using listbox-style SELECT elements.
+     * @type Boolean
      */
     _alternateRender: false,
     
+    /**
+     * The "main" element upon which contains items and upon which listeners are registered.  
+     * For normal rendering, this is the SELECT, which directly contains individual OPTION elements.
+     * For the alternate rendering, this is the TABLE, whose TBODY element contains individual
+     * TR elements that represent options.
+     * @type Element
+     */
     _element: null,
     
+    /**
+     * Rendered DIV element when alternate listbox rendering is enabled.
+     * Null if list is rendered as a SELECT element.
+     * @type Element.
+     */
     _div: null,
     
     /**
      * Rendered focus state of component, based on received DOM focus/blur events.
+     * @type Boolean
      */
     _focused: false,
     
+    /**
+     * Determines current selection state.
+     * By default, the value of the "selection" property of the component is returned.
+     * If the _selectedIdPriorirty flag is set, or if the "selection" property has no value,
+     * then selection is determined based on the "selectedId" property of the component.
+     * 
+     * @return the selection, either an integer index or array of indices
+     */
+    _getSelection: function() {
+        // Retrieve selection from "selection" property.
+        var selection = this._selectedIdPriority ? null : this.component.get("selection");
+        
+        if (selection == null) {
+            // If selection is now in "selection" property, query "selectedId" property.
+            var selectedId = this.component.get("selectedId");
+
+            if (selectedId) {
+                // If selectedId property is set, find item with corresponding id.
+                var items = this.component.get("items");
+
+                for (var i = 0; i < items.length; ++i) {
+                    if (items[i].id == selectedId) {
+                        selection = i;
+                        break;
+                    }
+                }
+            }
+            
+            // If selection is null (selectedId not set, or corresponding item not found),
+            // set selection to null/default value.
+            if (selection == null) {
+                selection = this.listBox ? [] : 0;
+            }
+        }
+        
+        return selection;
+    },
+    
+    /** Processes a focus blur event */
     _processBlur: function(e) {
         this._focused = false;
     },
@@ -98,6 +177,7 @@ Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
     },
     
     /**
+     * Processes a selection change event.
      * This event handler is registered only for traditional SELECT elements, i.e., the _alternateRender flag will be false.
      */
     _processChange: function(e) {
@@ -125,92 +205,67 @@ Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
         this.component.doAction();
     },
     
+    /** Processes a focus event */
     _processFocus: function(e) {
         this._focused = true;
-        if (!this.client || !this.client.verifyInput(this.component, Echo.Client.FLAG_INPUT_PROPERTY)) {
+        if (!this.client || !this.client.verifyInput(this.component)) {
             return true;
         }
         this.component.application.setFocusedComponent(this.component);
     },
     
-    /**
-     * IE-specific event handler to prevent mouse-selection of text in DOM-rendered listbox component.
-     */
+    /** IE-specific event handler to prevent mouse-selection of text in DOM-rendered listbox component. */
     _processSelectStart: function(e) {
         Core.Web.DOM.preventEventDefault(e);
     },
 
-    /**
-     * Renders the list selection component as a standard SELECT element.
-     * This strategy is always used in all browsers except IE6, and is used in IE6
-     * for drop-down select fields.  IE6 cannot use this strategy for listboxes
-     * do to major bugs in this browser (listboxes randomly change back into selectfields
-     * when rendered by DOM manipulation).
-     * This strategy is used when the _alternateRender flag is false.
-     */
-    _renderMainAsSelect: function(update, parentElement) {
-        this._element = document.createElement("select");
-        this._element.id = this.component.renderId;
-        this._element.size = this.listBox ? 6 : 1;
-
-        if (!this._enabled) {
-            this._element.disabled = true;
+    /** @see Echo.Render.ComponentSync#renderAdd */
+    renderAdd: function(update, parentElement) {
+        this._multipleSelect = this.component.get("selectionMode") == Echo.ListBox.MULTIPLE_SELECTION;
+        if (this.listBox && Core.Web.Env.QUIRK_IE_SELECT_LIST_DOM_UPDATE) {
+            this._alternateRender = true;
         }
-        if (this._multipleSelect) {
-            this._element.multiple = "multiple";
-        }
-
-        this._element.style.height = Echo.Sync.Extent.toCssValue(this.component.render("height"), false, false);
-        this._element.style.width = Echo.Sync.Extent.toCssValue(this.component.render("width"), true, false);
-        if (this._enabled) {
-            Echo.Sync.renderComponentDefaults(this.component, this._element);
+        this._enabled = this.component.isRenderEnabled();
+        
+        if (this._alternateRender) {
+            this._renderMainAsDiv(update, parentElement);
         } else {
-            Echo.Sync.LayoutDirection.render(this.component.getLayoutDirection(), this._element);
-            Echo.Sync.Color.render(Echo.Sync.getEffectProperty(this.component, "foreground", "disabledForeground", true), 
-                    this._element, "color");
-            Echo.Sync.Color.render(Echo.Sync.getEffectProperty(this.component, "background", "disabledBackground", true), 
-                    this._element, "backgroundColor");
-            Echo.Sync.Font.render(Echo.Sync.getEffectProperty(this.component, "font", "disabledFont", true),this._element);
+            this._renderMainAsSelect(update, parentElement);
         }
-        Echo.Sync.Border.render(Echo.Sync.getEffectProperty(this.component, "border", "disabledBorder", !this._enabled), 
-                this._element);
-        Echo.Sync.Insets.render(this.component.render("insets"), this._element, "padding");
-
-        var items = this.component.get("items");
-        if (items) {
-            for (var i = 0; i < items.length; ++i) {
-                var optionElement = document.createElement("option");
-                if (items[i].text == null) {
-                    optionElement.appendChild(document.createTextNode(items[i].toString()));
-                } else {
-                    optionElement.appendChild(document.createTextNode(items[i].text));
-                }
-                if (items[i].foreground) {
-                    Echo.Sync.Color.render(items[i].foreground, optionElement, "color");
-                }
-                if (items[i].background) {
-                    Echo.Sync.Color.render(items[i].background, optionElement, "backgroundColor");
-                }
-                if (items[i].font) {
-                    Echo.Sync.Font.render(items[i].font, optionElement);
-                }
-                this._element.appendChild(optionElement);
-            }
-        }
-    
-        if (this._enabled) {
-            Core.Web.Event.add(this._element, "change", Core.method(this, this._processChange), false);
-            Core.Web.Event.add(this._element, "blur", Core.method(this, this._processBlur), false);
-            Core.Web.Event.add(this._element, "focus", Core.method(this, this._processFocus), false);
-        }
-
-        parentElement.appendChild(this._element);
     },
 
+    /** @see Echo.Render.ComponentSync#renderDisplay */
+    renderDisplay: function() {
+        this._renderSelection();
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderDispose */
+    renderDispose: function(update) { 
+        Core.Web.Event.removeAll(this._element);
+        this._element = null;
+        if (this._div) {
+            Core.Web.Event.removeAll(this._div);
+            this._div = null;
+        }
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderFocus */
+    renderFocus: function() {
+        if (this._focused) {
+            return;
+        }
+        
+        this._focused = true;
+        Core.Web.DOM.focusElement(this._element);
+    },
+    
     /**
      * Renders a list box as a DIV element containing DIV elements of selectable items.
      * This strategy is used on IE6 due to bugs in this browser's rendering engine.
      * This strategy is used when the _alternateRender flag is true.
+     * 
+     * @param {Echo.Update.ComponentUpdate} update the update
+     * @param {Element} parent the parent DOM element 
      */
     _renderMainAsDiv: function(update, parentElement) {
         this._element = document.createElement("table");
@@ -278,75 +333,79 @@ Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
     },
     
     /**
-     * Delegates to _renderMainAsSelect() or _renderMainAsDiv() depending on type of list selection component and browser bugs.
+     * Renders the list selection component as a standard SELECT element.
+     * This strategy is always used in all browsers except IE6, and is used in IE6
+     * for drop-down select fields.  IE6 cannot use this strategy for listboxes
+     * do to major bugs in this browser (listboxes randomly change back into selectfields
+     * when rendered by DOM manipulation).
+     * This strategy is used when the _alternateRender flag is false.
+     * 
+     * @param {Echo.Update.ComponentUpdate} update the update
+     * @param {Element} parent the parent DOM element 
      */
-    _renderMain: function(update, parentElement) {
-        this._multipleSelect = this.component.get("selectionMode") == Echo.ListBox.MULTIPLE_SELECTION;
-        if (this.listBox && Core.Web.Env.QUIRK_IE_SELECT_LIST_DOM_UPDATE) {
-            this._alternateRender = true;
+    _renderMainAsSelect: function(update, parentElement) {
+        this._element = document.createElement("select");
+        this._element.id = this.component.renderId;
+        this._element.size = this.listBox ? 6 : 1;
+
+        if (!this._enabled) {
+            this._element.disabled = true;
         }
-        this._enabled = this.component.isRenderEnabled();
-        
-        if (this._alternateRender) {
-            this._renderMainAsDiv(update, parentElement);
+        if (this._multipleSelect) {
+            this._element.multiple = "multiple";
+        }
+
+        this._element.style.height = Echo.Sync.Extent.toCssValue(this.component.render("height"), false, false);
+        this._element.style.width = Echo.Sync.Extent.toCssValue(this.component.render("width"), true, false);
+        if (this._enabled) {
+            Echo.Sync.renderComponentDefaults(this.component, this._element);
         } else {
-            this._renderMainAsSelect(update, parentElement);
+            Echo.Sync.LayoutDirection.render(this.component.getLayoutDirection(), this._element);
+            Echo.Sync.Color.render(Echo.Sync.getEffectProperty(this.component, "foreground", "disabledForeground", true), 
+                    this._element, "color");
+            Echo.Sync.Color.render(Echo.Sync.getEffectProperty(this.component, "background", "disabledBackground", true), 
+                    this._element, "backgroundColor");
+            Echo.Sync.Font.render(Echo.Sync.getEffectProperty(this.component, "font", "disabledFont", true),this._element);
         }
-    },
-    
-    renderDisplay: function() {
-        this._renderSelection();
-    },
-    
-    renderDispose: function(update) { 
-        Core.Web.Event.removeAll(this._element);
-        this._element = null;
-        if (this._div) {
-            Core.Web.Event.removeAll(this._div);
-            this._div = null;
-        }
-    },
-    
-    renderFocus: function() {
-        if (this._focused) {
-            return;
-        }
-        
-        this._focused = true;
-        Core.Web.DOM.focusElement(this._element);
-    },
-    
-    _getSelection: function() {
-        // Retrieve selection from "selection" property.
-        var selection = this._selectedIdPriority ? null : this.component.get("selection");
-        
-        if (selection == null) {
-            // If selection is now in "selection" property, query "selectedId" property.
-            var selectedId = this.component.get("selectedId");
+        Echo.Sync.Border.render(Echo.Sync.getEffectProperty(this.component, "border", "disabledBorder", !this._enabled), 
+                this._element);
+        Echo.Sync.Insets.render(this.component.render("insets"), this._element, "padding");
 
-            if (selectedId) {
-                // If selectedId property is set, find item with corresponding id.
-                var items = this.component.get("items");
-
-                for (var i = 0; i < items.length; ++i) {
-                    if (items[i].id == selectedId) {
-                        selection = i;
-                    }
+        var items = this.component.get("items");
+        if (items) {
+            for (var i = 0; i < items.length; ++i) {
+                var optionElement = document.createElement("option");
+                if (items[i].text == null) {
+                    optionElement.appendChild(document.createTextNode(items[i].toString()));
+                } else {
+                    optionElement.appendChild(document.createTextNode(items[i].text));
                 }
-            }
-            
-            // If selection is null (selectedId not set, or corresponding item not found),
-            // set selection to null/default value.
-            if (selection == null) {
-                selection = this.listBox ? [] : 0;
+                if (items[i].foreground) {
+                    Echo.Sync.Color.render(items[i].foreground, optionElement, "color");
+                }
+                if (items[i].background) {
+                    Echo.Sync.Color.render(items[i].background, optionElement, "backgroundColor");
+                }
+                if (items[i].font) {
+                    Echo.Sync.Font.render(items[i].font, optionElement);
+                }
+                this._element.appendChild(optionElement);
             }
         }
-        
-        return selection;
-    },
     
+        if (this._enabled) {
+            Core.Web.Event.add(this._element, "change", Core.method(this, this._processChange), false);
+            Core.Web.Event.add(this._element, "blur", Core.method(this, this._processBlur), false);
+            Core.Web.Event.add(this._element, "focus", Core.method(this, this._processFocus), false);
+        }
+
+        parentElement.appendChild(this._element);
+    },
+
+    /**
+     * Renders the current selection state.
+     */
     _renderSelection: function() {
-        // Set selection.
         var selection = this._getSelection(),
             i;
         
@@ -392,6 +451,7 @@ Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
         this._hasRenderedSelectedItems = true;
     },
     
+    /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
         if (update.getUpdatedProperty("selectedId") && !update.getUpdatedProperty("selection")) {
             this._selectedIdPriority = true;
@@ -405,6 +465,12 @@ Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
         return false; // Child elements not supported: safe to return false.
     },
     
+    /**
+     * Sets the selection state.
+     * Updates values of both "selection" and "selectedId" properties of the component.
+     * 
+     * @param selection the new selection state, either the selected index or an array of selected indices 
+     */
     _setSelection: function(selection) {
         this._selectedIdPriority = false;
     
@@ -443,14 +509,11 @@ Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
  */
 Echo.Sync.ListBox = Core.extend(Echo.Sync.ListComponent, {
     
+    /** @see Echo.Sync.ListComponent#listBox */
     listBox: true,
 
     $load: function() {
         Echo.Render.registerPeer("ListBox", this);
-    },
-
-    renderAdd: function(update, parentElement) {
-        this._renderMain(update, parentElement, true);
     }
 });
 
@@ -459,11 +522,10 @@ Echo.Sync.ListBox = Core.extend(Echo.Sync.ListComponent, {
  */
 Echo.Sync.SelectField = Core.extend(Echo.Sync.ListComponent, { 
 
+    /** @see Echo.Sync.ListComponent#listBox */
+    listBox: false,
+
     $load: function() {
         Echo.Render.registerPeer("SelectField", this);
-    },
-    
-    renderAdd: function(update, parentElement) {
-        this._renderMain(update, parentElement, false);
     }
 });

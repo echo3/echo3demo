@@ -22,6 +22,18 @@
 Echo.Render = {
 
     /**
+     * Count of loaded/unloaded peers.  Used for testing purposes to ensure peers are not being leaked.
+     * @type Number
+     */
+    _loadedPeerCount: 0,
+
+    /**
+     * Next sequentially assigned unique peer identifier.
+     * @type Number
+     */
+    _nextPeerId: 0,
+    
+    /**
      * Mapping between component type names and instantiable peer classes.
      */
     _peers: {},
@@ -29,17 +41,12 @@ Echo.Render = {
     /**
      * Map containing removed components.  Maps component ids to removed components.
      * Created and destroyed during each render.
-     * 
-     * @type Object
      */
     _disposedComponents: null,
     
-    //FIXME  Scrollbar position tracking code in SplitPane appears to suggest that
-    // disposed states are not in good shape....SplitPane is being disposed when
-    // parent contentPane is redrawn.
-    
     /**
      * An array sorting implementation to organize an array by component depth.
+     * @see Array#sort
      */
     _componentDepthArraySort: function(a, b) {
         return Echo.Render._getComponentDepth(a.parent) - Echo.Render._getComponentDepth(b.parent);
@@ -50,8 +57,8 @@ Echo.Render = {
      * component hierarchy.  If a peer does not provide a renderDisplay() implementation,
      * it is skipped (although its descendants will NOT be skipped).
      * 
-     * @param the root component of the sub-hierarchy on which renderDisplay() should be invoked
-     * @param includeSelf flag indicating whether renderDisplay() should be invoked on the
+     * @param {Echo.Component} the root component of the sub-hierarchy on which renderDisplay() should be invoked
+     * @param {Boolean} includeSelf flag indicating whether renderDisplay() should be invoked on the
      *        specified component (if false, it will only be invoked on child components)
      */
     _doRenderDisplay: function(component, includeSelf) {
@@ -67,7 +74,7 @@ Echo.Render = {
     /**
      * Recursive work method for _doRenderDisplay().  
      * 
-     * @param component the component on which to invoke renderDisplay()
+     * @param {Echo.Component} component the component on which to invoke renderDisplay()
      */
     _doRenderDisplayImpl: function(component) {
         if (component.peer) {
@@ -88,8 +95,9 @@ Echo.Render = {
      * The root component is at depth 0, its immediate children are
      * at depth 1, their children are at depth 2, and so on.
      *
-     * @param component the component whose depth is to be calculated
+     * @param {Echo.Component} component the component whose depth is to be calculated
      * @return the depth of the component
+     * @type Number
      */
     _getComponentDepth: function(component) {
         var depth = -1;
@@ -120,7 +128,9 @@ Echo.Render = {
             throw new Error("Peer not found for: " + component.componentType);
         }
         
+        ++this._loadedPeerCount;        
         component.peer = new peerClass();
+        component.peer._peerId = this._nextPeerId++;
         component.peer.component = component;
         component.peer.client = client;
     },
@@ -235,9 +245,9 @@ Echo.Render = {
                     }
                 }
             }
-    
-            //FIXME ....moved after loop, ensure this is okay (evaluate use of dispose).
-            // Set disposed set of peer to false.
+
+            // Invoke _setPeerDisposedState() to ensure that peer is marked as non-disposed.
+            // (A full-re-render may have invoked renderComponentDispose()).
             Echo.Render._setPeerDisposedState(updates[i].parent, false);
         }
         
@@ -247,20 +257,36 @@ Echo.Render = {
         }
         
         // Display Phase: Invoke renderDisplay on all updates.
+        // The "displayed" array holds component who have already had renderDisplay() invoked on themselves (and their descendants).
+        // This is done to avoid invoking renderDisplay() multiple times on a single component during a single rendering.
+        var displayed = [];
         for (i = 0; i < updates.length; ++i) {
             if (updates[i] == null) {
                 // Skip removed updates.
                 continue;
             }
-            //FIXME. this does needless work....resizing twice is quite possible.
-            // if property updates are present.
+            
+            // Determine if component hierarchy has already had renderDisplay() invoked, skipping to next update if necessary.
+            var cancelDisplay = false;
+            for (j = 0; j < displayed.length; ++j) {
+                if (displayed[j].isAncestorOf(updates[i].parent)) {
+                    cancelDisplay = true;
+                    break;
+                }
+            }
+            if (cancelDisplay) {
+                continue;
+            }
+            
             if (updates[i].renderContext.displayRequired) {
                 // The renderContext has specified only certain child components should have their
                 // renderDisplay() methods invoked.
                 for (j = 0; j < updates[i].renderContext.displayRequired.length; ++j) {
+                    displayed.push(updates[i].renderContext.displayRequired[j]);
                     Echo.Render._doRenderDisplay(updates[i].renderContext.displayRequired[j], true);
                 }
             } else {
+                displayed.push(updates[i].parent);
                 Echo.Render._doRenderDisplay(updates[i].parent, true);
             }
         }
@@ -271,8 +297,8 @@ Echo.Render = {
         }
     
         // Unload peers for truly removed components, destroy mapping.
-        for (var componentId in Echo.Render._disposedComponents) {
-            var component = Echo.Render._disposedComponents[componentId];
+        for (var peerId in Echo.Render._disposedComponents) {
+            var component = Echo.Render._disposedComponents[peerId];
             Echo.Render._unloadPeer(component);
         }
 
@@ -326,7 +352,7 @@ Echo.Render = {
      * hierarchy outside of processUpdates().  This method is only used in special cases,
      * e.g., by in the case of Application Rendered Components that need to render children.
      * 
-     * @param parent the parent component of the sub-hierarchy on which renderDisplay() should
+     * @param {Echo.Component} parent the parent component of the sub-hierarchy on which renderDisplay() should
      *        be invoked (note that renderDisplay WILL be invoked on the parent as well 
      *        as its descendants)
      */
@@ -340,8 +366,8 @@ Echo.Render = {
      * a fashion that it will be destroying the rendering of its children and re-rendering them.
      * It is not necessary to invoke this method on components that may not contain children.
      *
-     * @param update the <code>ComponentUpdate</code> for which this change is being performed
-     * @param component the <code>Component</code> to be disposed
+     * @param {Echo.Update.ComponentUpdate} update the <code>ComponentUpdate</code> for which this change is being performed
+     * @param {Echo.Component} component the <code>Component</code> to be disposed
      */
     renderComponentDispose: function(update, component) {
         this._renderComponentDisposeImpl(update, component);
@@ -351,8 +377,8 @@ Echo.Render = {
      * Recursive implementation of renderComponentDispose.  Invokes
      * renderDispose() on all child peers, sets disposed state on each.
      * 
-     * @param update the <code>ComponentUpdate</code> for which this change is being performed
-     * @param component the <code>Component</code> to be disposed
+     * @param {Echo.Update.ComponentUpdate} update the <code>ComponentUpdate</code> for which this change is being performed
+     * @param {Echo.Component} component the <code>Component</code> to be disposed
      */
     _renderComponentDisposeImpl: function(update, component) {
         if (!component.peer || component.peer.disposed) {
@@ -378,14 +404,13 @@ Echo.Render = {
     _setPeerDisposedState: function(component, disposed) {
         if (disposed) {
             component.peer.disposed = true;
-            Echo.Render._disposedComponents[component.renderId] = component;
+            Echo.Render._disposedComponents[component.peer._peerId] = component;
         } else {
             component.peer.disposed = false;
-            delete Echo.Render._disposedComponents[component.renderId];
+            delete Echo.Render._disposedComponents[component.peer._peerId];
         }
     },
     
-    // FIXME. Ensure this is properly invoked and no peers are being leaked.
     /**
      * Destroys a component synchronization peer for a specific components.
      * The peer will be removed from the "peer" property of the component.
@@ -398,6 +423,7 @@ Echo.Render = {
         component.peer.client = null;
         component.peer.component = null;
         component.peer = null;
+        --this._loadedPeerCount;        
     },
 
     /**
@@ -405,7 +431,9 @@ Echo.Render = {
      *
      * This method may be necessary to invoke manually by component renderers
      * that use animation and may be hiding the focused component (such that
-     * the client browser will not focus it) when processUpdates() completes. 
+     * the client browser will not focus it) when processUpdates() completes.
+     * 
+     * @param {Echo.Client} client the client 
      */
     updateFocus: function(client) {
         var focusedComponent = client.application.getFocusedComponent();
@@ -426,43 +454,58 @@ Echo.Render.ComponentSync = Core.extend({
         /**
          * Focus flag indicating up arrow keypress events should be handled by focus manager when
          * the component is focused.
+         * @type Number
          */
         FOCUS_PERMIT_ARROW_UP: 0x1,
 
         /**
          * Focus flag indicating down arrow keypress events should be handled by focus manager when
          * the component is focused.
+         * @type Number
          */
         FOCUS_PERMIT_ARROW_DOWN: 0x2, 
 
         /**
          * Focus flag indicating left arrow keypress events should be handled by focus manager when
          * the component is focused.
+         * @type Number
          */
         FOCUS_PERMIT_ARROW_LEFT: 0x4,
         
         /**
          * Focus flag indicating right arrow keypress events should be handled by focus manager when
          * the component is focused.
+         * @type Number
          */
         FOCUS_PERMIT_ARROW_RIGHT: 0x8, 
 
         /**
          * Focus flag indicating all arrow keypress events should be handled by focus manager when
          * the component is focused.
+         * @type Number
          */
         FOCUS_PERMIT_ARROW_ALL: 0xf,
         
         /**
          * Dimension value for <code>getPreferredSize()</code> indicating height should be calculated.
+         * @type Number
          */
         SIZE_HEIGHT: 0x1,
         
         /**
          * Dimension value for <code>getPreferredSize()</code> indicating width should be calculated.
+         * @type Number
          */
         SIZE_WIDTH: 0x2
     },
+    
+    /**
+     * Unique peer identifier, for internal use only.
+     * Using component renderId is inadequate, as two unique component instances may have same id across
+     * add-remove-add operations.
+     * @type Number
+     */
+    _peerId: null,
 
     /**
      * The client supported by this peer.
@@ -476,6 +519,13 @@ Echo.Render.ComponentSync = Core.extend({
      * @type Echo.Component
      */
     component: null,
+    
+    /**
+     * Flag indicating that the component has been disposed, i.e., the peer's <code>renderDispose()</code> method 
+     * has run since the last time <code>renderAdd()</code> was last invoked.
+     * @type Boolean
+     */
+    disposed: false,
 
     /**
      * Creates a new component synchronization peer.
@@ -534,12 +584,31 @@ Echo.Render.ComponentSync = Core.extend({
          *
          * @param {Echo.Update.ComponentUpdate} update the update being rendered
          * @return true if this invocation has re-rendered all child components, false otherwise
+         * @type Boolean
          */
         renderUpdate: function(update) { }
     },
     
     $virtual: {
     
+        /**
+         * Returns the focus flags for the component, one or more of the following values, ORed together.
+         * <ul>
+         *  <li><code>FOCUS_PERMIT_ARROW_UP</code>: indicates that the container may change focus from the current component if
+         *   the up arrow key is pressed.</li>
+         *  <li><code>FOCUS_PERMIT_ARROW_DOWN</code>: indicates that the container may change focus from the current component if
+         *   the down arrow key is pressed.</li>
+         *  <li><code>FOCUS_PERMIT_ARROW_LEFT</code>: indicates that the container may change focus from the current component if
+         *   the left arrow key is pressed.</li>
+         *  <li><code>FOCUS_PERMIT_ARROW_RIGHT</code>: indicates that the container may change focus from the current component if
+         *   the right arrow key is pressed.</li>
+         *  <li><code>FOCUS_PERMIT_ARROW_ALL</code>: indicates that the container may change focus from the current component if
+         *   any arrow key is pressed (this is a shorthand for up, left, down, and right ORed together).</li>
+         * </ul>
+         * 
+         * @return the focus flags
+         * @type Number
+         */
         getFocusFlags: null,
         
         /**
@@ -555,6 +624,7 @@ Echo.Render.ComponentSync = Core.extend({
          *         <li><code>SIZE_HEIGHT</code></li>
          *        </ul>
          * @return the preferred rendered size of the component
+         * @type {Number}
          */
         getPreferredSize: null,
         
@@ -589,40 +659,51 @@ Echo.Render.RootSync = Core.extend(Echo.Render.ComponentSync, {
         throw new Error("Unsupported operation: renderAdd().");
     },
     
+    /**
+     * Removes all content from root container and adds current content.
+     * 
+     * @param {Echo.Update.ComponentUpdate} update the causing update 
+     */
+    _renderContent: function(update) {
+        Echo.Render.renderComponentDispose(update, update.parent);
+        Core.Web.DOM.removeAllChildren(this.client.domainElement);
+        for (var i = 0; i < update.parent.children.length; ++i) {
+            Echo.Render.renderComponentAdd(update, update.parent.children[i], this.client.domainElement);
+        }
+    },
+    
     /** @see Echo.Render.ComponentSync#renderDispose */
     renderDispose: function(update) { },
     
     /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
         var fullRender = false;
-        if (update.hasAddedChildren() || update.hasRemovedChildren()) {
-            Core.Web.DOM.removeAllChildren(this.client.domainElement);
-            for (var i = 0; i < update.parent.children.length; ++i) {
-                Echo.Render.renderComponentAdd(update, update.parent.children[i], this.client.domainElement);
-            }
+
+        if (update.fullRefresh || update.hasAddedChildren() || update.hasRemovedChildren()) {
+            Echo.Sync.renderComponentDefaults(this.component, this.client.domainElement);
+            document.title = this.component.render("title", "");
+            this._renderContent(update);
             fullRender = true;
-        }
-        
-        this.client.domainElement.dir = this.component.application.getLayoutDirection().isLeftToRight() ? "ltr" : "rtl";
-        
-        if (update.hasUpdatedProperties()) {
-            var property;
-            if (property = update.getUpdatedProperty("title")) {
-                document.title = property.newValue;
+        } else {
+            this.client.domainElement.dir = this.component.application.getLayoutDirection().isLeftToRight() ? "ltr" : "rtl";
+            if (update.hasUpdatedProperties()) {
+                var property;
+                if (property = update.getUpdatedProperty("title")) {
+                    document.title = property.newValue;
+                }
+                if (property = update.getUpdatedProperty("background")) {
+                    Echo.Sync.Color.renderClear(property.newValue, this.client.domainElement, "backgroundColor");
+                }
+                if (property = update.getUpdatedProperty("foreground")) {
+                    Echo.Sync.Color.renderClear(property.newValue, this.client.domainElement, "foreground");
+                }
+                if (property = update.getUpdatedProperty("font")) {
+                    Echo.Sync.Font.renderClear(property.newValue, this.client.domainElement);
+                }
+                Echo.Sync.LayoutDirection.render(this.component.getLayoutDirection(), this.client.domainElement);
             }
-            if (property = update.getUpdatedProperty("background")) {
-                Echo.Sync.Color.renderClear(property.newValue, this.client.domainElement, "backgroundColor");
-            }
-            if (property = update.getUpdatedProperty("foreground")) {
-                Echo.Sync.Color.renderClear(property.newValue, this.client.domainElement, "foreground");
-            }
-            if (property = update.getUpdatedProperty("font")) {
-                Echo.Sync.Font.renderClear(property.newValue, this.client.domainElement);
-            }
-            Echo.Sync.LayoutDirection.render(this.component.getLayoutDirection(), this.client.domainElement);
         }
         
         return fullRender;
     }
 });
-
