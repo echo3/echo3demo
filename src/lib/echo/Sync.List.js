@@ -283,7 +283,10 @@ Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
         
         this._div.style.cssText = "cursor:default;overflow:auto;";
         this._div.style.height = Echo.Sync.Extent.toCssValue(this.component.render("height", "6em"), false, false);
-        this._div.style.width = Echo.Sync.Extent.toCssValue(this.component.render("width"), true, false);
+        var width = this.component.render("width");
+        if (!Echo.Sync.Extent.isPercent(width)) {
+            this._div.style.width = Echo.Sync.Extent.toCssValue(width, true, false);
+        }
         if (this._enabled) {
             Echo.Sync.renderComponentDefaults(this.component, this._element);
         } else {
@@ -344,6 +347,8 @@ Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
      * @param {Element} parent the parent DOM element 
      */
     _renderMainAsSelect: function(update, parentElement) {
+        this._div = document.createElement("div");
+    
         this._element = document.createElement("select");
         this._element.id = this.component.renderId;
         this._element.size = this.listBox ? 6 : 1;
@@ -356,7 +361,18 @@ Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
         }
 
         this._element.style.height = Echo.Sync.Extent.toCssValue(this.component.render("height"), false, false);
-        this._element.style.width = Echo.Sync.Extent.toCssValue(this.component.render("width"), true, false);
+        
+        var width = this.component.render("width");
+        if (width) {
+            if (Echo.Sync.Extent.isPercent(width)) {
+                if (!Core.Web.Env.QUIRK_IE_SELECT_PERCENT_WIDTH) {
+                    this._div.style.width = width;
+                    this._element.style.width = "100%";
+                }
+            } else {
+                this._element.style.width = Echo.Sync.Extent.toCssValue(width, true, false);
+            }
+        }
         if (this._enabled) {
             Echo.Sync.renderComponentDefaults(this.component, this._element);
         } else {
@@ -399,7 +415,9 @@ Echo.Sync.ListComponent = Core.extend(Echo.Render.ComponentSync, {
             Core.Web.Event.add(this._element, "focus", Core.method(this, this._processFocus), false);
         }
 
-        parentElement.appendChild(this._element);
+        this._div.appendChild(this._element);
+
+        parentElement.appendChild(this._div);
     },
 
     /**
