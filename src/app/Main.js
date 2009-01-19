@@ -13,6 +13,7 @@ DemoApp = Core.extend(Echo.Application, {
         ],
         
         MODULE_AUTOMATIC_DEMO: [
+            "lib/echo/Sync.ToggleButton.js",
             "lib/echo/Sync.List.js",
             "app/AutomaticDemo.js"
         ],
@@ -23,12 +24,14 @@ DemoApp = Core.extend(Echo.Application, {
     
         MODULE_PREFERENCES: [
             "lib/echo/Sync.List.js",
+            "lib/echo/Sync.ToggleButton.js",
             "lib/extras/Application.ColorSelect.js",
             "lib/extras/Sync.ColorSelect.js",
             "app/Preferences.js"
         ],
     
         MODULE_DEMO_WINDOWPANE: [
+            "lib/echo/Sync.ToggleButton.js",
             "lib/extras/Application.TabPane.js",
             "lib/extras/Sync.TabPane.js",
             "lib/extras/Application.ColorSelect.js",
@@ -41,6 +44,7 @@ DemoApp = Core.extend(Echo.Application, {
         ],
         
         MODULE_DEMO_BASIC_COMPONENTS: [
+            "lib/echo/Sync.ToggleButton.js",
             "lib/echo/Sync.Grid.js",
             "lib/echo/Sync.List.js",
             "lib/echo/Sync.TextComponent.js",
@@ -72,6 +76,7 @@ DemoApp = Core.extend(Echo.Application, {
         
         MODULE_DEMO_TABPANE: [
             "lib/echo/Sync.Grid.js",
+            "lib/echo/Sync.ToggleButton.js",
             "lib/extras/Application.ColorSelect.js",
             "lib/extras/Sync.ColorSelect.js",
             "lib/extras/Application.TabPane.js",
@@ -94,6 +99,7 @@ DemoApp = Core.extend(Echo.Application, {
         ],
     
         MODULE_DEMO_EXTRAS_WIDGETS: [
+            "lib/echo/Sync.ToggleButton.js",
             "lib/extras/Application.CalendarSelect.js",
             "lib/extras/Sync.CalendarSelect.js",
             "lib/extras/Application.ColorSelect.js",
