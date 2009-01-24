@@ -224,8 +224,8 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
 
     /** Constructor. */
     $construct: function() {
-        this._childPanes = new Array(2);
-        this._paneDivs = new Array(2);
+        this._childPanes = [];
+        this._paneDivs = [];
         this._processSeparatorMouseMoveRef = Core.method(this, this._processSeparatorMouseMove);
         this._processSeparatorMouseUpRef = Core.method(this, this._processSeparatorMouseUp);
     },
@@ -482,6 +482,10 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
     
     /** Processes a key press event. */
     _processKeyPress: function(e) {
+        if (!this.client) {
+            return;
+        }
+        
         var focusPrevious,
             focusedComponent,
             focusFlags,
@@ -491,14 +495,14 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         case 39:
             if (!this._orientationVertical) {
                 focusPrevious = (e.keyCode == 37) ^ (!this._orientationTopLeft);
-                focusedComponent = this.component.application.getFocusedComponent();
+                focusedComponent = this.client.application.getFocusedComponent();
                 if (focusedComponent && focusedComponent.peer && focusedComponent.peer.getFocusFlags) {
                     focusFlags = focusedComponent.peer.getFocusFlags();
                     if ((focusPrevious && focusFlags & Echo.Render.ComponentSync.FOCUS_PERMIT_ARROW_LEFT) || 
                             (!focusPrevious && focusFlags & Echo.Render.ComponentSync.FOCUS_PERMIT_ARROW_RIGHT)) {
-                        focusChild = this.component.application.focusManager.findInParent(this.component, focusPrevious);
+                        focusChild = this.client.application.focusManager.findInParent(this.component, focusPrevious);
                         if (focusChild) {
-                            this.component.application.setFocusedComponent(focusChild);
+                            this.client.application.setFocusedComponent(focusChild);
                             Core.Web.DOM.preventEventDefault(e);
                             return false;
                         }
@@ -510,14 +514,14 @@ Echo.Sync.SplitPane = Core.extend(Echo.Render.ComponentSync, {
         case 40:
             if (this._orientationVertical) {
                 focusPrevious = (e.keyCode == 38) ^ (!this._orientationTopLeft);
-                focusedComponent = this.component.application.getFocusedComponent();
+                focusedComponent = this.client.application.getFocusedComponent();
                 if (focusedComponent && focusedComponent.peer && focusedComponent.peer.getFocusFlags) {
                     focusFlags = focusedComponent.peer.getFocusFlags();
                     if ((focusPrevious && focusFlags & Echo.Render.ComponentSync.FOCUS_PERMIT_ARROW_UP) ||
                             (!focusPrevious && focusFlags & Echo.Render.ComponentSync.FOCUS_PERMIT_ARROW_DOWN)) {
-                        focusChild = this.component.application.focusManager.findInParent(this.component, focusPrevious);
+                        focusChild = this.client.application.focusManager.findInParent(this.component, focusPrevious);
                         if (focusChild) {
-                            this.component.application.setFocusedComponent(focusChild);
+                            this.client.application.setFocusedComponent(focusChild);
                             Core.Web.DOM.preventEventDefault(e);
                             return false;
                         }

@@ -229,35 +229,35 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
         
         var bottom = bounds.top + bounds.height,
             right = bounds.left + bounds.width,
-            bodyBounds = new Core.Web.Measure.Bounds(document.body);
+            domainBounds = new Core.Web.Measure.Bounds(this.client.domainElement);
         this._overlay = { };
 
         if (bounds.top > 0) {
             this._overlay.top = document.createElement("div");
             this._overlay.top.style.cssText = "position:absolute;z-index:32767;top:0;left:0;width:100%;" +
                     "height:" + bounds.top + "px;";
-            document.body.appendChild(this._overlay.top);
+            this.client.domainElement.appendChild(this._overlay.top);
         }
         
-        if (bottom < bodyBounds.height) {
+        if (bottom < domainBounds.height) {
             this._overlay.bottom = document.createElement("div");
             this._overlay.bottom.style.cssText = "position:absolute;z-index:32767;bottom:0;left:0;width:100%;" +
                     "top:" + bottom + "px;";
-            document.body.appendChild(this._overlay.bottom);
+            this.client.domainElement.appendChild(this._overlay.bottom);
         }
 
         if (bounds.left > 0) {
             this._overlay.left = document.createElement("div");
             this._overlay.left.style.cssText = "position:absolute;z-index:32767;left:0;" +
                     "width:" + bounds.left + "px;top:" + bounds.top + "px;height:" + bounds.height + "px;";
-            document.body.appendChild(this._overlay.left);
+            this.client.domainElement.appendChild(this._overlay.left);
         }
 
-        if (right < bodyBounds.width) {
+        if (right < domainBounds.width) {
             this._overlay.right = document.createElement("div");
             this._overlay.right.style.cssText = "position:absolute;z-index:32767;right:0;" +
                     "left:" + right + "px;top:" + bounds.top + "px;height:" + bounds.height + "px;";
-            document.body.appendChild(this._overlay.right);
+            this.client.domainElement.appendChild(this._overlay.right);
         }
         
         for (var name in this._overlay) {
@@ -274,7 +274,7 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
             return;
         }
         for (var name in this._overlay) {
-            document.body.removeChild(this._overlay[name]);
+            this.client.domainElement.removeChild(this._overlay[name]);
         }
         this._overlay = null;
     },
@@ -844,6 +844,7 @@ Extras.Sync.DropDownMenu = Core.extend(Extras.Sync.Menu, {
     _selectedItem: null,
     
     _createContent: function(itemModel) {
+        var img;
         if (itemModel.icon) {
             if (itemModel.text) {
                 // Render Text and Icon
@@ -852,19 +853,19 @@ Extras.Sync.DropDownMenu = Core.extend(Extras.Sync.Menu, {
                 var tbody = document.createElement("tbody");
                 var tr = document.createElement("tr");
                 var td = document.createElement("td");
-                td.style.cssText = "padding:0vertical-align:top;"
+                td.style.cssText = "padding:0vertical-align:top;";
                 img = document.createElement("img");
                 Echo.Sync.ImageReference.renderImg(itemModel.icon, img);
                 td.appendChild(img);
                 tr.appendChild(td);
                 td = document.createElement("td");
-                td.style.cssText = "padding:width:3px;"
+                td.style.cssText = "padding:width:3px;";
                 var spacingDiv = document.createElement("div");
                 spacingDiv.style.cssText = "width:3px";
                 td.appendChild(spacingDiv);
                 tr.appendChild(td);
                 td = document.createElement("td");
-                td.style.cssText = "padding:0vertical-align:top;"
+                td.style.cssText = "padding:0vertical-align:top;";
                 td.appendChild(document.createTextNode(itemModel.text));
                 tr.appendChild(td);
                 tbody.appendChild(tr);
@@ -930,7 +931,7 @@ Extras.Sync.DropDownMenu = Core.extend(Extras.Sync.Menu, {
         Echo.Sync.Border.render(this.component.render("border", Extras.Sync.Menu.DEFAULT_BORDER), dropDownDiv); 
         
         var relativeDiv = document.createElement("div");
-        relativeDiv.style.cssText = "position:relative;overflow:hidden;"
+        relativeDiv.style.cssText = "position:relative;overflow:hidden;";
         dropDownDiv.appendChild(relativeDiv);
         
         Echo.Sync.Extent.render(this.component.render("width"), dropDownDiv, "width", true, true);

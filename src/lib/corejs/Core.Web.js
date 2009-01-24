@@ -454,7 +454,7 @@ Core.Web.Env = {
             } else if (this._testUAString("trident")) {
                 this.ENGINE_MSHTML = true;
             } else if (this._testUAString("gecko")) {
-                this.BROWSER_MOZILLA = ENGINE_GECKO = true;
+                this.BROWSER_MOZILLA = this.ENGINE_GECKO = true;
             }
         }
         
@@ -1586,7 +1586,10 @@ Core.Web.Measure = {
         testDiv.style.cssText = "width:100%;height:10px;";
         scrollDiv.appendChild(testDiv);
         containerElement.appendChild(scrollDiv);
-        Core.Web.Measure.SCROLL_WIDTH = Core.Web.Measure.SCROLL_HEIGHT = 500 - testDiv.offsetWidth;
+        var measuredWidth = 500 - testDiv.offsetWidth;
+        if (measuredWidth) {
+            Core.Web.Measure.SCROLL_WIDTH = Core.Web.Measure.SCROLL_HEIGHT = measuredWidth;
+        }
         containerElement.removeChild(scrollDiv);
     },
     

@@ -1,6 +1,8 @@
 /**
- * BorderPane component.
- *
+ * BorderPane component: a container which renders a
+ * <code>FillImageBorder</code> around its content. May contain only one
+ * child. May contain a pane component as a child.
+ * 
  * @sp {#FillImageBorder} border the border with which to surround the content
  * @sp {#Insets} insets the inset margin between border and content
  */
@@ -19,6 +21,9 @@ Extras.BorderPane = Core.extend(Echo.Component, {
         Echo.ComponentFactory.registerType("Extras.BorderPane", this);
     },
     
+    /** @see Echo.Component#componentType */
     componentType: "Extras.BorderPane",
+
+    /** @see Echo.Component#pane */
     pane: true
 });

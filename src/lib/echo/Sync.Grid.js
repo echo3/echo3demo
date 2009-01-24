@@ -237,7 +237,7 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
              */
             _getCellArray: function(y) {
                 while (y >= this.cellArrays.length) {
-                    this.cellArrays.push(new Array(this.gridXSize));
+                    this.cellArrays.push([]);
                 }
                 return this.cellArrays[y]; 
             },
@@ -325,7 +325,8 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
                         this.cellArrays[y].splice(removedX, 1);
                     }
                     
-                    var removedXExtent = this.xExtents.splice(removedX, 1);
+                    var removedXExtent = this.xExtents.splice(removedX, 1)[0];
+
                     if (removedXExtent) {
                         this.xExtents[removedX - 1] = this.addExtents(this.xExtents[removedX - 1], removedXExtent,
                                 this.horizontalOrientation ? true : false);
@@ -394,7 +395,7 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
                     this.cellArrays.splice(removedY, 1);
                     
                     // Remove size data for removed row, add value to previous if necessary.
-                    var removedYExtent = this.yExtents.splice(removedY, 1);
+                    var removedYExtent = this.yExtents.splice(removedY, 1)[0];
                     if (removedYExtent) {
                         this.yExtents[removedY - 1] = this.addExtents(this.yExtents[removedY - 1], removedYExtent,
                                 this.horizontalOrientation ? false : true);
@@ -502,6 +503,10 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
      * Processes a key press event (for focus navigation amongst child cells.
      */
     _processKeyPress: function(e) { 
+        if (!this.client) {
+            return;
+        }
+        
         var focusPrevious,
             focusedComponent,
             focusFlags,
@@ -510,14 +515,14 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
         case 37:
         case 39:
             focusPrevious = this.component.getRenderLayoutDirection().isLeftToRight() ? e.keyCode == 37 : e.keyCode == 39;
-            focusedComponent = this.component.application.getFocusedComponent();
+            focusedComponent = this.client.application.getFocusedComponent();
             if (focusedComponent && focusedComponent.peer && focusedComponent.peer.getFocusFlags) {
                 focusFlags = focusedComponent.peer.getFocusFlags();
                 if ((focusPrevious && focusFlags & Echo.Render.ComponentSync.FOCUS_PERMIT_ARROW_LEFT) ||
                         (!focusPrevious && focusFlags & Echo.Render.ComponentSync.FOCUS_PERMIT_ARROW_RIGHT)) {
-                    focusChild = this.component.application.focusManager.findInParent(this.component, focusPrevious);
+                    focusChild = this.client.application.focusManager.findInParent(this.component, focusPrevious);
                     if (focusChild) {
-                        this.component.application.setFocusedComponent(focusChild);
+                        this.client.application.setFocusedComponent(focusChild);
                         Core.Web.DOM.preventEventDefault(e);
                         return false;
                     }
@@ -527,15 +532,15 @@ Echo.Sync.Grid = Core.extend(Echo.Render.ComponentSync, {
         case 38:
         case 40:
             focusPrevious = e.keyCode == 38;
-            focusedComponent = this.component.application.getFocusedComponent();
+            focusedComponent = this.client.application.getFocusedComponent();
             if (focusedComponent && focusedComponent.peer && focusedComponent.peer.getFocusFlags) {
                 focusFlags = focusedComponent.peer.getFocusFlags();
                 if ((focusPrevious && focusFlags & Echo.Render.ComponentSync.FOCUS_PERMIT_ARROW_UP) ||
                         (!focusPrevious && focusFlags & Echo.Render.ComponentSync.FOCUS_PERMIT_ARROW_DOWN)) {
-                    focusChild = this.component.application.focusManager.findInParent(this.component, focusPrevious,
+                    focusChild = this.client.application.focusManager.findInParent(this.component, focusPrevious,
                             this._columnCount);
                     if (focusChild) {
-                        this.component.application.setFocusedComponent(focusChild);
+                        this.client.application.setFocusedComponent(focusChild);
                         Core.Web.DOM.preventEventDefault(e);
                         return false;
                     }

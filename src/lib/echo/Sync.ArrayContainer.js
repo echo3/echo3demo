@@ -89,6 +89,10 @@ Echo.Sync.ArrayContainer = Core.extend(Echo.Render.ComponentSync, {
      * @param e the event
      */
     processKeyPress: function(e) {
+        if (!this.client) {
+            return;
+        }
+        
         switch (e.keyCode) {
         case this.prevFocusKey:
         case this.nextFocusKey:
@@ -96,13 +100,13 @@ Echo.Sync.ArrayContainer = Core.extend(Echo.Render.ComponentSync, {
             if (this.invertFocusRtl && !this.component.getRenderLayoutDirection().isLeftToRight()) {
                 focusPrevious = !focusPrevious;
             }
-            var focusedComponent = this.component.application.getFocusedComponent();
+            var focusedComponent = this.client.application.getFocusedComponent();
             if (focusedComponent && focusedComponent.peer && focusedComponent.peer.getFocusFlags) {
                 var focusFlags = focusedComponent.peer.getFocusFlags();
                 if ((focusPrevious && focusFlags & this.prevFocusFlag) || (!focusPrevious && focusFlags & this.nextFocusFlag)) {
-                    var focusChild = this.component.application.focusManager.findInParent(this.component, focusPrevious);
+                    var focusChild = this.client.application.focusManager.findInParent(this.component, focusPrevious);
                     if (focusChild) {
-                        this.component.application.setFocusedComponent(focusChild);
+                        this.client.application.setFocusedComponent(focusChild);
                         Core.Web.DOM.preventEventDefault(e);
                         return false;
                     }
