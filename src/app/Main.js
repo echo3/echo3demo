@@ -157,6 +157,7 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["WelcomeScreen.Title"], 
                     "image/demoicon/WelcomeIcon16.gif", 
                     "image/demoicon/WelcomeIcon64.gif",
+                    null,
                     function(container) { 
                         container.setContent(new DemoApp.WelcomeScreen());
                     },
@@ -168,10 +169,9 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["WindowPaneScreen.Title"], 
                     "image/demoicon/WindowPaneIcon16.gif", 
                     "image/demoicon/WindowPaneIcon64.gif",
+                    DemoApp.MODULE_DEMO_WINDOWPANE,
                     function(container) {
-                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_WINDOWPANE, function() {
-                            container.setContent(new DemoApp.WindowPaneScreen());
-                        });
+                        container.setContent(new DemoApp.WindowPaneScreen());
                     },
                     "app/WindowPaneScreen.js"
                 ),
@@ -179,10 +179,9 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["SplitPaneScreen.Title"], 
                     "image/demoicon/SplitPaneIcon16.gif", 
                     "image/demoicon/SplitPaneIcon64.gif",
+                    DemoApp.MODULE_DEMO_SPLITPANE,
                     function(container) {
-                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_SPLITPANE, function() {
-                            container.setContent(new DemoApp.SplitPaneScreen());
-                        });
+                        container.setContent(new DemoApp.SplitPaneScreen());
                     },
                     "app/SplitPaneScreen.js"
                 ),
@@ -190,10 +189,9 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["BasicComponentsScreen.Title"], 
                     "image/demoicon/BasicComponentsIcon16.gif", 
                     "image/demoicon/BasicComponentsIcon64.gif",
+                    DemoApp.MODULE_DEMO_BASIC_COMPONENTS, 
                     function(container) {
-                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_BASIC_COMPONENTS, function() {
-                            container.setContent(new DemoApp.BasicComponentsScreen());
-                        });
+                        container.setContent(new DemoApp.BasicComponentsScreen());
                     },
                     "app/BasicComponentsScreen.js"
                 ),
@@ -201,10 +199,9 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["LayoutContainersScreen.Title"], 
                     "image/demoicon/LayoutContainersIcon16.gif", 
                     "image/demoicon/LayoutContainersIcon64.gif",
+                    DemoApp.MODULE_DEMO_LAYOUT_CONTAINERS,
                     function(container) {
-                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_LAYOUT_CONTAINERS, function() {
-                            container.setContent(new DemoApp.LayoutContainersScreen());
-                        });
+                        container.setContent(new DemoApp.LayoutContainersScreen());
                     },
                     "app/LayoutContainersScreen.js"
                 )
@@ -214,10 +211,9 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["JSDevelopmentScreen.Title"], 
                     "image/demoicon/JSDevelopmentIcon16.gif", 
                     "image/demoicon/JSDevelopmentIcon64.gif",
+                    DemoApp.MODULE_DEMO_JS_DEVELOPMENT,
                     function(container) {
-                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_JS_DEVELOPMENT, function() {
-                            container.setContent(new DemoApp.JSDevelopmentScreen());
-                        });
+                        container.setContent(new DemoApp.JSDevelopmentScreen());
                     },
                     "app/JSDevelopmentScreen.js"
                 ),
@@ -225,10 +221,9 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["JavaDevelopmentScreen.Title"], 
                     "image/demoicon/JavaDevelopmentIcon16.gif", 
                     "image/demoicon/JavaDevelopmentIcon64.gif",
+                    DemoApp.MODULE_DEMO_JAVA_DEVELOPMENT,
                     function(container) {
-                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_JAVA_DEVELOPMENT, function() {
-                            container.setContent(new DemoApp.JavaDevelopmentScreen());
-                        });
+                        container.setContent(new DemoApp.JavaDevelopmentScreen());
                     },
                     "app/JavaDevelopmentScreen.js"
                 )
@@ -238,10 +233,9 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["AccordionPaneScreen.Title"], 
                     "image/demoicon/AccordionPaneIcon16.gif", 
                     "image/demoicon/AccordionPaneIcon64.gif",
+                    DemoApp.MODULE_DEMO_ACCORDIONPANE, 
                     function(container) {
-                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_ACCORDIONPANE, function() {
-                            container.setContent(new DemoApp.AccordionPaneScreen());
-                        });
+                        container.setContent(new DemoApp.AccordionPaneScreen());
                     },
                     "app/AccordionPaneScreen.js"
                 ),
@@ -249,10 +243,9 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["TabPaneScreen.Title"], 
                     "image/demoicon/TabPaneIcon16.gif", 
                     "image/demoicon/TabPaneIcon64.gif",
+                    DemoApp.MODULE_DEMO_TABPANE,
                     function(container) {
-                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_TABPANE, function() {
-                            container.setContent(new DemoApp.TabPaneScreen());
-                        });
+                        container.setContent(new DemoApp.TabPaneScreen());
                     },
                     "app/TabPaneScreen.js"
                 ),
@@ -260,10 +253,9 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["RichTextScreen.Title"], 
                     "image/demoicon/RichTextIcon16.gif", 
                     "image/demoicon/RichTextIcon64.gif",
+                    DemoApp.MODULE_DEMO_RICHTEXTAREA,
                     function(container) {
-                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_RICHTEXTAREA, function() {
-                            container.setContent(new DemoApp.RichTextScreen());
-                        });
+                        container.setContent(new DemoApp.RichTextScreen());
                     },
                     "app/RichTextScreen.js"
                 ),
@@ -271,10 +263,9 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["ExtrasWidgetsScreen.Title"], 
                     "image/demoicon/WidgetsIcon16.gif", 
                     "image/demoicon/WidgetsIcon64.gif",
+                    DemoApp.MODULE_DEMO_EXTRAS_WIDGETS, 
                     function(container) {
-                        Core.Web.Library.exec(DemoApp.MODULE_DEMO_EXTRAS_WIDGETS, function() {
-                            container.setContent(new DemoApp.ExtrasWidgetsScreen());
-                        });
+                        container.setContent(new DemoApp.ExtrasWidgetsScreen());
                     },
                     "app/ExtrasWidgetsScreen.js"
                 )
@@ -373,11 +364,12 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
          */
         ScreenData: Core.extend({
 
-            $construct: function(title, icon16, icon64, launchFunction, sourceUrl) {
+            $construct: function(title, icon16, icon64, modules, launchFunction, sourceUrl) {
                 this.id = Echo.Application.generateUid();
                 this.title = title;
                 this.icon16 = icon16;
                 this.icon64 = icon64;
+                this.modules = modules;
                 this.launchFunction = launchFunction;
                 this.sourceUrl = sourceUrl;
             }
@@ -496,13 +488,16 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                         })
                     ]
                 })
-            ]
+            ],
+            events: {
+                init: Core.method(this, function() {
+                    this.launchScreen(this.getNextScreen());
+                })
+            }
         });
                 
         this._menu.set("model", this.createMenuModel());
         this._createLaunchPanel();
-        
-        this.launchScreen(this.getNextScreen());
     },
     
     _createLaunchPanel: function() {
@@ -618,6 +613,22 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         
         this._activeScreen = screen;
         
+        if (screen.modules) {
+            this.application.client.exec(screen.modules, Core.method(this, function() {
+                if (screen.launchFunction) {
+                    screen.launchFunction(this);
+                }
+                this._setActiveTab(screen);
+            }));
+        } else {
+            if (screen.launchFunction) {
+                screen.launchFunction(this);
+            }
+            this._setActiveTab(screen);
+        }
+    },
+    
+    _setActiveTab: function(screen) {
         for (var i = 0; i < this._launchPanel.children.length && !this._activeScreenLaunchButton; ++i) {
             var column = this._launchPanel.children[i];
             for (var j = 0; j < column.children.length && !this._activeScreenLaunchButton; ++j) {
@@ -630,9 +641,6 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             }
         }
         
-        if (screen.launchFunction) {
-            screen.launchFunction(this);
-        }
     },
     
     _launchScreenWindowed: function(screen) {
@@ -651,12 +659,12 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
     _processMenuAction: function(e) {
         switch (e.modelId) {
         case "about":
-            Core.Web.Library.exec(DemoApp.MODULE_ABOUT, Core.method(this, function() {
+            this.application.client.exec(DemoApp.MODULE_ABOUT, Core.method(this, function() {
                 this.add(new DemoApp.AboutDialog());
             }));
             break;
         case "autodemo":
-            Core.Web.Library.exec(DemoApp.MODULE_AUTOMATIC_DEMO, Core.method(this, function() {
+            this.application.client.exec(DemoApp.MODULE_AUTOMATIC_DEMO, Core.method(this, function() {
                 this.add(new DemoApp.AutomaticDemo.StartDialog(this));
             }));
             break;
@@ -664,37 +672,37 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             this.add(new DemoApp.DownloadWindow());
             break;            
         case "perftest":
-            Core.Web.Library.exec(DemoApp.MODULE_AUTOMATIC_DEMO, Core.method(this, function() {
+            this.application.client.exec(DemoApp.MODULE_AUTOMATIC_DEMO, Core.method(this, function() {
                 this.add(new DemoApp.AutomaticDemo.PerformanceTestDialog(this));
             }));
             break;
         case "preferences":
-            Core.Web.Library.exec(DemoApp.MODULE_PREFERENCES, Core.method(this, function() {
+            this.application.client.exec(DemoApp.MODULE_PREFERENCES, Core.method(this, function() {
                 this.add(new DemoApp.PreferencesDialog(this.application));
             }));
             break;
         case "viewsource":
-            Core.Web.Library.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
                 this.add(new DemoApp.SourceWindow(this._activeScreen));
             }));
             break;
         case "viewsource.main":
-            Core.Web.Library.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
                 this.add(new DemoApp.SourceWindow("app/Main.js"));
             }));
             break;
         case "viewsource.ss":
-            Core.Web.Library.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
                 this.add(new DemoApp.SourceWindow("app/Default.StyleSheet.js"));
             }));
             break;
         case "viewsource.msg":
-            Core.Web.Library.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
                 this.add(new DemoApp.SourceWindow("app/Messages.js"));
             }));
             break;
         case "viewsource.html":
-            Core.Web.Library.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
                 this.add(new DemoApp.SourceWindow("index.html"));
             }));
             break;
@@ -732,7 +740,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
     _setLocale: function(locale) {
         DemoApp.locale = locale;
         if (locale in DemoApp.LOCALE_MODULES) {
-            Core.Web.Library.exec(["app/Messages." + locale + ".js"], Core.method(this, function() {
+            this.application.client.exec(["app/Messages." + locale + ".js"], Core.method(this, function() {
                 this.application.setLocale(locale);
                 // FIXME. Recreate UI.
             }));
