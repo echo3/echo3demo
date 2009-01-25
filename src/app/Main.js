@@ -147,9 +147,7 @@ DemoApp = Core.extend(Echo.Application, {
     _sections: null,
     workspace: null,
     
-    $construct: function() {
-        Echo.Application.call(this);
-        
+    init: function() {
         this._msg = DemoApp.getMessages();
         this._sections = [
             new DemoApp.Workspace.SectionData(this._msg["SectionTitle.Welcome"], [
@@ -276,7 +274,7 @@ DemoApp = Core.extend(Echo.Application, {
         this.rootComponent.add(this.workspace);
         
         // Edit/Enable the following line to launch a specific screen at startup.
-        //this.workspace.launchScreen(this._sections[3].screens[2]);
+        this.workspace.launchScreen(this._sections[3].screens[2]);
     }
 });
 
