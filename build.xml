@@ -45,7 +45,9 @@
                 <file name="WelcomeScreen.js"/>
             </filelist>
         </concat>
-        <java fork="true" jar="build-lib/yuicompressor-2.3.5.jar" output="out/AppCompressed.js">
+        <java fork="true" jar="build-lib/yuicompressor-2.4.2.jar" output="out/AppCompressed.js">
+            <arg value="--line-break"/>
+            <arg value="1000"/>
             <arg value="out/Concat.js"/>
         </java>
         <delete file="out/Concat.js"/>
