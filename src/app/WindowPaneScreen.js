@@ -69,7 +69,7 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                         this._colorSelect = new Extras.ColorSelect({
                                             events: {
                                                 property: Core.method(this, function(e) {
-                                                    if (e.propertyName = "color") {
+                                                    if (e.propertyName == "color") {
                                                         this._processSetColor(e);
                                                     }
                                                 })

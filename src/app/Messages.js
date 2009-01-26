@@ -369,7 +369,6 @@ DemoApp.Messages = new Core.ResourceBundle({
     "TabPaneScreen.AnotherEmbeddedWindowPane":              "Another Embedded WindowPane",
     "TabPaneScreen.YetAnotherWindowPane":                   "Yet Another WindowPane",
     "TabPaneScreen.MoreTab":                                "More",
-    "TabPaneScreen.WindowPanesTab":                         "WindowPanes",
     "TabPaneScreen.JustTab":                                "Just",
     "TabPaneScreen.AnotherTab":                             "Another",
     "TabPaneScreen.TabPaneTab":                             "TabPane",

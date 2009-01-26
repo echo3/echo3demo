@@ -311,7 +311,6 @@ DemoApp.Messages.set("1337", {
     "TabPaneScreen.AnotherEmbeddedWindowPane":              "4n07h3r 3mb3dd3d W!nd0wP4n3",
     "TabPaneScreen.YetAnotherWindowPane":                   "Y37 4n07h3r W!nd0wP4n3",
     "TabPaneScreen.MoreTab":                                "M0r3",
-    "TabPaneScreen.WindowPanesTab":                         "W!nd0wP4n35",
     "TabPaneScreen.JustTab":                                "Ju57",
     "TabPaneScreen.AnotherTab":                             "4n07h3r",
     "TabPaneScreen.TabPaneTab":                             "74bP4n3",

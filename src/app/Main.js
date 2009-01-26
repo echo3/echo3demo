@@ -159,8 +159,7 @@ DemoApp = Core.extend(Echo.Application, {
                     function(container) { 
                         container.setContent(new DemoApp.WelcomeScreen());
                     },
-                    "app/WelcomeScreen.js"
-                )
+                    "app/WelcomeScreen.js")
             ]),
             new DemoApp.Workspace.SectionData(this._msg["SectionTitle.CoreComponents"], [
                 new DemoApp.Workspace.ScreenData(
@@ -171,8 +170,7 @@ DemoApp = Core.extend(Echo.Application, {
                     function(container) {
                         container.setContent(new DemoApp.WindowPaneScreen());
                     },
-                    "app/WindowPaneScreen.js"
-                ),
+                    "app/WindowPaneScreen.js"),
                 new DemoApp.Workspace.ScreenData(
                     this._msg["SplitPaneScreen.Title"], 
                     "image/demoicon/SplitPaneIcon16.gif", 
@@ -181,8 +179,7 @@ DemoApp = Core.extend(Echo.Application, {
                     function(container) {
                         container.setContent(new DemoApp.SplitPaneScreen());
                     },
-                    "app/SplitPaneScreen.js"
-                ),
+                    "app/SplitPaneScreen.js"),
                 new DemoApp.Workspace.ScreenData(
                     this._msg["BasicComponentsScreen.Title"], 
                     "image/demoicon/BasicComponentsIcon16.gif", 
@@ -191,8 +188,7 @@ DemoApp = Core.extend(Echo.Application, {
                     function(container) {
                         container.setContent(new DemoApp.BasicComponentsScreen());
                     },
-                    "app/BasicComponentsScreen.js"
-                ),
+                    "app/BasicComponentsScreen.js"),
                 new DemoApp.Workspace.ScreenData(
                     this._msg["LayoutContainersScreen.Title"], 
                     "image/demoicon/LayoutContainersIcon16.gif", 
@@ -201,8 +197,7 @@ DemoApp = Core.extend(Echo.Application, {
                     function(container) {
                         container.setContent(new DemoApp.LayoutContainersScreen());
                     },
-                    "app/LayoutContainersScreen.js"
-                )
+                    "app/LayoutContainersScreen.js")
             ]),
             new DemoApp.Workspace.SectionData(this._msg["SectionTitle.Technology"], [
                 new DemoApp.Workspace.ScreenData(
@@ -213,8 +208,7 @@ DemoApp = Core.extend(Echo.Application, {
                     function(container) {
                         container.setContent(new DemoApp.JSDevelopmentScreen());
                     },
-                    "app/JSDevelopmentScreen.js"
-                ),
+                    "app/JSDevelopmentScreen.js"),
                 new DemoApp.Workspace.ScreenData(
                     this._msg["JavaDevelopmentScreen.Title"], 
                     "image/demoicon/JavaDevelopmentIcon16.gif", 
@@ -223,8 +217,7 @@ DemoApp = Core.extend(Echo.Application, {
                     function(container) {
                         container.setContent(new DemoApp.JavaDevelopmentScreen());
                     },
-                    "app/JavaDevelopmentScreen.js"
-                )
+                    "app/JavaDevelopmentScreen.js")
             ]),
             new DemoApp.Workspace.SectionData(this._msg["SectionTitle.Extras"], [
                 new DemoApp.Workspace.ScreenData(
@@ -235,8 +228,7 @@ DemoApp = Core.extend(Echo.Application, {
                     function(container) {
                         container.setContent(new DemoApp.AccordionPaneScreen());
                     },
-                    "app/AccordionPaneScreen.js"
-                ),
+                    "app/AccordionPaneScreen.js"),
                 new DemoApp.Workspace.ScreenData(
                     this._msg["TabPaneScreen.Title"], 
                     "image/demoicon/TabPaneIcon16.gif", 
@@ -245,8 +237,7 @@ DemoApp = Core.extend(Echo.Application, {
                     function(container) {
                         container.setContent(new DemoApp.TabPaneScreen());
                     },
-                    "app/TabPaneScreen.js"
-                ),
+                    "app/TabPaneScreen.js"),
                 new DemoApp.Workspace.ScreenData(
                     this._msg["RichTextScreen.Title"], 
                     "image/demoicon/RichTextIcon16.gif", 
@@ -255,8 +246,7 @@ DemoApp = Core.extend(Echo.Application, {
                     function(container) {
                         container.setContent(new DemoApp.RichTextScreen());
                     },
-                    "app/RichTextScreen.js"
-                ),
+                    "app/RichTextScreen.js"),
                 new DemoApp.Workspace.ScreenData(
                     this._msg["ExtrasWidgetsScreen.Title"], 
                     "image/demoicon/WidgetsIcon16.gif", 
@@ -265,8 +255,7 @@ DemoApp = Core.extend(Echo.Application, {
                     function(container) {
                         container.setContent(new DemoApp.ExtrasWidgetsScreen());
                     },
-                    "app/ExtrasWidgetsScreen.js"
-                )
+                    "app/ExtrasWidgetsScreen.js")
             ])
         ];
         
