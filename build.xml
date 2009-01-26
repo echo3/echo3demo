@@ -1,6 +1,12 @@
-<project name="Echo3Demo" default="compress" basedir=".">
+<project name="Echo3Demo" default="build" basedir=".">
     <target name="clean">
         <delete dir="out"/>
+    </target>
+    <target name="jslint">
+        <java fork="true" jar="resource/JSLint/rhino.jar">
+            <arg value="resource/JSLint/jslint.js"/>
+            <arg value="src/app/"/>
+        </java>
     </target>
     <target name="compress" depends="clean">
         <concat destfile="out/Concat.js" fixlastline="true">
@@ -46,5 +52,8 @@
         <copy todir="out/">
             <fileset dir="src/"/>
         </copy>
+    </target>
+    <target name="build" depends="clean,jslint,compress">
+    
     </target>
 </project>
