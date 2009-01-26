@@ -214,7 +214,7 @@ DemoApp = Core.extend(Echo.Application, {
                     this._msg["WelcomeScreen.Title"], 
                     "image/demoicon/WelcomeIcon16.gif", 
                     "image/demoicon/WelcomeIcon64.gif",
-                    null,
+                    [],
                     function(container) { 
                         container.setContent(new DemoApp.WelcomeScreen());
                     },
@@ -384,10 +384,6 @@ DemoApp.ScreenWindow = Core.extend(Echo.WindowPane, {
                 }
             }
         });
-        
-        if (screen.launchFunction) {
-            screen.launchFunction(this);
-        }
     },
     
     /**
@@ -797,38 +793,32 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
      * Launches a demo screen in the main content area.
      *
      * @param {DemoApp.Workspace.ScreenData} screen the screen to launch
+     * @param {Boolean} windowed flag indicating whether the screen should be launched in a window (true) or in the 
+     *        main content area (false)
      */
-    launchScreen: function(screen) {
-        if (this._activeScreenLaunchButton) {
-            this._activeScreenLaunchButton.setStyleName("LaunchPanel");
-            this._activeScreenLaunchButton = null;
-        }
-        
-        this._activeScreen = screen;
-        
-        if (screen.modules) {
-            this.application.client.exec(screen.modules, Core.method(this, function() {
-                if (screen.launchFunction) {
-                    screen.launchFunction(this);
-                }
-                this._setActiveTab(screen);
-            }));
-        } else {
-            if (screen.launchFunction) {
-                screen.launchFunction(this);
-            }
-            this._setActiveTab(screen);
-        }
-    },
+    launchScreen: function(screen, windowed) {
+        var screenWindow;
     
-    /**
-     * Launches a demo screen in a popup window.
-     *
-     * @param {DemoApp.Workspace.ScreenData} screen the screen to launch
-     */
-    _launchScreenWindowed: function(screen) {
-        var screenWindow = new DemoApp.ScreenWindow(screen);
-        this.add(screenWindow);
+        if (windowed) {
+            screenWindow = new DemoApp.ScreenWindow(screen);
+            this.add(screenWindow);
+        } else {
+            if (this._activeScreenLaunchButton) {
+                this._activeScreenLaunchButton.setStyleName("LaunchPanel");
+                this._activeScreenLaunchButton = null;
+            }
+
+            this._activeScreen = screen;
+        }
+        
+        this.application.client.exec(screen.modules, Core.method(this, function() {
+            if (screen.launchFunction) {
+                screen.launchFunction(windowed ? screenWindow : this);
+            }
+            if (!windowed) {
+                this._setActiveTab(screen);
+            }
+        }));
     },
     
     /**
@@ -918,7 +908,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             } else if (e.modelId.substring(0,2) == "W:") {
                 // Launch a demo screen in a popup window.
                 screen = this._screenMap[e.modelId.substring(2)];
-                this._launchScreenWindowed(screen);
+                this.launchScreen(screen, true);
             } else if (e.modelId.substring(0,7) == "locale.") {
                 // Set the application locale.
                 var locale = e.modelId.substring(7);
