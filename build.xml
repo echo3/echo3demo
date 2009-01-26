@@ -11,6 +11,7 @@
 
 
     <target name="clean">
+        <delete dir="tmp"/>
         <delete dir="out"/>
     </target>
     
@@ -22,6 +23,7 @@
     </target>
     
     <target name="init">
+        <mkdir dir="tmp"/>
         <!-- Copy non-JS files, path structure. -->
         <copy todir="out/">
             <fileset dir="src/">
@@ -41,20 +43,19 @@
     <target name="compress.modules">
         <mkdir dir="out"/>
         <yui-compressor 
-            warn="false" 
-            munge="true"
-            linebreakposition="1000"
-            preserveallsemicolons="false" 
-            jssuffix=".js"
-            fromdir="src/" 
-            todir="out/">
-
+                warn="false" 
+                munge="true"
+                linebreakposition="1000"
+                preserveallsemicolons="false" 
+                jssuffix=".js"
+                fromdir="src/" 
+                todir="out/">
           <include name="**/*.js"/>
         </yui-compressor>
     </target>
     
-    <target name="compress.boot" depends="clean">
-        <concat destfile="out/Concat.js" fixlastline="true">
+    <target name="compress.boot">
+        <concat destfile="tmp/AppCompressed.js" fixlastline="true">
             <filelist dir="src/lib/corejs/">
                 <file name="Core.js"/>
                 <file name="Core.Web.js"/>
@@ -90,12 +91,17 @@
                 <file name="WelcomeScreen.js"/>
             </filelist>
         </concat>
-        <java fork="true" jar="build-lib/yuicompressor-2.4.2.jar" output="out/AppCompressed.js">
-            <arg value="--line-break"/>
-            <arg value="1000"/>
-            <arg value="out/Concat.js"/>
-        </java>
-        <delete file="out/Concat.js"/>
+        
+        <yui-compressor 
+                warn="false" 
+                munge="true"
+                linebreakposition="1000"
+                preserveallsemicolons="false" 
+                jssuffix=".js"
+                fromdir="tmp/" 
+                todir="out/">
+          <include name="AppCompressed.js"/>
+        </yui-compressor>
     </target>
     <target name="build" depends="clean,jslint,init,compress.modules,compress.boot">
     
