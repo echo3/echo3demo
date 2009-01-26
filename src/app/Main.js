@@ -194,7 +194,16 @@ DemoApp = Core.extend(Echo.Application, {
         locale: null
     },
     
+    /**
+     * Displayed DemoApp.Workspace.Section objects.
+     * @type Array
+     */
     _sections: null,
+    
+    /**
+     * The DemoApp.Workspace being displayed.
+     * @type DemoApp.Workspace
+     */
     workspace: null,
     
     /** @see Echo.Application#init */
