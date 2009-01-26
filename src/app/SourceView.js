@@ -7,7 +7,7 @@ DemoApp.SourcePane = Core.extend(Echo.ContentPane, {
         Echo.ContentPane.call(this, data);
         var url = this.render("url");
         if (url) {
-            var conn = new Core.Web.HttpConnection(url, "GET");
+            var conn = new Core.Web.HttpConnection("src/" + url, "GET");
             conn.addResponseListener(Core.method(this, this._responseListener));
             try {
                 conn.connect();
