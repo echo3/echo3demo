@@ -198,12 +198,6 @@ DemoApp = Core.extend(Echo.Application, {
      * Localized resource map.
      */
     _msg: null,
-
-    /**
-     * Displayed DemoApp.Workspace.Section objects.
-     * @type Array
-     */
-    _sections: null,
     
     /**
      * The DemoApp.Workspace being displayed.
@@ -214,7 +208,7 @@ DemoApp = Core.extend(Echo.Application, {
     /** @see Echo.Application#init */
     init: function() {
         this._msg = DemoApp.getMessages();
-        this._sections = [
+        var sections = [
             new DemoApp.Workspace.SectionData(this._msg["SectionTitle.Welcome"], [
                 new DemoApp.Workspace.ScreenData(
                     this._msg["WelcomeScreen.Title"], 
@@ -324,11 +318,11 @@ DemoApp = Core.extend(Echo.Application, {
             ])
         ];
         
-        this.workspace = new DemoApp.Workspace(this._sections);
+        this.workspace = new DemoApp.Workspace(sections);
         this.rootComponent.add(this.workspace);
         
         // Edit/Enable the following line to launch a specific screen at startup.
-        //this.workspace.launchScreen(this._sections[3].screens[2]);
+        //this.workspace.launchScreen(sections[3].screens[2]);
     }
 });
 
@@ -545,7 +539,17 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
      * @type Echo.Button
      */
     _activeScreenLaunchButton: null,
+    
+    /**
+     * Window displaying stop controls, displayed when automatic demo/performance test is active.
+     * @type Echo.WindowPane
+     */
     _stopWindow: null,
+    
+    /**
+     * Label displaying current frames-per-second, used when performance test is active.
+     * @type Echo.Label
+     */
     fpsLabel: null,
 
     $construct: function(sections) {
@@ -662,6 +666,9 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         this._createLaunchPanel();
     },
     
+    /**
+     * Iterates sections/screens to create launch panel component and screen-id to screen mapping.
+     */
     _createLaunchPanel: function() {
         this._screenMap = { };
         for (var i = 0; i < this._sections.length; ++i) {
@@ -786,6 +793,11 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         }
     },
     
+    /**
+     * Launches a demo screen in the main content area.
+     *
+     * @param {DemoApp.Workspace.ScreenData} screen the screen to launch
+     */
     launchScreen: function(screen) {
         if (this._activeScreenLaunchButton) {
             this._activeScreenLaunchButton.setStyleName("LaunchPanel");
@@ -809,6 +821,138 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         }
     },
     
+    /**
+     * Launches a demo screen in a popup window.
+     *
+     * @param {DemoApp.Workspace.ScreenData} screen the screen to launch
+     */
+    _launchScreenWindowed: function(screen) {
+        var screenWindow = new DemoApp.ScreenWindow(screen);
+        this.add(screenWindow);
+    },
+    
+    /**
+     * Processes a click on a demo launcher button.
+     * 
+     * @param e the action event recevied from the button
+     */
+    _processLauncherClick: function(e) {
+        if (this._screenMap[e.actionCommand]) {
+            this.setTransition(Extras.TransitionPane.TYPE_FADE);
+            var screen = this._screenMap[e.actionCommand];
+            this.launchScreen(screen);
+        }
+    },
+    
+    /**
+     * Processes a menu item selection.
+     * 
+     * @param e the event
+     */
+    _processMenuAction: function(e) {
+        switch (e.modelId) {
+        case "about":
+            // Display about dialog.
+            this.application.client.exec(DemoApp.MODULE_ABOUT, Core.method(this, function() {
+                this.add(new DemoApp.AboutDialog());
+            }));
+            break;
+        case "autodemo":
+            // Display automatic demo dialog.
+            this.application.client.exec(DemoApp.MODULE_AUTOMATIC_DEMO, Core.method(this, function() {
+                this.add(new DemoApp.AutomaticDemo.StartDialog(this));
+            }));
+            break;
+        case "download":
+            // Display download instructions dialog.
+            this.add(new DemoApp.DownloadWindow());
+            break;            
+        case "perftest":
+            // Display performance test dialog.
+            this.application.client.exec(DemoApp.MODULE_AUTOMATIC_DEMO, Core.method(this, function() {
+                this.add(new DemoApp.AutomaticDemo.PerformanceTestDialog(this));
+            }));
+            break;
+        case "preferences":
+            // Display preferences dialog.
+            this.application.client.exec(DemoApp.MODULE_PREFERENCES, Core.method(this, function() {
+                this.add(new DemoApp.PreferencesDialog(this.application));
+            }));
+            break;
+        case "viewsource":
+            // Display source of active screen.
+            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+                this.add(new DemoApp.SourceWindow(this._activeScreen));
+            }));
+            break;
+        case "viewsource.main":
+            // Display source of Main.js.
+            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+                this.add(new DemoApp.SourceWindow("app/Main.js"));
+            }));
+            break;
+        case "viewsource.ss":
+            // Display source of stylesheet.
+            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+                this.add(new DemoApp.SourceWindow("app/Default.StyleSheet.js"));
+            }));
+            break;
+        case "viewsource.msg":
+            // Display source of main resource map.
+            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+                this.add(new DemoApp.SourceWindow("app/Messages.js"));
+            }));
+            break;
+        case "viewsource.html":
+            // Display source of index.html.
+            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
+                this.add(new DemoApp.SourceWindow("index.html"));
+            }));
+            break;
+        default:
+            var screen;
+            if (e.modelId.substring(0,2) == "L:") {
+                // Launch a demo screen in the main content area.
+                screen = this._screenMap[e.modelId.substring(2)];
+                this.launchScreen(screen);
+            } else if (e.modelId.substring(0,2) == "W:") {
+                // Launch a demo screen in a popup window.
+                screen = this._screenMap[e.modelId.substring(2)];
+                this._launchScreenWindowed(screen);
+            } else if (e.modelId.substring(0,7) == "locale.") {
+                // Set the application locale.
+                var locale = e.modelId.substring(7);
+                this._setLocale(locale);
+            }
+            break;
+        }
+    },
+    
+    /**
+     * Process a click event on the next screen button.
+     *
+     * @param e the event
+     */
+    _processNext: function(e) {
+        this.setTransition(Extras.TransitionPane.TYPE_CAMERA_PAN_RIGHT);
+        this.launchScreen(this.getNextScreen());
+    },
+    
+    /**
+     * Process a click event on the previous screen button.
+     *
+     * @param e the event
+     */
+    _processPrevious: function(e) {
+        this.setTransition(Extras.TransitionPane.TYPE_CAMERA_PAN_LEFT);
+        this.launchScreen(this.getPreviousScreen());
+    },
+    
+    /**
+     * Sets the active tab of the launch panel to contain the specified screen.
+     * 
+     * @param {DemoApp.Workspace.ScreenData} the screen 
+     */
     _setActiveTab: function(screen) {
         for (var i = 0; i < this._launchPanel.children.length && !this._activeScreenLaunchButton; ++i) {
             var column = this._launchPanel.children[i];
@@ -824,100 +968,21 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         
     },
     
-    _launchScreenWindowed: function(screen) {
-        var screenWindow = new DemoApp.ScreenWindow(screen);
-        this.add(screenWindow);
-    },
-    
-    _processLauncherClick: function(e) {
-        if (this._screenMap[e.actionCommand]) {
-            this.setTransition(Extras.TransitionPane.TYPE_FADE);
-            var screen = this._screenMap[e.actionCommand];
-            this.launchScreen(screen);
-        }
-    },
-    
-    _processMenuAction: function(e) {
-        switch (e.modelId) {
-        case "about":
-            this.application.client.exec(DemoApp.MODULE_ABOUT, Core.method(this, function() {
-                this.add(new DemoApp.AboutDialog());
-            }));
-            break;
-        case "autodemo":
-            this.application.client.exec(DemoApp.MODULE_AUTOMATIC_DEMO, Core.method(this, function() {
-                this.add(new DemoApp.AutomaticDemo.StartDialog(this));
-            }));
-            break;
-        case "download":
-            this.add(new DemoApp.DownloadWindow());
-            break;            
-        case "perftest":
-            this.application.client.exec(DemoApp.MODULE_AUTOMATIC_DEMO, Core.method(this, function() {
-                this.add(new DemoApp.AutomaticDemo.PerformanceTestDialog(this));
-            }));
-            break;
-        case "preferences":
-            this.application.client.exec(DemoApp.MODULE_PREFERENCES, Core.method(this, function() {
-                this.add(new DemoApp.PreferencesDialog(this.application));
-            }));
-            break;
-        case "viewsource":
-            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
-                this.add(new DemoApp.SourceWindow(this._activeScreen));
-            }));
-            break;
-        case "viewsource.main":
-            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
-                this.add(new DemoApp.SourceWindow("app/Main.js"));
-            }));
-            break;
-        case "viewsource.ss":
-            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
-                this.add(new DemoApp.SourceWindow("app/Default.StyleSheet.js"));
-            }));
-            break;
-        case "viewsource.msg":
-            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
-                this.add(new DemoApp.SourceWindow("app/Messages.js"));
-            }));
-            break;
-        case "viewsource.html":
-            this.application.client.exec(DemoApp.MODULE_SOURCE_VIEW, Core.method(this, function() {
-                this.add(new DemoApp.SourceWindow("index.html"));
-            }));
-            break;
-        default:
-            var screen;
-            if (e.modelId.substring(0,2) == "L:") {
-                screen = this._screenMap[e.modelId.substring(2)];
-                this.launchScreen(screen);
-            } else if (e.modelId.substring(0,2) == "W:") {
-                screen = this._screenMap[e.modelId.substring(2)];
-                this._launchScreenWindowed(screen);
-            } else if (e.modelId.substring(0,7) == "locale.") {
-                var locale = e.modelId.substring(7);
-                this._setLocale(locale);
-            }
-            break;
-        }
-    },
-    
-    _processNext: function(e) {
-        this.setTransition(Extras.TransitionPane.TYPE_CAMERA_PAN_RIGHT);
-        this.launchScreen(this.getNextScreen());
-    },
-    
-    _processPrevious: function(e) {
-        this.setTransition(Extras.TransitionPane.TYPE_CAMERA_PAN_LEFT);
-        this.launchScreen(this.getPreviousScreen());
-    },
-    
+    /**
+     * Sets the content of the main content area (invoked by the screen's launch function to configure the window).
+     * 
+     * @param {Echo.Component} content the component to display
+     */
     setContent: function(content) {
         this._contentArea.removeAll();
         this._contentArea.add(content);
     },
     
+    /**
+     * Sets the locale of the application.
+     *
+     * @param locale the new locale
+     */
     _setLocale: function(locale) {
         DemoApp.locale = locale;
         if (locale in DemoApp.LOCALE_MODULES) {
@@ -928,11 +993,26 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         }
     },
     
+    /**
+     * Sets the transition effect used by the main content area.
+     *
+     * @param {Number} type the transition type (use transition constants from Extras.TransitionPane)
+     * @param {Boolean} overridePreferences flag indicating whether default user preferences should be overridden
+     */
     setTransition: function(type, overridePreferences) {
         this._contentArea.set("type", overridePreferences || DemoApp.pref.transitionsEnabled ?
                 type : Extras.TransitionPane.TYPE_IMMEDIATE);    
     },
     
+    /**
+     * Starts an automatic demo/performance test.
+     *
+     * @param {Boolean} performanceTest flag indicating whether the demo should be a performance test
+     * @param {Number} interval delay in milliseconds between automatic progression of screens
+     * @param {Boolean} randomOrder flag indicating whether screens should be navigated in sequential 
+     *        (false) or random (true) order
+     * @param {Array} transitionStyle array of transition styels which may be used
+     */
     startAutomaticDemo: function(performanceTest, interval, randomOrder, transitionStyle) {
         if (performanceTest) {
             interval = 0;
@@ -955,6 +1035,12 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         Core.Web.Scheduler.add(this._autoDemoRunnable);
     },
     
+    /**
+     * Stops the automatic demo/performance test.
+     *
+     * @param {Number} performanceTestFps optional value indicating the final measured frames per second of a performance test
+     *        (if provided, a dialog will be displayed announcing this value to the user)
+     */
     stopAutomaticDemo: function(performanceTestFps) {
         this.remove(this._stopWindow);
         this._stopWindow = null;
