@@ -308,7 +308,7 @@ DemoApp.ScreenWindow = Core.extend(Echo.WindowPane, {
             title: screen.title,
             styleName: DemoApp.pref.windowStyleName,
             width: 600,
-            height:500,
+            height: 500,
             maximizeEnabled: true,
             events: {
                 close: function(e) {
