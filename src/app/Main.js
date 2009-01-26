@@ -193,7 +193,12 @@ DemoApp = Core.extend(Echo.Application, {
          */
         locale: null
     },
-    
+
+    /**
+     * Localized resource map.
+     */
+    _msg: null,
+
     /**
      * Displayed DemoApp.Workspace.Section objects.
      * @type Array
@@ -500,12 +505,45 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         })
     },
 
+    /**
+     * Localized resource map.
+     */
+    _msg: null,
+    
+    /**
+     * AccordionPane containing section columns.
+     * @type Extras.AccordionPane
+     */
     _launchPanel: null,
+    
+    /**
+     * The main content area used to display demonstration screens.
+     * @type Extras.TransitionPane
+     */
     _contentArea: null,
-    _menu: null,
+    
+    /**
+     * Mapping between screen ids and DemoApp.Workspace.ScreenData instances.
+     * Used for launching screens by id (e.g., as selected from menu).
+     */
     _screenMap: null,
+    
+    /**
+     * The currently displayed screen.
+     * @type DemoApp.Workspace.ScreenData
+     */
     _activeScreen: null,
+    
+    /**
+     * Array of DemoApp.Workspace.SectionData instances which are available.
+     * @type Array
+     */
     _sections: null,
+    
+    /**
+     * Launch button for currently active screen.
+     * @type Echo.Button
+     */
     _activeScreenLaunchButton: null,
     _stopWindow: null,
     fpsLabel: null,
@@ -555,6 +593,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                             children: [
                                 this._menu = new Extras.MenuBarPane({
                                     styleName: "Default",
+                                    model: this.createMenuModel(),
                                     events: {
                                         action: Core.method(this, this._processMenuAction)
                                     }
@@ -620,7 +659,6 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             }
         });
                 
-        this._menu.set("model", this.createMenuModel());
         this._createLaunchPanel();
     },
     
@@ -651,6 +689,13 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         }
     },
     
+    /**
+     * Creates a main menu bar model.
+     * This method is public because certain demonstration screens may use it for examples.
+     *
+     * @return the created menu bar model     
+     * @type Extras.MenuModel
+     */
     createMenuModel: function() {
         var launchMenu = new Extras.MenuModel(null, this._msg["Menu.LaunchMenu"], null);
         var windowedLaunchMenu = new Extras.MenuModel(null, this._msg["Menu.StartWindowedDemoMenu"], null);
@@ -695,6 +740,12 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         return menuModel;
     },
     
+    /**
+     * Determines which screen is sequentially after the current screen.
+     *
+     * @return the next screen
+     * @type DemoApp.Workspace.ScreenData
+     */
     getNextScreen: function() {
         var activeFound = this._activeScreen == null;
         for (var k = 0; k < 2; ++k) {
@@ -712,6 +763,12 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         }
     },
     
+    /**
+     * Determines which screen is sequentially before the current screen.
+     *
+     * @return the previous screen
+     * @type DemoApp.Workspace.ScreenData
+     */
     getPreviousScreen: function() {
         var activeFound = this._activeScreen == null;
         for (var k = 0; k < 2; ++k) {
