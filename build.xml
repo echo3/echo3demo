@@ -1,14 +1,59 @@
 <project name="Echo3Demo" default="build" basedir=".">
+
+    <taskdef 
+            name="yui-compressor" 
+            classname="net.noha.tools.ant.yuicompressor.tasks.YuiCompressorTask">
+        <classpath>
+            <pathelement location="build-lib/yui-compressor-ant-task-0.3.jar"/>
+            <pathelement location="build-lib/yuicompressor-2.4.2.jar"/>
+        </classpath>
+    </taskdef>
+
+
     <target name="clean">
         <delete dir="out"/>
     </target>
+    
     <target name="jslint">
         <java fork="true" jar="resource/JSLint/rhino.jar">
             <arg value="resource/JSLint/jslint.js"/>
             <arg value="src/app/"/>
         </java>
     </target>
-    <target name="compress" depends="clean">
+    
+    <target name="init">
+        <!-- Copy non-JS files, path structure. -->
+        <copy todir="out/">
+            <fileset dir="src/">
+                <exclude name="**/*.js"/>
+            </fileset>
+        </copy>
+        
+        <!-- Copy non-JS files, path structure. -->
+        <copy todir="out/src/">
+            <fileset dir="src/">
+                <include name="**/*.js"/>
+                <include name="**/*.html"/>
+            </fileset>
+        </copy>
+    </target>
+    
+    <target name="compress.modules">
+        <mkdir dir="out"/>
+        <yui-compressor 
+            warn="false" 
+            munge="true"
+            linebreakposition="1000"
+            preserveallsemicolons="false" 
+            jssuffix=".js"
+            fromdir="src/" 
+            todir="out/">
+
+          <include name="**/*.js"/>
+        </yui-compressor>
+    </target>
+    
+    <target name="compress.boot" depends="clean">
         <concat destfile="out/Concat.js" fixlastline="true">
             <filelist dir="src/lib/corejs/">
                 <file name="Core.js"/>
@@ -51,11 +96,8 @@
             <arg value="out/Concat.js"/>
         </java>
         <delete file="out/Concat.js"/>
-        <copy todir="out/">
-            <fileset dir="src/"/>
-        </copy>
     </target>
-    <target name="build" depends="clean,jslint,compress">
+    <target name="build" depends="clean,jslint,init,compress.modules,compress.boot">
     
     </target>
 </project>
