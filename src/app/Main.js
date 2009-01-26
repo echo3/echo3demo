@@ -6,22 +6,26 @@ DemoApp = Core.extend(Echo.Application, {
 
     $static: {
     
+        /** Required JavaScript module URLs for "About" dialog. */
         MODULE_ABOUT: [
             "lib/extras/Application.TabPane.js",
             "lib/extras/Sync.TabPane.js",
             "app/About.js"
         ],
         
+        /** Required JavaScript module URLs for Automatic demo system. */
         MODULE_AUTOMATIC_DEMO: [
             "lib/echo/Sync.ToggleButton.js",
             "lib/echo/Sync.List.js",
             "app/AutomaticDemo.js"
         ],
     
+        /** Required JavaScript module URLs for source viewer. */
         MODULE_SOURCE_VIEW: [
             "app/SourceView.js"
         ],
     
+        /** Required JavaScript module URLs for preferences dialog. */
         MODULE_PREFERENCES: [
             "lib/echo/Sync.List.js",
             "lib/echo/Sync.ToggleButton.js",
@@ -30,6 +34,7 @@ DemoApp = Core.extend(Echo.Application, {
             "app/Preferences.js"
         ],
     
+        /** Required JavaScript module URLs for WindowPane demo screen. */
         MODULE_DEMO_WINDOWPANE: [
             "lib/echo/Sync.ToggleButton.js",
             "lib/extras/Application.TabPane.js",
@@ -39,10 +44,12 @@ DemoApp = Core.extend(Echo.Application, {
             "app/WindowPaneScreen.js"
         ],
         
+        /** Required JavaScript module URLs for SplitPane demo screen. */
         MODULE_DEMO_SPLITPANE: [
             "app/SplitPaneScreen.js"
         ],
         
+        /** Required JavaScript module URLs for Basic Components demo screen. */
         MODULE_DEMO_BASIC_COMPONENTS: [
             "lib/echo/Sync.ToggleButton.js",
             "lib/echo/Sync.Grid.js",
@@ -51,11 +58,13 @@ DemoApp = Core.extend(Echo.Application, {
             "app/BasicComponentsScreen.js"
         ],
     
+        /** Required JavaScript module URLs for Layout Containers demo screen. */
         MODULE_DEMO_LAYOUT_CONTAINERS: [
             "lib/echo/Sync.Grid.js",
             "app/LayoutContainersScreen.js"
         ],
         
+        /** Required JavaScript module URLs for JavaScript Development demo screen. */
         MODULE_DEMO_JS_DEVELOPMENT: [
             "lib/extras/Application.TabPane.js",
             "lib/extras/Sync.TabPane.js",
@@ -65,15 +74,18 @@ DemoApp = Core.extend(Echo.Application, {
             "app/JSDevelopmentScreen.js"
         ],
         
+        /** Required JavaScript module URLs for Java Development demo screen. */
         MODULE_DEMO_JAVA_DEVELOPMENT: [
             "app/SourceView.js",
             "app/JavaDevelopmentScreen.js"
         ],
         
+        /** Required JavaScript module URLs for AccordionPane demo screen. */
         MODULE_DEMO_ACCORDIONPANE: [
             "app/AccordionPaneScreen.js"
         ],
         
+        /** Required JavaScript module URLs for TabPane demo screen. */
         MODULE_DEMO_TABPANE: [
             "lib/echo/Sync.Grid.js",
             "lib/echo/Sync.ToggleButton.js",
@@ -84,6 +96,7 @@ DemoApp = Core.extend(Echo.Application, {
             "app/TabPaneScreen.js"
         ],
         
+        /** Required JavaScript module URLs for RichTextArea demo screen. */
         MODULE_DEMO_RICHTEXTAREA: [
             "lib/echo/Sync.List.js",
             "lib/echo/Sync.Grid.js",
@@ -98,6 +111,7 @@ DemoApp = Core.extend(Echo.Application, {
             "app/RichTextScreen.js"
         ],
     
+        /** Required JavaScript module URLs for Extras Widgets demo screen. */
         MODULE_DEMO_EXTRAS_WIDGETS: [
             "lib/echo/Sync.ToggleButton.js",
             "lib/extras/Application.CalendarSelect.js",
@@ -113,21 +127,53 @@ DemoApp = Core.extend(Echo.Application, {
             "app/ExtrasWidgetsScreen.js"
         ],
         
+        /**
+         * Set of available locale modules.
+         */
         LOCALE_MODULES: {
             "1337": true
         },
-    
+        
+        /**
+         * User preference information.
+         */ 
         pref: {
+        
+            /**
+             * Flag indicating whether animated transition effects are enabled.
+             * @type Boolean
+             */
             transitionsEnabled: true,
+            
+            /**
+             * Default WindowPane style name.
+             * @type String
+             */
             windowStyleName: "Default",
+            
+            /**
+             * Background color for source code viewer.
+             * @type {#Color}
+             */
             sourceViewerBackground: "#000000",
+            
+            /**
+             * Foreground color for source code viewer.
+             * @type {#Color}
+             */
             sourceViewerForeground: "#00ff00"
         },
         
+        /**
+         * Retrieves resource map for current (globally configured) locale from resource bundle.
+         */
         getMessages: function() {
             return DemoApp.Messages.get(DemoApp.locale);
         },
         
+        /**
+         * Global initialization method.  Creates/starts client/application in "rootArea" element of document.
+         */
         init: function() {
             Core.Web.init();
             if (Echo.DebugConsole) {
@@ -141,12 +187,17 @@ DemoApp = Core.extend(Echo.Application, {
             client.init();
         },
         
+        /**
+         * Globally configured locale.
+         * @type String
+         */
         locale: null
     },
     
     _sections: null,
     workspace: null,
     
+    /** @see Echo.Application#init */
     init: function() {
         this._msg = DemoApp.getMessages();
         this._sections = [
@@ -272,8 +323,12 @@ DemoApp = Core.extend(Echo.Application, {
  */
 DemoApp.DownloadWindow = Core.extend(Echo.WindowPane, {
 
+    /**
+     * Localized resource map.
+     */
     _msg: null,
 
+    /** Creates a new download window. */
     $construct: function() {
         this._msg = DemoApp.getMessages();
         Echo.WindowPane.call(this, {
@@ -297,10 +352,15 @@ DemoApp.DownloadWindow = Core.extend(Echo.WindowPane, {
 });
 
 /**
- * Window used to display windowed demo screens. 
+ * Window component used to display windowed demo screens. 
  */
 DemoApp.ScreenWindow = Core.extend(Echo.WindowPane, {
     
+    /** 
+     * Creates a new ScreenWindow
+     *
+     * @param {DemoApp.Workspace.ScreenData} screen the screen data object
+     */
     $construct: function(screen) {
         Echo.WindowPane.call(this, {
             icon: screen.icon16,
@@ -322,6 +382,11 @@ DemoApp.ScreenWindow = Core.extend(Echo.WindowPane, {
         }
     },
     
+    /**
+     * Sets the content of the window (invoked by the screen's launch function to configure the window).
+     * 
+     * @param {Echo.Component} content the component to display
+     */
     setContent: function(content) {
         this.removeAll();
         this.add(content);
@@ -339,7 +404,24 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
          * Data object representing a section (collection of demo screens).
          */
         SectionData: Core.extend({
+        
+            /**
+             * Section title.
+             * @type String
+             */
+            title: null,
+            
+            /**
+             * Array of DemoApp.WorkSpace.ScreenData objects contained in the section.
+             */
+            screens: null,
 
+            /**
+             * Creates a new section.
+             * 
+             * @param {String} title the section title
+             * @param {Array} array of DemoApp.WorkSpace.ScreenData objects contained in the section
+             */
             $construct: function(title, screens) {
                 this.title = title;
                 this.screens = screens;
@@ -350,7 +432,53 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
          * Data object representing a launchable demo screen.
          */
         ScreenData: Core.extend({
+        
+            /**
+             * The screen title.
+             * @type String
+             */
+            title: null,
+            
+            /** 
+             * The 16x16 icon.
+             * @type #ImageReference
+             */
+            icon16: null,
 
+            /** 
+             * The 64x64 icon.
+             * @type #ImageReference
+             */
+            icon64: null,
+            
+            /**
+             * Array of JavaScript module URLs which are required to display the screen.
+             * @type Array
+             */
+            modules: null,
+            
+            /**
+             * Function to be invoked to launch the module.
+             * @type Function
+             */
+            launchFunction: null,
+            
+            /**
+             * URL of module source (used by source viewer).
+             * @type String
+             */
+            sourceUrl: null,
+
+            /**
+             * Creates a new screen.
+             *
+             * @param {String} title the screen title
+             * @param {#ImageReference} icon16 the 16x16 icon
+             * @param {#ImageReference} icon64 the 64x64 icon
+             * @param {Array} modules array of JavaScript module URLs which are required to display the screen
+             * @param {Function} function to be invoked to launch the module
+             * @param {String} sourceUrl URL of module source (used by source viewer)
+             */
             $construct: function(title, icon16, icon64, modules, launchFunction, sourceUrl) {
                 this.id = Echo.Application.generateUid();
                 this.title = title;
