@@ -13,6 +13,7 @@
     <target name="clean">
         <delete dir="tmp"/>
         <delete dir="out"/>
+        <delete dir="release"/>
     </target>
     
     <target name="jslint">
@@ -103,7 +104,19 @@
           <include name="AppCompressed.js"/>
         </yui-compressor>
     </target>
-    <target name="build" depends="clean,jslint,init,compress.modules,compress.boot">
+    <target name="build" depends="clean,init,compress.modules,compress.boot">
     
     </target>
+    
+    <target name="release" depends="clean,jslint,build">
+        <mkdir dir="release"/>
+        <copy todir="release/e3d">
+            <fileset dir="out/"/>
+        </copy>
+        <tar tarfile="tmp/e3d.tar" basedir="release" longfile="gnu"/>
+        <delete dir="release/e3d"/>
+        <gzip src="tmp/e3d.tar" zipfile="release/e3d.tgz"/>
+        <delete file="release/e3d.tar"/>
+    </target>
+    
 </project>
