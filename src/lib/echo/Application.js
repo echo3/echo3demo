@@ -664,6 +664,18 @@ Echo.Component = Core.extend({
     children: null,
     
     /**
+     * renderId of application-set next focusable component.
+     * @type String 
+     */
+    focusNextId: null,
+    
+    /**
+     * renderId of application-set previous focusable component.
+     * @type String 
+     */
+    focusPreviousId: null,
+    
+    /**
      * Internal style used to store properties set directly on component.
      */
     _localStyle: null,
@@ -1391,18 +1403,27 @@ Echo.FocusManager = Core.extend({
                 component = this._application.rootComponent;
             }
         }
+        
+        // If a specific next focusable component has been specified, attempt to focus it.
+        var setComponentId = reverse ? component.focusPreviousId : component.focusNextId;
+        if (setComponentId) {
+            var setComponent = this._application.getComponentByRenderId(setComponentId);
+            if (setComponent && setComponent.isActive() && setComponent.focusable) {
+                return setComponent;
+            }
+        }
 
-        /** The component which is currently focused by the application. */
+        // The component which is currently focused by the application.
         var originComponent = component;
         
-        /** An associative array containing the ids of all previously visited components. */
+        // An associative array containing the ids of all previously visited components.
         var visitedComponents = { };
         
-        /** The value of 'component' on the previous iteration. */
+        // The value of 'component' on the previous iteration.
         var lastComponent = null;
         
         while (true) {
-            /** The candidate next component to be focused */
+            // The candidate next component to be focused.
             var nextComponent = null, componentIndex;
 
             if ((reverse && component == originComponent) || (lastComponent && lastComponent.parent == component)) {
@@ -1737,7 +1758,7 @@ Echo.Update.ComponentUpdate = Core.extend({
     _manager: null,
     
     /**
-     * The parent component represented in this <code>ServerComponentUpdate</code>.
+     * The parent component represented in this <code>ComponentUpdate</code>.
      * @type Echo.Component
      */
     parent: null,
@@ -1802,7 +1823,7 @@ Echo.Update.ComponentUpdate = Core.extend({
         this._manager = manager;
         
         /**
-         * The parent component represented in this <code>ServerComponentUpdate</code>.
+         * The parent component represented in this <code>ComponentUpdate</code>.
          * @type Echo.Component
          */
         this.parent = parent;

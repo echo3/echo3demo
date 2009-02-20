@@ -951,7 +951,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                 if (launchButton.get("id") == screen.id) {
                     this._activeScreenLaunchButton = launchButton;
                     this._activeScreenLaunchButton.setStyleName("LaunchPanel.Selected");
-                    this._launchPanel.set("activeTab", column.renderId);
+                    this._launchPanel.set("activeTabId", column.renderId);
                 }
             }
         }

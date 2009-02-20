@@ -5,6 +5,16 @@
 Echo.Client = Core.extend({
     
     $static: {
+
+        /**
+         * Default client configuration, copied into client configuration.
+         */
+        DEFAULT_CONFIGURATION: {
+            "StopError.Message": "This application has been stopped due to an error.",
+            "WaitIndicator.Text": "Please wait...",
+            "Action.Continue": "Continue",
+            "Action.Restart": "Restart Application"
+        },
     
         /**
          * Global array containing all active client instances in the current browser window.
@@ -29,6 +39,14 @@ Echo.Client = Core.extend({
         // Register resize listener on containing window one time.
         Core.Web.DOM.addEventListener(window, "resize", this._globalWindowResizeListener, false);
     },
+    
+    /**
+     * Application-configurable properties.
+     * Initialized at construction, this value should never be set, only individual properties of the configuration may
+     * be modified.
+     * @type Object
+     */
+    configuration: null,
     
     /**
      * Flag indicating the user interface should be rendered in design-mode, where all rendered component elements are
@@ -80,6 +98,12 @@ Echo.Client = Core.extend({
     _processKeyPressRef: null,
     
     /**
+     * Flag indicating wait indicator is active.
+     * @type Boolean
+     */
+    _waitIndicatorActive: false, 
+    
+    /**
      * Method reference to this._processApplicationFocus().
      * @type Function
      */
@@ -113,6 +137,11 @@ Echo.Client = Core.extend({
      * Creates a new Client instance.  Derived classes must invoke.
      */
     $construct: function() { 
+        this.configuration = { };
+        for (var x in Echo.Client.DEFAULT_CONFIGURATION) {
+            this.configuration[x] = Echo.Client.DEFAULT_CONFIGURATION[x];
+        }
+        
         this._inputRestrictionMap = { };
         this._processKeyPressRef = Core.method(this, this._processKeyPress);
         this._processApplicationFocusRef = Core.method(this, this._processApplicationFocus);
@@ -172,10 +201,14 @@ Echo.Client = Core.extend({
         
         /**
          * Default dispose implementation.
-         * Invokes configure(null, null) to deconfigure the client. 
+         * Invokes configure(null, null) to deconfigure the client.  Disables wait indicator. 
          */
         dispose: function() {
+            // Deconfigure.
             this.configure(null, null);
+
+            // Disable wait indicator.
+            this._setWaitVisible(false);
         }
     },
     
@@ -224,8 +257,7 @@ Echo.Client = Core.extend({
      *         the restriction by invoking removeInputRestriction()
      */
     createInputRestriction: function() {
-        Core.Web.Scheduler.add(this._waitIndicatorRunnable);
-
+        this._setWaitVisible(true);
         var id = (++this._lastInputRestrictionId).toString();
         ++this._inputRestrictionCount;
         this._inputRestrictionMap[id] = true;
@@ -233,7 +265,88 @@ Echo.Client = Core.extend({
     },
     
     /**
-     * Loads required libraries and then executes a function, adding input restrictions while the libaries are being loaded.
+     * Displays an error message, locking the state of the client.  The client is unlocked when the user presses an
+     * (optionally configurable) action button.
+     * 
+     * @param {String} message the message to display
+     * @param {String} detail optional details about the message (e.g., client-side exception)
+     * @param {String} actionText optional text for an action button
+     * @param {Function} actionFunction optional function to execute when action button is clicked
+     */
+    displayError: function(parentElement, message, detail, actionText, actionFunction) {
+        // Create restriction.
+        var restriction = this.createInputRestriction(false);
+
+        // Disable wait indicator.
+        this._setWaitVisible(false);
+
+        // Darken screen.
+        var blackoutDiv = document.createElement("div");
+        blackoutDiv.style.cssText = "position:absolute;z-index:32766;width:100%;height:100%;background-color:#000000;opacity:0.75";
+        if (Core.Web.Env.PROPRIETARY_IE_OPACITY_FILTER_REQUIRED) {
+            blackoutDiv.style.filter = "alpha(opacity=75)";
+        }
+        parentElement.appendChild(blackoutDiv);
+        
+        // Render error message.
+        var div = document.createElement("div");
+        div.style.cssText = "position:absolute;z-index:32767;width:100%;height:100%;overflow:hidden;";
+        parentElement.appendChild(div);
+        
+        var contentDiv = document.createElement("div");
+        contentDiv.style.cssText = "border-bottom:4px solid #af1f1f;background-color:#5f1f1f;color:#ffffff;" + 
+                "padding:20px 40px 0px;";
+        
+        if (message) {
+            var messageDiv = document.createElement("div");
+            messageDiv.style.cssText = "font-weight: bold; margin-bottom:20px;";
+            messageDiv.appendChild(document.createTextNode(message));
+            contentDiv.appendChild(messageDiv);
+        }
+        
+        if (detail) {
+            var detailDiv = document.createElement("div");
+            detailDiv.style.cssText = "margin-bottom:20px;";
+            detailDiv.appendChild(document.createTextNode(detail));
+            contentDiv.appendChild(detailDiv);
+        }
+        
+        div.appendChild(contentDiv);
+
+        if (actionText) {
+            var actionDiv = document.createElement("div");
+            actionDiv.tabIndex = "0";
+            actionDiv.style.cssText = "border: 1px outset #af2f2f;background-color:#af2f2f;padding:2px 10px;" +
+                    "margin-bottom:20px;cursor:pointer;font-weight:bold;";
+            actionDiv.appendChild(document.createTextNode(actionText));
+            contentDiv.appendChild(actionDiv);
+            var listener = Core.method(this, function(e) {
+                if (e.type != "keypress" || e.keyCode == 13) { 
+                    try {
+                        // Remove error elements.
+                        Core.Web.DOM.removeEventListener(actionDiv, "click", listener, false);
+                        Core.Web.DOM.removeEventListener(actionDiv, "keypress", listener, false);
+                        div.parentNode.removeChild(div);
+                        blackoutDiv.parentNode.removeChild(blackoutDiv);
+
+                        // Remove restriction.
+                        this.removeInputRestriction(restriction);
+                    } finally {
+                        if (actionFunction) {
+                            actionFunction();
+                        }
+                    }
+                }
+            });
+            
+            Core.Web.DOM.addEventListener(actionDiv, "click", listener, false);
+            Core.Web.DOM.addEventListener(actionDiv, "keypress", listener, false);
+            Core.Web.DOM.focusElement(actionDiv);
+        }
+    },
+    
+    /**
+     * Loads required libraries and then executes a function, adding input restrictions while the libraries are being loaded.
      *
      * @param {Array} requiredLibraries the URLs of the libraries which must be loaded before the function can execute
      * @param {Function} f the function to execute
@@ -247,59 +360,56 @@ Echo.Client = Core.extend({
     },
     
     /**
-     * Handles an application failure, refusing future input and displaying an error message over the entirety of the domain 
-     * element.
+     * Handles an application failure.
+     * If the "StopError.URI" property of the <code>configuration</code> is set, the window is redirected to that URI.
+     * If it is not set, an error message is displayed over the domain element, and further input is refused.  A restart
+     * button is provided to reload the document.
      * 
-     * @param {String} msg the message to display (a generic message will be used if omitted) 
+     * @param {String} detail the error details 
      */
-    fail: function(msg) {
-        // Block future input.
-        this.createInputRestriction(false);
-        
-        // Default message.
-        msg = msg || "This application has been stopped due to an error. Press the reload or refresh button.";
-        
-        // Darken screen.
-        if (!Core.Web.Env.NOT_SUPPORTED_CSS_OPACITY) {
-            var blackoutDiv = document.createElement("div");
-            blackoutDiv.style.cssText = "position:absolute;z-index:32766;width:100%;height:100%;background-color:#000000;" +
-                    "opacity:0.75;";
-            this.domainElement.appendChild(blackoutDiv);
+    fail: function(detail) {
+        var element = this.domainElement;
+        try {
+            // Attempt to dispose.
+            this.dispose();
+        } finally {
+            if (this.configuration["StopError.URI"]) {
+                // Redirect.
+                window.location.href = this.configuration["StopError.URI"];
+            } else {
+                // Display error.
+                this.displayError(element, this.configuration["StopError.Message"], detail, this.configuration["Action.Restart"], 
+                        function() {
+                    window.location.reload();
+                });
+            }
         }
-
-        // Display fail message.
-        var div = document.createElement("div");
-        div.style.cssText = "position:absolute;z-index:32767;width:100%;height:100%;";
-        this.domainElement.appendChild(div);
-        var msgDiv = document.createElement("div");
-        msgDiv.style.cssText = "border:#5f1f1f outset 1px;background-color:#5f1f1f;color:#ffffff;padding:2px 10px;";
-        msgDiv.appendChild(document.createTextNode(msg));
-        div.appendChild(msgDiv);
-        var xDiv = document.createElement("div");
-        xDiv.style.cssText = "color:red;line-height:90%;font-size:" + 
-                (new Core.Web.Measure.Bounds(this.domainElement).height || 100) + 
-                "px;text-align:center;overflow:hidden;";
-        xDiv.appendChild(document.createTextNode("X"));
-        div.appendChild(xDiv);
-        
-        // Attempt to dispose.
-        this.dispose();
     },
     
     /**
-     * Forces IE browser to re-render entire document if the height of the application's domain element measures zero.
-     * This is a workaround for an Internet Explorer bug where the browser's rendering engine fundamentally fails and simply
-     * displays a blank screen (commonly referred to on bug-tracker/forum as the "blank screen of death"/BSOD).
-     * This bug appears to be most prevalent in IE7. 
+     * Force various browsers to redraw the screen correctly.  This method is used to workaround the blank screen bug in 
+     * Internet Explorer and the CSS positioning bug in Opera. 
      */
-    _forceIERedraw: function() {
-        if (Core.Web.Env.BROWSER_INTERNET_EXPLORER && this.domainElement.offsetHeight === 0) {
-            var displayState = document.documentElement.style.display;
-            if (!displayState) {
-                displayState = "";
+    forceRedraw: function() {
+        if (this.parent) {
+            this.parent.forceRedraw();
+        } else if (Core.Web.Env.QUIRK_IE_BLANK_SCREEN) {
+            if (this.domainElement.offsetHeight === 0) {
+                // Force IE browser to re-render entire document if the height of the application's domain element measures zero.
+                // This is a workaround for an Internet Explorer bug where the browser's rendering engine fundamentally fails and 
+                // simply displays a blank screen (commonly referred to on bug-tracker/forum as the "blank screen of death").
+                // This bug appears to be most prevalent in IE7. 
+                var displayState = document.documentElement.style.display;
+                if (!displayState) {
+                    displayState = "";
+                }
+                document.documentElement.style.display = "none";
+                document.documentElement.style.display = displayState;
             }
-            document.documentElement.style.display = "none";
-            document.documentElement.style.display = displayState;
+        } else if (Core.Web.Env.QUIRK_OPERA_CSS_POSITIONING) {
+            // Execute renderComponentDisplay() on root component to avoid (some) issues with Opera's absolute CSS positioning bug.
+            // This does not completely work around the issue, but makes it somewhat usable.
+            Echo.Render.renderComponentDisplay(this.application.rootComponent);
         }
     },
     
@@ -340,9 +450,21 @@ Echo.Client = Core.extend({
         try {
             ir = this.createInputRestriction();
             Echo.Render.processUpdates(this);
-        } finally {
             this.removeInputRestriction(ir);
-            this._forceIERedraw();
+            this.forceRedraw();
+        } catch (ex) {
+            if (ex.lineNumber) {
+                // Display reported line number and adjusted line number (used if script was loaded dynamically).
+                Core.Debug.consoleWrite("Reported Line #: " + ex.lineNumber);
+                Core.Debug.consoleWrite("Evaluated Line #: " + (ex.lineNumber - Core.Web.Library.evalLine) + 
+                        " (if evaluated script)");
+            }
+            if (ex.stack) {
+                // Display stack trace if available (Mozilla browsers).
+                Core.Debug.consoleWrite("Exception: " + ex + ", Stack Trace: " + ex.stack);
+            }
+            this.fail("Exception during Client.processUpdates(): " + ex.message);
+            throw (ex);
         }
     },
     
@@ -374,14 +496,8 @@ Echo.Client = Core.extend({
         if (this._inputRestrictionCount === 0) {
             // Last input restriction removed.
 
-            // Remove wait indicator from scheduling (if wait indicator has not been presented yet, it will not be).
-            Core.Web.Scheduler.remove(this._waitIndicatorRunnable);
-            
             // Disable wait indicator.
-            if (this._waitIndicatorActive) {
-                this._waitIndicatorActive = false;
-                this._waitIndicator.deactivate();
-            }
+            this._setWaitVisible(false);
             
             if (this._inputRestrictionListeners) {
                 // Notify input restriction listeners.
@@ -396,6 +512,32 @@ Echo.Client = Core.extend({
     },
     
     /**
+     * Shows/hides wait indicator.
+     * 
+     * @param {Boolean} visible the new visibility state of the wait indicator
+     */
+    _setWaitVisible: function(visible) {
+        if (visible) {
+            if (this.application && !this._waitIndicatorActive) {
+                this._waitIndicatorActive = true;
+                
+                // Schedule runnable to display wait indicator.
+                Core.Web.Scheduler.add(this._waitIndicatorRunnable);
+            }
+        } else {
+            if (this._waitIndicatorActive) {
+                this._waitIndicatorActive = false;
+
+                // Remove wait indicator from scheduling (if wait indicator has not been presented yet, it will not be).
+                Core.Web.Scheduler.remove(this._waitIndicatorRunnable);
+                
+                // Deactivate if already displayed.
+                this._waitIndicator.deactivate(this);
+            }
+        }
+    },
+    
+    /**
      * Sets the wait indicator that will be displayed when a client-server action takes longer than
      * a specified period of time.
      * 
@@ -403,7 +545,7 @@ Echo.Client = Core.extend({
      */
     setWaitIndicator: function(waitIndicator) {
         if (this._waitIndicator) {
-            this._waitIndicator.deactivate();
+            this._setWaitVisible(false);
         }
         this._waitIndicator = waitIndicator;
     },
@@ -412,8 +554,7 @@ Echo.Client = Core.extend({
      * Activates the wait indicator.
      */
     _waitIndicatorActivate: function() {
-        this._waitIndicatorActive = true;
-        this._waitIndicator.activate();
+        this._waitIndicator.activate(this);
     },
 
     /**
@@ -490,16 +631,20 @@ Echo.Client.WaitIndicator = Core.extend({
          * Wait indicator activation method. Invoked when the wait indicator
          * should be activated. The implementation should add the wait indicator
          * to the DOM and begin any animation (if applicable).
+         * 
+         * @param {Echo.Client} the client
          */
-        activate: function() { },
+        activate: function(client) { },
         
         /**
          * Wait indicator deactivation method. Invoked when the wait indicator
          * should be deactivated. The implementation should remove the wait
          * indicator from the DOM, cancel any animations, and dispose of any
          * resources.
+         * 
+         * @param {Echo.Client} the client
          */
-        deactivate: function() { }
+        deactivate: function(client) { }
     }
 });
 
@@ -507,26 +652,35 @@ Echo.Client.WaitIndicator = Core.extend({
  * Default wait indicator implementation.
  */
 Echo.Client.DefaultWaitIndicator = Core.extend(Echo.Client.WaitIndicator, {
-
+    
     /** Creates a new DefaultWaitIndicator. */
     $construct: function() {
         this._divElement = document.createElement("div");
         this._divElement.style.cssText = "display: none;z-index:32767;position:absolute;top:30px;right:30px;" +
                  "width:200px;padding:20px;border:1px outset #abcdef;background-color:#abcdef;color:#000000;text-align:center;";
-        this._divElement.appendChild(document.createTextNode("Please wait..."));
+        this._textNode = document.createTextNode("");
+        this._divElement.appendChild(this._textNode);
         this._fadeRunnable = new Core.Web.Scheduler.MethodRunnable(Core.method(this, this._tick), 50, true);
         document.body.appendChild(this._divElement);
     },
     
     /** @see Echo.Client.WaitIndicator#activate */
-    activate: function() {
+    activate: function(client) {
+        if (client.configuration["WaitIndicator.Background"]) {
+            this._divElement.style.backgroundColor = client.configuration["WaitIndicator.Background"];
+            this._divElement.style.borderColor = client.configuration["WaitIndicator.Background"];
+        }
+        if (client.configuration["WaitIndicator.Foreground"]) {
+            this._divElement.style.color = client.configuration["WaitIndicator.Foreground"];
+        }
+        this._textNode.nodeValue = client.configuration["WaitIndicator.Text"];
         this._divElement.style.display = "block";
         Core.Web.Scheduler.add(this._fadeRunnable);
         this._opacity = 0;
     },
     
     /** @see Echo.Client.WaitIndicator#deactivate */
-    deactivate: function() {
+    deactivate: function(client) {
         this._divElement.style.display = "none";
         Core.Web.Scheduler.remove(this._fadeRunnable);
     },

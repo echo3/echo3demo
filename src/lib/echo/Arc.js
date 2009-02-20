@@ -40,10 +40,33 @@ Echo.Arc.Client = Core.extend(Echo.FreeClient, {
  */
 Echo.Arc.ComponentSync = Core.extend(Echo.Render.ComponentSync, {
 
+    /**
+     * The embedded application.
+     * @type Echo.Application
+     */
+    arcApplication: null,
+    
+    /**
+     * The embedded client.
+     * @type Echo.Client
+     */
+    arcClient: null,
+
+    /**
+     * The base component that will serve as the rendered form of this synchronization peer's supported component.
+     * @type Echo.Component
+     */
+    baseComponent: null,
+    
+    /**
+     * Default domain element.  A DIV element which is created/returned if 
+     */
+    _defaultDomainElement: null,
+    
     $abstract: {
     
         /**
-         * Creates the base component of that will be added to the root
+         * Creates the base component that will be added to the root
          * of the rendering application.  This component should probably be a
          * ContentPane or other container.
          * This method must be overridden by ARC implementations.
@@ -57,23 +80,28 @@ Echo.Arc.ComponentSync = Core.extend(Echo.Render.ComponentSync, {
         
         /**
          * Returns the element in which the client should be rendered.
+         * Default implementation creates/returns a DIV.
+         * May be overridden.  This implementation does not need to be invoked by overriding implementation. 
          * 
          * @type Element
          */
         getDomainElement: function() { 
+            if (!this._defaultDomainElement) {
+                this._defaultDomainElement = document.createElement("div");
+            }
             return this._defaultDomainElement;
         },
         
         /**
-         * renderAdd() implementation: must be invoked by overriding method.
+         * Default renderAdd() implementation: appends the element returned by getDomainElement() to the parent.
+         * May be overridden.  This implementation does not need to be invoked by overriding implementation. 
          * 
          * @see Echo.Render.ComponentSync#renderAdd
          */
         renderAdd: function(update, parentElement) {
-            if (!this.getDomainElement()) {
-                this._defaultDomainElement = document.createElement("div");
-                parentElement.appendChild(this._defaultDomainElement);
-            }
+            var element = this.getDomainElement();
+            Core.Debug.consoleWrite("RA:" + element);
+            parentElement.appendChild(element);
         },
     
         /**
@@ -96,7 +124,7 @@ Echo.Arc.ComponentSync = Core.extend(Echo.Render.ComponentSync, {
                 this.arcApplication = new Echo.Application();
                 this.arcApplication.setStyleSheet(this.client.application.getStyleSheet());
                 this.baseComponent = this.createComponent();
-                if (this.baseComponent == null) {
+                if (!this.baseComponent) {
                     throw new Error("Invalid base component: null");
                 }
                 this.arcApplication.rootComponent.add(this.baseComponent);

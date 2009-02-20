@@ -1,105 +1,177 @@
-Extras.Serial.ItemModel = {
-
-    _parseIcon: function(client, propertyElement) {
-        var icon = Core.Web.DOM.getChildElementByTagName(propertyElement, "icon");
-        if (icon) {
-            return Echo.Serial.ImageReference.toProperty(client, icon);
+/**
+ * ItemModel PropertyTranslator singleton.  Not registered, but used by other translators.
+ */
+Extras.Serial.ItemModel = Core.extend(Echo.Serial.PropertyTranslator, {
+    
+    $static: {
+    
+        /**
+         * Parses an icon contained in a menu model property element.
+         * 
+         * @param {Echo.Client} client the client
+         * @param {Element} pElement the property "p" element
+         */
+        parseIcon: function(client, pElement) {
+            var icon = Core.Web.DOM.getChildElementByTagName(pElement, "icon");
+            if (icon) {
+                return Echo.Serial.ImageReference.toProperty(client, icon);
+            }
+            return null;
+        },
+        
+        /** @see Echo.Serial.PropertyTranslator#toProperty */
+        toProperty: function(client, pElement) {
+            var type = pElement.getAttribute("t");
+            if (type.indexOf(Extras.Serial.PROPERTY_TYPE_PREFIX) === 0) {
+                type = type.substring(Extras.Serial.PROPERTY_TYPE_PREFIX.length);
+            }
+            var translator = Extras.Serial[type];
+              if (translator) {
+                  return translator.toProperty(client, pElement);
+            } else {
+                throw new Error("Unsupported model type: " + type);
+            }
         }
-        return null;
+    }
+});
+
+/**
+ * MenuModel PropertyTranslator singleton.
+ */
+Extras.Serial.MenuModel = Core.extend(Echo.Serial.PropertyTranslator, {
+    
+    $static: {
+
+        /** @see Echo.Serial.PropertyTranslator#toProperty */
+        toProperty: function(client, pElement) {
+            var id = pElement.getAttribute("id");
+            var text = pElement.getAttribute("text");
+            var icon = Extras.Serial.ItemModel.parseIcon(client, pElement);
+            var model = new Extras.MenuModel(id, text, icon);
+            
+            var children = Core.Web.DOM.getChildElementsByTagName(pElement, "item");
+            for (var i = 0; i < children.length; i++) {
+                var childElement = children[i];
+                var subModel = Extras.Serial.ItemModel.toProperty(client, childElement);
+                model.addItem(subModel);
+           }
+           return model;
+        }
     },
     
-    toProperty: function(client, propertyElement) {
-        var type = propertyElement.getAttribute("t");
-        if (type.indexOf(Extras.Serial.PROPERTY_TYPE_PREFIX) === 0) {
-            type = type.substring(Extras.Serial.PROPERTY_TYPE_PREFIX.length);
+    $load: function() {
+        Echo.Serial.addPropertyTranslator("Extras.Serial.MenuModel", this);
+    }
+});
+
+/**
+ * OptionModel PropertyTranslator singleton.
+ */
+Extras.Serial.OptionModel = Core.extend(Echo.Serial.PropertyTranslator, {
+    
+    $static: {
+
+        /** @see Echo.Serial.PropertyTranslator#toProperty */
+        toProperty: function(client, pElement) {
+            var id = pElement.getAttribute("id");
+            var text = pElement.getAttribute("text");
+            var icon = Extras.Serial.ItemModel.parseIcon(client, pElement);
+            return new Extras.OptionModel(id, text, icon);
         }
-        var translator = Extras.Serial[type];
-          if (translator) {
-              return translator.toProperty(client, propertyElement);
-        } else {
-            throw new Error("Unsupported model type: " + type);
+    },
+    
+    $load: function() {
+        Echo.Serial.addPropertyTranslator("Extras.Serial.OptionModel", this);
+    }
+});
+
+/**
+ * RadioOptionModel PropertyTranslator singleton.
+ */
+Extras.Serial.RadioOptionModel = Core.extend(Echo.Serial.PropertyTranslator, {
+    
+    $static: {
+
+        /** @see Echo.Serial.PropertyTranslator#toProperty */
+        toProperty: function(client, pElement) {
+            var id = pElement.getAttribute("id");
+            var text = pElement.getAttribute("text");
+            var icon = Extras.Serial.ItemModel.parseIcon(client, pElement);
+            return new Extras.RadioOptionModel(id, text, icon);
         }
+    },
+    
+    $load: function() {
+        Echo.Serial.addPropertyTranslator("Extras.Serial.RadioOptionModel", this);
     }
-};
+});
 
-Extras.Serial.MenuModel = {
+/**
+ * ToggleOptionModel PropertyTranslator singleton.
+ */
+Extras.Serial.ToggleOptionModel = Core.extend(Echo.Serial.PropertyTranslator, {
+    
+    $static: {
 
-    toProperty: function(client, propertyElement) {
-        var id = propertyElement.getAttribute("id");
-        var text = propertyElement.getAttribute("text");
-        var icon = Extras.Serial.ItemModel._parseIcon(client, propertyElement);
-        var model = new Extras.MenuModel(id, text, icon);
-        
-        var children = Core.Web.DOM.getChildElementsByTagName(propertyElement, "item");
-        for (var i = 0; i < children.length; i++) {
-            var childElement = children[i];
-            var subModel = Extras.Serial.ItemModel.toProperty(client, childElement);
-            model.addItem(subModel);
-       }
-       return model;
+        /** @see Echo.Serial.PropertyTranslator#toProperty */
+        toProperty: function(client, pElement) {
+            var id = pElement.getAttribute("id");
+            var text = pElement.getAttribute("text");
+            var icon = Extras.Serial.ItemModel.parseIcon(client, pElement);
+            return new Extras.ToggleOptionModel(id, text, icon);
+        }
+    },
+    
+    $load: function() {
+        Echo.Serial.addPropertyTranslator("Extras.Serial.ToggleOptionModel", this);
     }
-};
+});
 
-Extras.Serial.OptionModel = {
+/**
+ * SeparatorModel PropertyTranslator singleton.
+ */
+Extras.Serial.SeparatorModel = Core.extend(Echo.Serial.PropertyTranslator, {
+    
+    $static: {
 
-    toProperty: function(client, propertyElement) {
-        var id = propertyElement.getAttribute("id");
-        var text = propertyElement.getAttribute("text");
-        var icon = Extras.Serial.ItemModel._parseIcon(client, propertyElement);
-        return new Extras.OptionModel(id, text, icon);
+        /** @see Echo.Serial.PropertyTranslator#toProperty */
+        toProperty: function(client, pElement) {
+            return new Extras.SeparatorModel();
+        }
+    },
+    
+    $load: function() {
+        Echo.Serial.addPropertyTranslator("Extras.Serial.SeparatorModel", this);
     }
-};
+});
 
-Extras.Serial.RadioOptionModel = {
+/**
+ * MenuStateModel PropertyTranslator singleton.
+ */
+Extras.Serial.MenuStateModel = Core.extend(Echo.Serial.PropertyTranslator, {
+    
+    $static: {
 
-    toProperty: function(client, propertyElement) {
-        var id = propertyElement.getAttribute("id");
-        var text = propertyElement.getAttribute("text");
-        var icon = Extras.Serial.ItemModel._parseIcon(client, propertyElement);
-        return new Extras.RadioOptionModel(id, text, icon);
-    }
-};
-
-Extras.Serial.ToggleOptionModel = {
-
-    toProperty: function(client, propertyElement) {
-        var id = propertyElement.getAttribute("id");
-        var text = propertyElement.getAttribute("text");
-        var icon = Extras.Serial.ItemModel._parseIcon(client, propertyElement);
-        return new Extras.ToggleOptionModel(id, text, icon);
-    }
-};
-
-Extras.Serial.SeparatorModel = {
-
-    toProperty: function(client, propertyElement) {
-        return new Extras.SeparatorModel();
-    }
-};
-
-Extras.Serial.MenuStateModel = {
-
-    toProperty: function(client, propertyElement) {
-        var stateModel = new Extras.MenuStateModel();
-        var children = Core.Web.DOM.getChildElementsByTagName(propertyElement, "i");
-        for (var i = 0; i < children.length; i++) {
-            var childElement = children[i];
-            var enabledValue = childElement.getAttribute("enabled");
-            if (enabledValue != null) {
-                stateModel.setEnabled(childElement.getAttribute("id"), enabledValue == "true");
+        /** @see Echo.Serial.PropertyTranslator#toProperty */
+        toProperty: function(client, pElement) {
+            var stateModel = new Extras.MenuStateModel();
+            var children = Core.Web.DOM.getChildElementsByTagName(pElement, "i");
+            for (var i = 0; i < children.length; i++) {
+                var childElement = children[i];
+                var enabledValue = childElement.getAttribute("enabled");
+                if (enabledValue != null) {
+                    stateModel.setEnabled(childElement.getAttribute("id"), enabledValue == "true");
+                }
+                var selectedValue = childElement.getAttribute("selected");
+                if (selectedValue != null) {
+                    stateModel.setSelected(childElement.getAttribute("id"), selectedValue == "true");
+                }
             }
-            var selectedValue = childElement.getAttribute("selected");
-            if (selectedValue != null) {
-                stateModel.setSelected(childElement.getAttribute("id"), selectedValue == "true");
-            }
+            return stateModel;
         }
-        return stateModel;
+    },
+    
+    $load: function() {
+        Echo.Serial.addPropertyTranslator("Extras.Serial.MenuStateModel", this);
     }
-};
-
-Echo.Serial.addPropertyTranslator("Extras.Serial.MenuModel", Extras.Serial.MenuModel);
-Echo.Serial.addPropertyTranslator("Extras.Serial.OptionModel", Extras.Serial.OptionModel);
-Echo.Serial.addPropertyTranslator("Extras.Serial.RadioOptionModel", Extras.Serial.RadioOptionModel);
-Echo.Serial.addPropertyTranslator("Extras.Serial.ToggleOptionModel", Extras.Serial.ToggleOptionModel);
-Echo.Serial.addPropertyTranslator("Extras.Serial.SeparatorModel", Extras.Serial.SeparatorModel);
-Echo.Serial.addPropertyTranslator("Extras.Serial.MenuStateModel", Extras.Serial.MenuStateModel);
+});

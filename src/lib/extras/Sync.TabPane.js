@@ -4,47 +4,99 @@
 Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
 
     $static: {
-        _supportedPartialProperties: ["activeTab", "activeTabIndex"],
-        _paneInsets: 0,
-        _defaultBorderType: Extras.TabPane.BORDER_TYPE_ADJACENT_TO_TABS,
-        _defaultForeground: "#000000",
-        _defaultInsets: 2,
-        _defaultTabActiveBorder: "1px solid #00004f",
-        _defaultTabActiveHeightIncrease: 2,
-        _defaultTabAlignment: "top",
-        _defaultTabCloseIconTextMargin: 5,
-        _defaultTabContentInsets: 0,
-        _defaultTabIconTextMargin: 5,
-        _defaultTabInactiveBorder: "1px solid #7f7f7f",
-        _defaultTabInset: 10,
-        _defaultTabInsets: "3px 8px",
-        _defaultTabPosition: Extras.TabPane.TAB_POSITION_TOP,
-        _defaultTabSpacing: 0,
+
+        /** 
+         * Supported partial update properties. 
+         * @type Array
+         */
+        _supportedPartialProperties: ["activeTabId", "activeTabIndex"],
+        
+        /**
+         * Default component property settings, used when supported component object does not provide settings. 
+         */
+        _DEFAULTS: {
+            borderType: Extras.TabPane.BORDER_TYPE_ADJACENT_TO_TABS,
+            foreground: "#000000",
+            insets: 2,
+            tabActiveBorder: "1px solid #00004f",
+            tabActiveHeightIncrease: 2,
+            tabAlignment: "top",
+            tabCloseIconTextMargin: 5,
+            tabContentInsets: 0,
+            tabIconTextMargin: 5,
+            tabInactiveBorder: "1px solid #7f7f7f",
+            tabInset: 10,
+            tabInsets: "3px 8px",
+            tabPosition: Extras.TabPane.TAB_POSITION_TOP,
+            tabSpacing: 0
+        },
         
         /**
          * Runnable to manage scrolling animation.
          */
         ScrollRunnable: Core.extend(Core.Web.Scheduler.Runnable, {
         
+            /** @see Core.Web.Scheduler.Runnable#repeat */
             repeat: true,
+
+            /** @see Core.Web.Scheduler.Runnable#timeInterval */
             timeInterval: 20,
 
+            /**
+             * Direction of scrolling travel.  True indicates tabs are scrolling in reverse (revealing tabs to the left),
+             * true indicating scrolling forward (revealing tabs to the right).
+             * @type Boolean
+             */
             reverse: false,
+            
+            /**
+             * Current distance scrolled, in pixels.
+             * @type Number
+             */
             distance: 0,
             
-            /** Minimum distance to move (in case of click rather than hold */
+            /** 
+             * Minimum distance to move (in case of click rather than hold
+             * @type Number 
+             */
             clickDistance: 50,
             
-            /** Rate to scroll when scroll button held. */
+            /** 
+             * Rate to scroll when scroll button held.
+             * @type Number 
+             */
             pixelsPerSecond: 400,
             
-            /** Initial scroll position. */
+            /** 
+             * Initial scroll position.
+             * @type Number 
+             */
             initialPosition: null,
             
+            /**
+             * Flag indicating whether the ScrollRunnable is disposed.
+             * @type Boolean
+             */
             disposed: false,
+            
+            /**
+             * The TabPane peer for which scrolling is being performed.
+             * @type Extras.Sync.TabPane
+             */
             peer: null,
+            
+            /**
+             * Last invocation time of run() method.  Used to determine the number of pixels which should be scrolled and 
+             * ensure a constant velocity of the tabs.
+             */
             lastInvokeTime: null,
         
+            /**
+             * Creates a new ScrollRunnable.
+             * 
+             * @param {Extras.Sync.TabPane} the synchronization peer
+             * @param {Boolean} direction of scrolling travel
+             */
             $construct: function(peer, reverse) {
                 this.peer = peer;
                 this.reverse = reverse;
@@ -52,6 +104,9 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
                 this.lastInvokeTime = new Date().getTime();
             },
             
+            /**
+             * Disposes of the scrolling runnable, removing it from the scheduler.
+             */
             dispose: function() {
                 if (!this.disposed) {
                     Core.Web.Scheduler.remove(this);
@@ -59,6 +114,11 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
                 this.disposed = true;
             },
             
+            /**
+             * Finishes the tab header scrolling operation in response to the user releasing the scroll button.
+             * Ensures the header has been scrolled the minimum "click distance", and if not, scrolls the header
+             * that distance.
+             */
             finish: function() {
                 if (this.distance < this.clickDistance) {
                     this.distance = this.clickDistance;
@@ -67,6 +127,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
                 this.dispose();
             },
             
+            /** @see Core.Web.Scheduler.Runnable#run */
             run: function() {
                 var time = new Date().getTime();
                 this.distance += Math.ceil(this.pixelsPerSecond * (time - this.lastInvokeTime) / 1000);
@@ -74,6 +135,9 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
                 this.updatePosition();
             },
             
+            /**
+             * Updates the scroll position of the tab pane header.
+             */
             updatePosition: function() {
                 var position = this.initialPosition + ((this.reverse ? -1 : 1) * this.distance);
                 if (!this.peer.setScrollPosition(position)) {
@@ -87,6 +151,10 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         Echo.Render.registerPeer("Extras.TabPane", this);
     },
     
+    /**
+     * Name-to-ImageReference map for icons used by the TabPane, e.g., tab close and scroll icons.
+     * @type Object
+     */
     _icons: null,
 
     /**
@@ -116,11 +184,13 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
     
     /**
      * Scroll previous arrow.
+     * @type Element
      */
     _previousControlDiv: null,
     
     /**
      * Scroll next arrow.
+     * @type Element
      */
     _nextControlDiv: null,
     
@@ -132,22 +202,42 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
     _tabs: null,
     
     /**
-     * Combined width of all tabs.
+     * Combined width of all tabs, in pixels.
+     * @type Number
      */
     _totalTabWidth: 0,
     
     /**
      * Flag indicating whether the header size may need to be reconfigured (by invoking configureHeaderSize() in the next
-     * renderDisplay() execution.
+     * renderDisplay() execution).
+     * @type Boolean
      */
     _configureHeaderSizeRequired: false,
     
+    /** 
+     * Method reference to <code>_tabSelectListener</code> of instance.
+     * @type Function 
+     */
+    _tabSelectListenerRef: null,
+    
+    /**
+     * The ScrollRunnable currently scrolling the tab headers.  Null when the tab pane is not actively scrolling. 
+     * @type Extras.Sync.TabPane#ScrollRunnable
+     */
     _scrollRunnable: null,
     
+    /**
+     * Current scroll position of tab header, in pixels.
+     * @type Number
+     */
     scrollPosition: 0,
     
+    /**
+     * Constructor.
+     */
     $construct: function() {
         this._tabs = [];
+        this._tabSelectListenerRef = Core.method(this, this._tabSelectListener);
     },
     
     /**
@@ -173,6 +263,10 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
 
+    /**
+     * Measures the height of the header region of the tab pane, adjusting the content region's size to accommodate it.
+     * Invoked in renderDisplay phase when <code>_configureHeaderSizeRequired</code> flag has been set.
+     */
     _configureHeaderSize: function() {
         var height = new Core.Web.Measure.Bounds(this._headerTabContainerDiv).height;
         if (height === 0) {
@@ -202,7 +296,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
     
     /**
      * Determines the renderId of the active tab child component.
-     * This method first queries the component's <code>activeTab</code> property, 
+     * This method first queries the component's <code>activeTabId</code> property, 
      * and if it is not set, the id is determined by finding the child component at the 
      * index specified by the component's <code>activeTabIndex</code> property.
      *
@@ -210,7 +304,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
      * @type String
      */
     _getActiveTabId: function() {
-        var activeTabId = this.component.get("activeTab");
+        var activeTabId = this.component.get("activeTabId");
         if (!activeTabId) {
             var activeTabIndex = this.component.get("activeTabIndex");
             if (activeTabIndex != null && activeTabIndex < this.component.children.length) {
@@ -222,7 +316,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
 
     /**
      * Retrieves the tab instance with the specified tab id.
-     * 
+     *
      * @param tabId the tab render id
      * @return the tab, or null if no tab is present with the specified id
      * @type Extras.Sync.TabPane.Tab
@@ -239,6 +333,8 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
     
     /**
      * Handler for mouse down event on previous/next scroll buttons.
+     * 
+     * @param e the mouse down event
      */
     _processScrollStart: function(e) {
         if (!this.client || !this.client.verifyInput(this.component)) {
@@ -251,6 +347,8 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
     
     /**
      * Handler for mouse up event on previous/next scroll buttons.
+     * 
+     * @param e the mouse up event
      */
     _processScrollStop: function(e) {
         if (!this._scrollRunnable) {
@@ -261,7 +359,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
     },
     
     /**
-     * Removes a specific tab.
+     * Removes a specific tab.  Removes its rendering from the DOM.
      *
      * @param {Extras.Sync.TabPane.Tab} tab the tab to remove
      */
@@ -281,20 +379,23 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         tab._dispose();
     },
     
+    /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
+        this.component.addListener("tabSelect", this._tabSelectListenerRef);
+        
         this._icons = { };
         
         // Configure Properties
         this._activeTabId = this._getActiveTabId();
-        this._borderType = this.component.render("borderType", Extras.Sync.TabPane._defaultBorderType);
-        this._insets = this.component.render("insets", Extras.Sync.TabPane._defaultInsets);
-        this._tabActiveBorder = this.component.render("tabActiveBorder", Extras.Sync.TabPane._defaultTabActiveBorder);
+        this._borderType = this.component.render("borderType", Extras.Sync.TabPane._DEFAULTS.borderType);
+        this._insets = this.component.render("insets", Extras.Sync.TabPane._DEFAULTS.insets);
+        this._tabActiveBorder = this.component.render("tabActiveBorder", Extras.Sync.TabPane._DEFAULTS.tabActiveBorder);
         this._tabActiveHeightIncreasePx = Echo.Sync.Extent.toPixels(this.component.render("tabActiveHeightIncrease", 
-                Extras.Sync.TabPane._defaultTabActiveHeightIncrease));
-        this._tabInactiveBorder = this.component.render("tabInactiveBorder", Extras.Sync.TabPane._defaultTabInactiveBorder);
-        this._tabInsetPx = Echo.Sync.Extent.toPixels(this.component.render("tabInset",Extras.Sync.TabPane._defaultTabInset));
-        this._tabPosition = this.component.render("tabPosition", Extras.Sync.TabPane._defaultTabPosition);
-        this._tabSpacing = this.component.render("tabSpacing", Extras.Sync.TabPane._defaultTabSpacing);
+                Extras.Sync.TabPane._DEFAULTS.tabActiveHeightIncrease));
+        this._tabInactiveBorder = this.component.render("tabInactiveBorder", Extras.Sync.TabPane._DEFAULTS.tabInactiveBorder);
+        this._tabInsetPx = Echo.Sync.Extent.toPixels(this.component.render("tabInset",Extras.Sync.TabPane._DEFAULTS.tabInset));
+        this._tabPosition = this.component.render("tabPosition", Extras.Sync.TabPane._DEFAULTS.tabPosition);
+        this._tabSpacing = this.component.render("tabSpacing", Extras.Sync.TabPane._DEFAULTS.tabSpacing);
         this._tabCloseEnabled = this.component.render("tabCloseEnabled", false);
         if (this._tabCloseEnabled) {
             this._icons.defaultIcon = this.component.render("tabCloseIcon");
@@ -366,7 +467,6 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
             this._activeTabId = null;
             if (componentCount > 0) {
                 this._selectTab(this.component.getComponent(0).renderId);
-                this._setActiveTabId(this._activeTabId);
             }
         }
 
@@ -390,6 +490,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         parentElement.appendChild(this._div);
     },
     
+    /** @see Echo.Render.ComponentSync#renderDisplay */
     renderDisplay: function() {
         var img, oversize, i;
 
@@ -421,7 +522,10 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
     
+    /** @see Echo.Render.ComponentSync#renderDispose */
     renderDispose: function(update) {
+        this.component.removeListener("tabSelect", this._tabSelectListenerRef);
+
         this._activeTabId = null;
         for (var i = 0; i < this._tabs.length; i++) {
             this._tabs[i]._dispose();
@@ -443,6 +547,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
     
+    /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
         var fullRender = false,
             tab,
@@ -485,7 +590,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
             }
             if (update.hasUpdatedProperties()) {
                 // partial update
-                var activeTabUpdate = update.getUpdatedProperty("activeTab");
+                var activeTabUpdate = update.getUpdatedProperty("activeTabId");
                 if (activeTabUpdate) {
                     activeTabRemoved = false;
                     this._selectTab(activeTabUpdate.newValue);
@@ -514,7 +619,7 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
     },
     
     /**
-     * Selects a specific tab.
+     * Changes the displayed active tab.
      * 
      * @param tabId {String} the id of the tab to select
      */
@@ -539,21 +644,13 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
     
-    _setActiveTabId: function(activeTabId) {
-        this.component.set("activeTab", activeTabId);
-        var indexSet = false;
-        for (var i = 0; i < this.component.children.length; ++i) {
-            if (this.component.children[i].renderId == activeTabId) {
-                this.component.set("activeTabIndex", i);
-                indexSet = true;
-                break;
-            }
-        }
-        if (!indexSet) {
-            this.component.set("activeTabIndex", null);
-        }
-    },
-
+    /**
+     * Enables/disables the scrolling controls used when the tab header is to wide to be displayed entirely at once.
+     * This method will lazy-render the specified scrolling control if it has not been previously enabled. 
+     * 
+     * @param {Boolean} previous flag indicating which scrolling control should be enabled/disabled, true indicating the
+     *        scroll-to-previous control, false indicating the scroll-to-next control
+     */
     _setOversizeEnabled: function(previous, enabled) {
         var controlDiv = previous ? this._previousControlDiv : this._nextControlDiv,
             img;
@@ -589,9 +686,17 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
             }
         } else if (controlDiv) {
             controlDiv.style.display = "none";
-        }     
+        }
     },
     
+    /**
+     * Sets the scroll position of the tab header.
+     * 
+     * @param {Number} position the scroll position, in pixels
+     * @return a boolean state indicating whether the scroll position could be set exactly (true) or was bounded by
+     *         an attempt to be scrolled to far (false)
+     * @type Boolean
+     */
     setScrollPosition: function(position) {
         var bounded = false,
             oversize = this._totalTabWidth > this._tabContainerWidth;
@@ -615,6 +720,15 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         }
         
         return !bounded;
+    },
+    
+    /**
+     * Event listener to component instance for user tab selections.
+     * 
+     * @param e the event
+     */
+    _tabSelectListener: function(e) {
+        this._selectTab(e.tab.renderId);
     }
 });
 
@@ -624,28 +738,82 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
  * on/off for an individual tab.
  */
 Extras.Sync.TabPane.Tab = Core.extend({
+    
+    /**
+     * The child component which will be rendered within the tab.
+     * @type Echo.Component
+     */
+    _childComponent: null,
+    
+    /**
+     * The TabPane synchronization peer.
+     * @type Extras.Sync.TabPane
+     */
+    _parent: null,
+    
+    /**
+     * TD element containing tab header (highest level element managed by Tab object in the header).
+     * @type Element
+     */
+    _headerTd: null,
+    
+    /**
+     * The DIV element which will contain the rendered child component.
+     * @type Element
+     */
+    _contentDiv: null,
+    
+    /**
+     * TD element containing left-side tab trim.
+     * @type Element
+     */
+    _leftTd: null,
+    
+    /**
+     * Center TD element, containing tab header content.
+     * @type Element
+     */
+    _centerTd: null,
+    
+    /**
+     * TD element containing right-side tab trim.
+     * @type Element
+     */
+    _rightTd: null,
+    
+    /**
+     * TD element containing close icon.
+     * @type Element
+     */
+    _closeIconTd: null,
+    
+    /**
+     * Flag indicating whether the tab may be closed.
+     * @type Boolean
+     */
+    _tabCloseEnabled: false,
 
+    /**
+     * Creates a new Tab instance.
+     * 
+     * @param {Echo.Component} childComponent the child component which will be rendered within the tab
+     * @param {Extras.Sync.TabPane} parent the TabPane synchronization peer
+     */
     $construct: function(childComponent, parent) {
         // state
         this._childComponent = childComponent;
         this._parent = parent;
-        this._rendered = false;
         if (parent._tabCloseEnabled) {
             var layoutData = this._childComponent.render("layoutData");
             this._tabCloseEnabled = layoutData ? layoutData.closeEnabled : false;
         } else {
             this._tabCloseEnabled = false;
         }
-        // elements
-        this._headerTd = null;
-        this._headerContentTable = null;
-        this._contentDiv = null;
-        this._leftTd = null;
-        this._centerTd = null;
-        this._rightTd = null;
-        this._closeImageTd = null;
     },
     
+    /**
+     * Adds event listeners to the tab to handle click and mouse events.
+     */
     _addEventListeners: function() {
         Core.Web.Event.add(this._headerTd, "click", Core.method(this, this._processClick), false);
         Core.Web.Event.Selection.disable(this._headerTd);
@@ -656,20 +824,28 @@ Extras.Sync.TabPane.Tab = Core.extend({
         }
     },
     
+    /**
+     * Disposes of the tab, releasing any resources.
+     */
     _dispose: function() {
         Core.Web.Event.removeAll(this._headerTd);
         
         this._parent = null;
         this._childComponent = null;
         this._headerTd = null;
-        this._headerContentTable = null;
         this._contentDiv = null;
         this._leftTd = null;
         this._centerTd = null;
         this._rightTd = null;
-        this._closeImageTd = null;
+        this._closeIconTd = null;
     },
     
+    /**
+     * Retries the close image (either default or rollover).
+     * 
+     * @param rollover flag indicating whether rollover (true) or default (false) image should be returned
+     * @type #ImageReference
+     */
     _getCloseImage: function(rollover) {
         var icons = this._parent._icons;
         var icon;
@@ -682,16 +858,28 @@ Extras.Sync.TabPane.Tab = Core.extend({
         }
         return icon ? icon : icons.defaultIcon || this._parent.client.getResourceUrl("Extras", "image/tabpane/Close.gif");
     },
-    
+
+    /**
+     * Determine content inset margin.
+     * 
+     * @return the content inset margin
+     * @type #Insets
+     */
     _getContentInsets: function() {
         if (this._childComponent.pane) {
-            return Extras.Sync.TabPane._paneInsets;
+            // Do not render insets on panes.
+            return 0;
         } else {
-            return this._parent.component.render("defaultContentInsets", 
-                    Extras.Sync.TabPane._defaultTabContentInsets);
+            return this._parent.component.render("defaultContentInsets", Extras.Sync.TabPane._DEFAULTS.tabContentInsets);
         }
     },
     
+    /**
+     * Retrieves left-side tab image data.  The returned object contains fillImage and width properties.
+     * 
+     * @param {Boolean} state the state of the tab, true for active, false for inactive
+     * @return a data object containing fillImage and width properties 
+     */
     _getLeftImage: function(state) {
         var propertyName = state ? "tabActiveLeftImage" : "tabInactiveLeftImage";
         var image = this._parent.component.render(propertyName);
@@ -702,6 +890,12 @@ Extras.Sync.TabPane.Tab = Core.extend({
         return { width: (image.width ? image.width : null), fillImage: fillImage };
     },
     
+    /**
+     * Retrieves right-side tab image data.  The returned object contains fillImage and width properties.
+     * 
+     * @param {Boolean} state the state of the tab, true for active, false for inactive
+     * @return a data object containing fillImage and width properties 
+     */
     _getRightImage: function(state) {
         var propertyName = state ? "tabActiveRightImage" : "tabInactiveRightImage";
         var image = this._parent.component.render(propertyName);
@@ -714,9 +908,11 @@ Extras.Sync.TabPane.Tab = Core.extend({
     
     /**
      * Renders the tab active or inactive, updating header state and showing/hiding tab content.
+     * 
+     * @param {Boolean} state the state of the tab, true for active, false for inactive
      */
     _renderActiveState: function(state) {
-        var headerContentTable = this._headerContentTable;
+        var headerContentTable = this._headerTd.firstChild;
         var centerTd = this._centerTd;
         var contentDiv = this._contentDiv;
         
@@ -803,51 +999,56 @@ Extras.Sync.TabPane.Tab = Core.extend({
     
     /**
      * Tab click handler.
+     * 
+     * @param e the click event
      */
     _processClick: function(e) {
         if (!this._parent || !this._parent.client || !this._parent.client.verifyInput(this._parent.component)) {
             return true;
         }
-        if (this._closeImageTd && Core.Web.DOM.isAncestorOf(this._closeImageTd, e.target)) {
+        if (this._closeIconTd && Core.Web.DOM.isAncestorOf(this._closeIconTd, e.target)) {
             // close icon clicked
             if (!this._tabCloseEnabled) {
                 return;
             }
-            this._parent.component.doTabClose(this._childComponent);
+            this._parent.component.doTabClose(this._childComponent.renderId);
         } else {
             // tab clicked
-            this._parent._selectTab(this._childComponent.renderId);
-            this._parent._setActiveTabId(this._childComponent.renderId);
-            this._parent.component.doTabSelect(this._childComponent);
+            this._parent.component.doTabSelect(this._childComponent.renderId);
         }
     },
     
     /**
      * Tab rollover enter handler.
+     * 
+     * @param e the mouse event
      */
     _processEnter: function(e) {
         if (!this._parent || !this._parent.client || !this._parent.client.verifyInput(this._parent.component)) {
             return true;
         }
         
-        var rollover = Core.Web.DOM.isAncestorOf(this._closeImageTd, e.target);
-        this._closeImageTd.firstChild.src = Echo.Sync.ImageReference.getUrl(this._getCloseImage(rollover));
+        var rollover = Core.Web.DOM.isAncestorOf(this._closeIconTd, e.target);
+        this._closeIconTd.firstChild.src = Echo.Sync.ImageReference.getUrl(this._getCloseImage(rollover));
     },
     
     /**
      * Tab rollover exit handler.
+     * 
+     * @param e the mouse event
      */
     _processExit: function(e) {
-        var rollover = Core.Web.DOM.isAncestorOf(this._closeImageTd, e.target);
-        this._closeImageTd.firstChild.src = Echo.Sync.ImageReference.getUrl(this._getCloseImage(false));
+        var rollover = Core.Web.DOM.isAncestorOf(this._closeIconTd, e.target);
+        this._closeIconTd.firstChild.src = Echo.Sync.ImageReference.getUrl(this._getCloseImage(false));
     },
     
     /**
      * Renders the tab.
+     * 
+     * @param {Echo.Update.ComponentUpdate} update the component update 
      */
     _render: function(update) {
         this._headerTd = this._renderHeader();
-        this._headerContentTable = this._headerTd.firstChild;
         this._contentDiv = this._renderContent(update);
         
         this._renderActiveState(this._childComponent.renderId == this._parent._activeTabId);
@@ -860,9 +1061,9 @@ Extras.Sync.TabPane.Tab = Core.extend({
     _renderCloseIcon: function() {
         var td = document.createElement("td");
         Echo.Sync.Alignment.render(this._parent.component.render("tabAlignment", 
-                Extras.Sync.TabPane._defaultTabAlignment), td, true, this._parent.component);
+                Extras.Sync.TabPane._DEFAULTS.tabAlignment), td, true, this._parent.component);
         td.style.padding = "0 0 0 " + this._parent.component.render("tabCloseIconTextMargin", 
-                Extras.Sync.TabPane._defaultTabCloseIconTextMargin + "px");
+                Extras.Sync.TabPane._DEFAULTS.tabCloseIconTextMargin + "px");
         td.style.cursor = "pointer";
         var img = document.createElement("img");
         img.src = Echo.Sync.ImageReference.getUrl(this._getCloseImage(false));
@@ -878,6 +1079,8 @@ Extras.Sync.TabPane.Tab = Core.extend({
     
     /**
      * Renders the content of a tab.
+     * 
+     * @param {Echo.Update.ComponentUpdate} update the component update 
      */
     _renderContent: function(update) {
         var div = document.createElement("div");
@@ -941,7 +1144,7 @@ Extras.Sync.TabPane.Tab = Core.extend({
         
         // Render TD element to contain tab content.
         var centerTd = document.createElement("td");
-        Echo.Sync.Insets.render(Extras.Sync.TabPane._defaultTabInsets, centerTd, "padding");
+        Echo.Sync.Insets.render(Extras.Sync.TabPane._DEFAULTS.tabInsets, centerTd, "padding");
         
         var labelDiv = document.createElement("div");
         centerTd.appendChild(labelDiv);
@@ -963,21 +1166,21 @@ Extras.Sync.TabPane.Tab = Core.extend({
             var textTd = document.createElement("td");
             textTd.style.whiteSpace = "nowrap";
             Echo.Sync.Alignment.render(this._parent.component.render("tabAlignment", 
-                    Extras.Sync.TabPane._defaultTabAlignment), textTd, true, this._parent.component);
+                    Extras.Sync.TabPane._DEFAULTS.tabAlignment), textTd, true, this._parent.component);
             textTd.appendChild(document.createTextNode(title));
             table.appendChild(tbody);
             tbody.appendChild(tr);
             tr.appendChild(textTd);
             if (closeIcon) {
-                this._closeImageTd = this._renderCloseIcon();
-                tr.appendChild(this._closeImageTd);
+                this._closeIconTd = this._renderCloseIcon();
+                tr.appendChild(this._closeIconTd);
             }
             labelDiv.appendChild(table);
         } else {
             // Render Text Only
             labelDiv.style.whiteSpace = "nowrap";
             Echo.Sync.Alignment.render(this._parent.component.render("tabAlignment", 
-                    Extras.Sync.TabPane._defaultTabAlignment), labelDiv, true, this._parent.component);
+                    Extras.Sync.TabPane._DEFAULTS.tabAlignment), labelDiv, true, this._parent.component);
             labelDiv.appendChild(document.createTextNode(title));
         }
         if (this._parent.component.render("tabHeight")) {
@@ -1003,15 +1206,17 @@ Extras.Sync.TabPane.Tab = Core.extend({
     
     /**
      * Renders the icon of a tab.
+     * 
+     * @param {#ImageReference} icon the icon 
      */
     _renderIcon: function(icon) {
         var td = document.createElement("td");
         Echo.Sync.Alignment.render(this._parent.component.render("tabAlignment", 
-                Extras.Sync.TabPane._defaultTabAlignment), td, true, this._parent.component);
+                Extras.Sync.TabPane._DEFAULTS.tabAlignment), td, true, this._parent.component);
         var img = document.createElement("img");
         img.src = Echo.Sync.ImageReference.getUrl(icon);
         img.style.marginRight = this._parent.component.render("tabIconTextMargin", 
-                Extras.Sync.TabPane._defaultTabIconTextMargin + "px");
+                Extras.Sync.TabPane._DEFAULTS.tabIconTextMargin + "px");
         td.appendChild(img);
         return td;
     }

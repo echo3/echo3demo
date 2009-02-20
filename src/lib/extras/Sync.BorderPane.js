@@ -7,10 +7,13 @@ Extras.Sync.BorderPane = Core.extend(Echo.Render.ComponentSync, {
         Echo.Render.registerPeer("Extras.BorderPane", this);
     },
 
-    $construct: function() {
-        this._div = null;
-    },
+    /**
+     * The main DIV element.
+     * @type Element
+     */
+    _div: null,
     
+    /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
         this._div = document.createElement("div");
         this._div.id = this.component.renderId;
@@ -20,6 +23,11 @@ Extras.Sync.BorderPane = Core.extend(Echo.Render.ComponentSync, {
         parentElement.appendChild(this._div);
     },
     
+    /**
+     * Renders the FillImageBorder surrounding the content.
+     * 
+     * @param {Echo.Update.ComponentUpdate} update the update
+     */
     _renderBorder: function() {
         var border = this.component.render("border", Extras.BorderPane.DEFAULT_BORDER);
         var borderInsets = Echo.Sync.Insets.toPixels(border.borderInsets);
@@ -78,6 +86,21 @@ Extras.Sync.BorderPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
     
+    /**
+     * Renders a sub-element of the border.
+     * 
+     * @param {#FillImageBorder} border the border
+     * @param {Number} position the index of the image within the border to use
+     * @param {Number} flags fill image rendering flags
+     * @param {Number} width the pixel width of the element
+     * @param {Number} height the pixel height of the element
+     * @param {Number} top the top position of the element
+     * @param {Number} right the right position of the element
+     * @param {Number} bottom the bottom position of the element
+     * @param {Number} left the left position of the element
+     * @return the created DIV
+     * @type Element
+     */
     _renderBorderPart: function(border, position, flags, width, height, top, right, bottom, left) {
         var div = document.createElement("div");
         div.style.cssText = "font-size:1px;position:absolute;";
@@ -111,6 +134,11 @@ Extras.Sync.BorderPane = Core.extend(Echo.Render.ComponentSync, {
         return div;
     },
     
+    /**
+     * Renders the contained content.
+     * 
+     * @param {Echo.Update.ComponentUpdate} update the update
+     */
     _renderContent: function(update) {
         this._content = document.createElement("div");
         this._content.style.cssText = "position:absolute;z-index:2;overflow:auto;";
@@ -140,32 +168,17 @@ Extras.Sync.BorderPane = Core.extend(Echo.Render.ComponentSync, {
         this._div.appendChild(this._content);
     },
     
+    /** @see Echo.Render.ComponentSync#renderDisplay */
     renderDisplay: function() {
         Core.Web.VirtualPosition.redraw(this._content);
         Core.Web.VirtualPosition.redraw(this._div);
-        if (this._top) {
-            Core.Web.VirtualPosition.redraw(this._top);
-        }
-        if (this._left) {
-            Core.Web.VirtualPosition.redraw(this._left);
-        }
-        if (this._right) {
-            Core.Web.VirtualPosition.redraw(this._right);
-        }
-        if (this._bottom) {
-            Core.Web.VirtualPosition.redraw(this._bottom);
-        }
+        Core.Web.VirtualPosition.redraw(this._top);
+        Core.Web.VirtualPosition.redraw(this._left);
+        Core.Web.VirtualPosition.redraw(this._right);
+        Core.Web.VirtualPosition.redraw(this._bottom);
     },
     
-    renderUpdate: function(update) {
-        var element = this._div;
-        var containerElement = element.parentNode;
-        Echo.Render.renderComponentDispose(update, update.parent);
-        containerElement.removeChild(element);
-        this.renderAdd(update, containerElement);
-        return true;
-    },
-    
+    /** @see Echo.Render.ComponentSync#renderDispose */
     renderDispose: function(update) {
         this._content = null;
         this._div = null;
@@ -173,5 +186,15 @@ Extras.Sync.BorderPane = Core.extend(Echo.Render.ComponentSync, {
         this._right = null;
         this._top = null;
         this._bottom = null;
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderUpdate */
+    renderUpdate: function(update) {
+        var element = this._div;
+        var containerElement = element.parentNode;
+        Echo.Render.renderComponentDispose(update, update.parent);
+        containerElement.removeChild(element);
+        this.renderAdd(update, containerElement);
+        return true;
     }
 });

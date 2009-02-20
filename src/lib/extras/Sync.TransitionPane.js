@@ -1,5 +1,5 @@
 /**
- * Synchronization peer for TransitionPane.
+ * Component rendering peer: TransitionPane.
  */
 Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
 
@@ -7,32 +7,56 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
         Echo.Render.registerPeer("Extras.TransitionPane", this);
     },
 
+    /**
+     * Outermost/top-level container element.
+     * @type Element
+     */
     _containerDiv: null,
+    
+    /**
+     * Content element, contains oldChildDiv/childDiv elements.
+     * @type Element
+     */
     contentDiv: null,
+    
+    /**
+     * The transition type value (retrieved from the component).
+     * @type Number
+     */
     type: null,
-    _duration: null,
+    
+    /**
+     * The transition which is actively running (null when content is not being transitioned).
+     * @type Extras.Sync.TransitionPane.Transition
+     */
     _transition: null,
+    
+    /**
+     * Reference to the Extras.Sync.TransitionPane.Transition object type which will be instantiated to perform a transition.
+     */
     _transitionClass: null,
-    _runnable: null,
     
     /**
      * The element containing the old child element, which is being transitioned FROM.
+     * @type Element
      */
     oldChildDiv: null,
     
     /**
      * The element containing the current/new child element, which is being transitioned TO.
+     * @type Element
      */
     childDiv: null,
     
     /**
      * Flag indicating whether initial content has been loaded (no transition effect is used on the first load).
+     * @type Boolean
      */
     _initialContentLoaded: false,
 
-    $construct: function() {
-    },
-    
+    /**
+     * Performs an immediate transition between old content and new content with no animated effect.
+     */
     doImmediateTransition: function() {
         this.removeOldContent();
         if (this.childDiv) {
@@ -40,6 +64,10 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
 
+    /**
+     * Determines the transition class that will be used to change content based on the
+     * type value of the supported Extras.TransitionPane component. 
+     */
     _loadTransition: function() {
         this.type = this.component.render("type");
         switch (this.type) {
@@ -62,7 +90,6 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
             break;
         default:
             this._transitionClass = null;
-            this._duration = null;
         }
     },
     
@@ -76,12 +103,6 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
 
-    _hideContent: function() {
-        if (this.childDiv) {
-            this.childDiv.style.visibility = "hidden";
-        }
-    },
-    
     /**
      * Shows new content.
      */
@@ -91,6 +112,7 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
 
+    /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
         this._containerDiv = document.createElement("div");
         this._containerDiv.id = this.component.renderId;
@@ -106,6 +128,11 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
     
+    /**
+     * Renders new content (a new child) added in an update.  Starts the transition.
+     * 
+     * @param {Echo.Update.ComponentUpdate} the update 
+     */
     _renderAddChild: function(update) {
         this._loadTransition();
         this.childDiv = document.createElement("div");
@@ -114,7 +141,7 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
         Echo.Render.renderComponentAdd(update, this.component.children[0], this.childDiv);
         
         if (this._initialContentLoaded) {
-            this._hideContent();
+            this.childDiv.style.visibility = "hidden";
             if (this._transitionClass) {
                 this._transitionStart();
             } else {
@@ -127,6 +154,7 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
         this.contentDiv.appendChild(this.childDiv);
     },
     
+    /** @see Echo.Render.ComponentSync#renderDispose */
     renderDispose: function(update) {
         this._initialContentLoaded = false;
         if (this._transition) {
@@ -137,6 +165,7 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
         this._containerDiv = null;
     },
 
+    /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
         var fullRender = false;
         if (update.hasUpdatedLayoutDataChildren()) {
@@ -181,12 +210,18 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
         return fullRender;
     },
     
+    /**
+     * Initiates the animated transition effect.
+     */
     _transitionStart: function() {
         this._transition = new this._transitionClass(this);
         this._transition.runTime = this.component.render("duration", this._transition.runTime);
         this._transition.start(Core.method(this, this._transitionFinish));
     },
     
+    /**
+     * Completes the animated transition effect. 
+     */
     _transitionFinish: function(abort) {
         // Abort current transition, if necessary.
         if (this._transition) {
@@ -212,6 +247,10 @@ Extras.Sync.TransitionPane = Core.extend(Echo.Render.ComponentSync, {
  */
 Extras.Sync.TransitionPane.Transition = Core.extend(Extras.Sync.Animation, {
 
+    /**
+     * The transition pane synchronization peer.
+     * @type Extras.Sync.TransitionPane
+     */
     transitionPane: null,
 
     /**
@@ -220,34 +259,69 @@ Extras.Sync.TransitionPane.Transition = Core.extend(Extras.Sync.Animation, {
      * This value will automatically be overridden if the TransitionPane component
      * has its "duration" property set.
      * @type Number
+     * @see Extras.Sync.Animation#runTime
      */
     runTime: 350,
 
     /**
      * Interval at which transition steps should be invoked, in milliseconds.
      * @type Number
+     * @see Extras.Sync.Animation#sleepInterval
      */
     sleepInterval: 10,
     
-    $abstract: { },
+    $abstract: true,
 
+    /**
+     * Constructor.
+     * 
+     * @param {Extras.Sync.TransitionPane} transitionPane the transition pane peer 
+     */
     $construct: function(transitionPane) {
         this.transitionPane = transitionPane;
     }
 });
 
+/**
+ * Transition implementation to translate between old content and new content by flipping horizontal blinds, as though the old
+ * screen were written to one side and the new screen were written to the other.
+ * Uses a series of alpha-channeled PNG images to approximate the effect.
+ */
 Extras.Sync.TransitionPane.BlindTransition = Core.extend(Extras.Sync.TransitionPane.Transition, {
 
+    /** @see Extras.Sync.Animation#runTime */
     runTime: 700,
+
+    /**
+     * The mask DIV that will display the blind graphic effect over the content.
+     * @type Element
+     */
     _maskDiv: null,
+    
+    /**
+     * Number of steps (images) to display.
+     * @type Number
+     */
     _stepCount: 14,
+    
+    /**
+     * Step number where old content will be swapped for new content.
+     * @type Number
+     */
     _swapStep: null,
+    
+    /**
+     * Flag indicating whether the transition will occur in reverse order.
+     * @type Boolean
+     */
     _reverse: false,
     
+    /** @see Extras.Sync.Animation#complete */
     complete: function(abort) {
         this._maskDiv.parentNode.removeChild(this._maskDiv);
     },
     
+    /** @see Extras.Sync.Animation#init */
     init: function() {
         this._swapStep = Math.floor(this._stepCount) / 2 + 1;
         this._reverse = this.transitionPane.type === Extras.TransitionPane.TYPE_BLIND_BLACK_OUT;
@@ -257,6 +331,7 @@ Extras.Sync.TransitionPane.BlindTransition = Core.extend(Extras.Sync.TransitionP
         this.transitionPane.contentDiv.appendChild(this._maskDiv);
     },
 
+    /** @see Extras.Sync.Animation#step */
     step: function(progress) {
         var currentStep = Math.ceil(progress * this._stepCount);
         if (currentStep === 0) {
@@ -297,13 +372,26 @@ Extras.Sync.TransitionPane.BlindTransition = Core.extend(Extras.Sync.TransitionP
     }    
 });
 
+/**
+ * Transition implementation to pan from old content to new content, as though both were either horizontally
+ * or vertically adjacent and the screen (camera) were moving from one to the other.
+ */
 Extras.Sync.TransitionPane.CameraPanTransition = Core.extend(
         Extras.Sync.TransitionPane.Transition, {
-        
+    
+    /**
+     * Flag indicating whether the new child (being transitioned to) has been placed on the screen.
+     * @type Boolean
+     */
     _newChildOnScreen: false,
     
+    /**
+     * The distance, in pixels, which content will travel across the screen (the width/height of the region).
+     * @type Number 
+     */
     _travel: null,
 
+    /** @see Extras.Sync.Animation#complete */
     complete: function(abort) {
         if (this.transitionPane.childDiv) {
             this.transitionPane.childDiv.style.zIndex = 0;
@@ -312,6 +400,7 @@ Extras.Sync.TransitionPane.CameraPanTransition = Core.extend(
         }
     },
     
+    /** @see Extras.Sync.Animation#init */
     init: function() {
         var bounds = new Core.Web.Measure.Bounds(this.transitionPane.contentDiv);
         this._travel = (this.transitionPane.type == Extras.TransitionPane.TYPE_CAMERA_PAN_DOWN || 
@@ -321,6 +410,7 @@ Extras.Sync.TransitionPane.CameraPanTransition = Core.extend(
         }
     },
     
+    /** @see Extras.Sync.Animation#step */
     step: function(progress) {
         switch (this.transitionPane.type) {
         case Extras.TransitionPane.TYPE_CAMERA_PAN_DOWN:
@@ -364,10 +454,15 @@ Extras.Sync.TransitionPane.CameraPanTransition = Core.extend(
     }
 });
 
+/**
+ * Transition implementation to fade from old content to new content.
+ */
 Extras.Sync.TransitionPane.FadeOpacityTransition = Core.extend(Extras.Sync.TransitionPane.Transition, {
     
+    /** @see Extras.Sync.Animation#runTime */
     runTime: 1000,
     
+    /** @see Extras.Sync.Animation#complete */
     complete: function(abort) {
         if (this.transitionPane.childDiv) {
             this.transitionPane.childDiv.style.zIndex = 0;
@@ -379,6 +474,7 @@ Extras.Sync.TransitionPane.FadeOpacityTransition = Core.extend(Extras.Sync.Trans
         }
     },
     
+    /** @see Extras.Sync.Animation#init */
     init: function() {
         if (this.transitionPane.childDiv) {
             if (Core.Web.Env.PROPRIETARY_IE_OPACITY_FILTER_REQUIRED) {
@@ -390,6 +486,7 @@ Extras.Sync.TransitionPane.FadeOpacityTransition = Core.extend(Extras.Sync.Trans
         this.transitionPane.showContent();
     },
     
+    /** @see Extras.Sync.Animation#step */
     step: function(progress) {
         var percent;
         if (this.transitionPane.childDiv) {
@@ -410,16 +507,32 @@ Extras.Sync.TransitionPane.FadeOpacityTransition = Core.extend(Extras.Sync.Trans
     }
 });
 
+/**
+ * Transition implementation to fade from old content to a solid color, then fade to new content.
+ */
 Extras.Sync.TransitionPane.FadeOpacityColorTransition = Core.extend(Extras.Sync.TransitionPane.Transition, {
 
+    /** @see Extras.Sync.Animation#runTime */
     runTime: 1000,
+
+    /**
+     * The masking color DIV element being faded in/out over the changing content.
+     * @type Element
+     */
     _maskDiv: null,
+    
+    /**
+     * Flag indicating whether old content has been fully faded out and swapped for new content.
+     * @type Boolean
+     */
     _swapped: false,
     
+    /** @see Extras.Sync.Animation#complete */
     complete: function(abort) {
         this._maskDiv.parentNode.removeChild(this._maskDiv);
     },
     
+    /** @see Extras.Sync.Animation#init */
     init: function() {
         this._maskDiv = document.createElement("div");
         this._maskDiv.style.cssText = "position:absolute;width:100%;height:100%;z-index:32767;";
@@ -436,6 +549,7 @@ Extras.Sync.TransitionPane.FadeOpacityColorTransition = Core.extend(Extras.Sync.
         this.transitionPane.contentDiv.appendChild(this._maskDiv);
     },
 
+    /** @see Extras.Sync.Animation#step */
     step: function(progress) {
         var opacity = 1 - Math.abs(progress * 2 - 1);
         if (progress > 0.5 && !this._swapped) {
