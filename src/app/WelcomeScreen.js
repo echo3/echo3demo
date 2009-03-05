@@ -11,7 +11,6 @@ DemoApp.WelcomeScreen = Core.extend(Echo.ContentPane, {
                 new Echo.WindowPane({
                     styleName: "GlassBlue",
                     contentWidth: "32em",
-                    contentHeight: "22em",
                     insets: "1em 2em",
                     positionX: "10%",
                     positionY: "90%",

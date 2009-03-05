@@ -282,19 +282,14 @@ DemoApp.JavaDevelopmentScreen = Core.extend(Echo.ContentPane, {
                     positionX: "100%",
                     positionY: "100%",
                     width: 300,
-                    height: 160,
                     resizable: false,
                     closable: false,
                     title: this._msg["JavaDevelopmentScreen.SourceDescription.Title"],
+                    insets: 10,
+                    backgroundImage: "image/LightBeigeLineBackground.png",
                     children: [
-                        new Echo.ContentPane({ 
-                            insets: 10,
-                            backgroundImage: "image/LightBeigeLineBackground.png",
-                            children: [
-                                new Echo.Label({
-                                    text: this._msg["JavaDevelopmentScreen.SourceDescription.Message"]
-                                })
-                            ]
+                        new Echo.Label({
+                            text: this._msg["JavaDevelopmentScreen.SourceDescription.Message"]
                         })
                     ]
                 })

@@ -16,7 +16,6 @@ DemoApp.PreferencesDialog = Core.extend(Echo.WindowPane, {
             styleName: DemoApp.pref.windowStyleName,
             modal: true,
             width: "40em",
-            height: "30em", 
             title: this._msg["PrefDialog.WindowTitle"],
             icon: "image/Icon16Preferences.gif",
             iconInsets: "6px 10px",

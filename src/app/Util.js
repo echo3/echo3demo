@@ -47,7 +47,6 @@ DemoApp.ColorSelectButton = Core.extend(Echo.Button, {
             styleName: DemoApp.pref.windowStyleName,
             title: "Select Color",
             width: 220,
-            height: 260,
             modal: true,
             events: {
                 close: Core.method(this, this._close)

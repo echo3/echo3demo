@@ -32,18 +32,13 @@ DemoApp.LayoutContainersScreen = Core.extend(Echo.ContentPane, {
                                     positionX: "90%",
                                     positionY: "50%",
                                     width: "19em",
-                                    height: "12em",
                                     closable: false,
                                     resizable: false,
+                                    backgroundImage: "image/LightBeigeLineBackground.png",
+                                    insets: "1ex",
                                     children: [
-                                        new Echo.ContentPane({
-                                            backgroundImage: "image/LightBeigeLineBackground.png",
-                                            insets: "1ex",
-                                            children: [
-                                                new Echo.Label({
-                                                    text: this._msg["LayoutContainersScreen.GridDescription"]
-                                                })
-                                            ]
+                                        new Echo.Label({
+                                            text: this._msg["LayoutContainersScreen.GridDescription"]
                                         })
                                     ]
                                 })
@@ -158,18 +153,13 @@ DemoApp.LayoutContainersScreen = Core.extend(Echo.ContentPane, {
                                     positionX: "10%",
                                     positionY: "50%",
                                     width: "19em",
-                                    height: "15em",
                                     closable: false,
                                     resizable: false,
+                                    backgroundImage: "image/LightBlueLineBackground.png",
+                                    insets: 5,
                                     children: [
-                                        new Echo.ContentPane({
-                                            backgroundImage: "image/LightBlueLineBackground.png",
-                                            insets: 5,
-                                            children: [
-                                                new Echo.Label({
-                                                    text: this._msg["LayoutContainersScreen.ColumnRowDescription"]
-                                                })
-                                            ]
+                                        new Echo.Label({
+                                            text: this._msg["LayoutContainersScreen.ColumnRowDescription"]
                                         })
                                     ]
                                 })

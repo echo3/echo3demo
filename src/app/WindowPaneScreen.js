@@ -57,7 +57,6 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                 new Echo.WindowPane({
                                     styleName: "GlassBlue2",
                                     contentWidth: "19em",
-                                    contentHeight: "18em",
                                     movable: false,
                                     closable: false,
                                     resizable: false,
@@ -273,7 +272,6 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                     styleName: "GlassBlue",
                     title: this._msg["WindowPaneScreen.TranslucentTitle"],
                     width: "30em",
-                    height: "23em",
                     closable: false,
                     positionX: "95%",
                     positionY: "55%",
@@ -299,7 +297,6 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                     closable: false,
                     positionX: "52%",
                     positionY: "95%",
-                    height: "22em",
                     insets: "1em 2em",
                     children: [
                         new Echo.Column({

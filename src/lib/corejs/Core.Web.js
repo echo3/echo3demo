@@ -799,6 +799,7 @@ Core.Web.Env = {
                 this.QUIRK_DELAYED_FOCUS_REQUIRED = true;
             }
         } else if (this.ENGINE_PRESTO) {
+            this.QUIRK_TABLE_CELL_WIDTH_EXCLUDES_PADDING = true;
             if (this.BROWSER_VERSION_MAJOR == 9 && this.BROWSER_VERSION_MINOR >= 50) {
                 this.QUIRK_OPERA_CSS_POSITIONING = true;
             }
@@ -1072,6 +1073,15 @@ Core.Web.Event = {
     
     /**
      * Unregisters an event handler.
+     * 
+     * CAUTION: If you are unregistering an event listener created with Core.method(), please see the documentation for
+     * Core.method() and note that a new closure-wrapped method is returned each time Core.method() is invoked.
+     * Thus calling removeListener(Core.method(this, this,_someListener)) will NOT remove an existing listener.
+     * The solution to this issue is to retain a reference to Core.method() wrapped listeners within the object
+     * that will register and unregister them.
+     * 
+     * If you are removing all listeners registered for a particular element (e.g., one which is being disposed)
+     * it is more efficient to simply invoke removeAll().
      *
      * @param {Element} element the DOM element on which to add the event handler
      * @param {String} eventType the DOM event type
@@ -1895,18 +1905,20 @@ Core.Web.Measure = {
         do {
             valueT += element.offsetTop  || 0;
             valueL += element.offsetLeft || 0;
-            if (element.style.borderLeftWidth && !init && Core.Web.Env.MEASURE_OFFSET_EXCLUDES_BORDER) {
-                var borderLeft = Core.Web.Measure.extentToPixels(element.style.borderLeftWidth, true);
-                valueL += borderLeft;
-                if (Core.Web.Env.QUIRK_MEASURE_OFFSET_HIDDEN_BORDER && element.style.overflow == "hidden") {
+            if (!init && Core.Web.Env.MEASURE_OFFSET_EXCLUDES_BORDER) {
+                if (element.style.borderLeftWidth && element.style.borderLeftStyle != "none") {
+                    var borderLeft = Core.Web.Measure.extentToPixels(element.style.borderLeftWidth, true);
                     valueL += borderLeft;
+                    if (Core.Web.Env.QUIRK_MEASURE_OFFSET_HIDDEN_BORDER && element.style.overflow == "hidden") {
+                        valueL += borderLeft;
+                    }
                 }
-            }
-            if (element.style.borderTopWidth && !init && Core.Web.Env.MEASURE_OFFSET_EXCLUDES_BORDER) {
-                var borderTop = Core.Web.Measure.extentToPixels(element.style.borderTopWidth, false);
-                valueT += borderTop;
-                if (Core.Web.Env.QUIRK_MEASURE_OFFSET_HIDDEN_BORDER && element.style.overflow == "hidden") {
+                if (element.style.borderTopWidth && element.style.borderTopStyle != "none") {
+                    var borderTop = Core.Web.Measure.extentToPixels(element.style.borderTopWidth, false);
                     valueT += borderTop;
+                    if (Core.Web.Env.QUIRK_MEASURE_OFFSET_HIDDEN_BORDER && element.style.overflow == "hidden") {
+                        valueT += borderTop;
+                    }
                 }
             }
             init = false;

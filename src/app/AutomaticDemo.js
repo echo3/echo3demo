@@ -25,7 +25,6 @@ DemoApp.AutomaticDemo.StartDialog = Core.extend(Echo.WindowPane, {
             styleName: DemoApp.pref.windowStyleName,
             modal: true,
             width: "40em",
-            height: "30em", 
             title: this._msg["AutomaticDemo.WindowTitle"],
             icon: "image/Icon16Play.gif",
             iconInsets: "6px 10px",
@@ -194,7 +193,6 @@ DemoApp.AutomaticDemo.StopDialog = Core.extend(Echo.WindowPane, {
             movable: false,
             positionX: "100%",
             positionY: "100%",
-            height: "8em",
             width: "20em"
         });
         
@@ -400,7 +398,6 @@ DemoApp.AutomaticDemo.PerformanceTestDialog = Core.extend(Echo.WindowPane, {
             styleName: DemoApp.pref.windowStyleName,
             modal: true,
             width: 400,
-            height: 300, 
             title: this._msg["PerformanceTest.WindowTitle"],
             icon: "image/Icon16Performance.gif",
             iconInsets: "6px 10px",
@@ -476,7 +473,6 @@ DemoApp.AutomaticDemo.PerformanceTestResultDialog = Core.extend(Echo.WindowPane,
             positionX: "50%",
             positionY: "50%",
             width: 550,
-            height: 142, 
             resizable: false,
             title: this._msg["PerformanceTest.WindowTitle"],
             icon: "image/Icon16Performance.gif",
