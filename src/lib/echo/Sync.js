@@ -330,7 +330,7 @@ Echo.Sync.Border = {
      * @param {#Border} border the border
      * @param {String} sideName, the border side name, "left", "right", "bottom", or "top" (defaults to "top" if omitted)
      * @return the border size in pixels
-     * @type {Number}
+     * @type Number
      */
     getPixelSize: function(border, sideName) {
         if (!border) {
@@ -567,8 +567,8 @@ Echo.Sync.Extent = {
             } else if (this._FORMATTED_DECIMAL_PIXEL_TEST.test(extent)) {
                 return Math.round(parseFloat(extent)) + "px";
             } else {
-                if (allowPercent && this.isPercent(extent)) {
-                    return extent;
+                if (this.isPercent(extent)) {
+                    return allowPercent ? extent : "";
                 } else {
                     var pixels = this.toPixels(extent, horizontal);
                     return pixels == null ? "" : this.toPixels(extent, horizontal) + "px";
@@ -584,6 +584,7 @@ Echo.Sync.Extent = {
      * 
      * @param {#Extent} extent the Extent
      * @param {Boolean} horizontal flag indicating whether the value is being rendered horizontally
+     * @return the pixel value
      * @type Number
      */
     toPixels: function(extent, horizontal) {
@@ -695,7 +696,16 @@ Echo.Sync.FillImage = {
         var isObject = typeof(fillImage) == "object";
         var url = isObject ? fillImage.url : fillImage;
 
-        if (Core.Web.Env.PROPRIETARY_IE_PNG_ALPHA_FILTER_REQUIRED && flags && (flags & this.FLAG_ENABLE_IE_PNG_ALPHA_FILTER)) {
+        if (Core.Web.Env.QUIRK_IE_SECURE_ITEMS && document.location.protocol == "https:") {
+            if (url.substring(0, 5) != "http:" && url.substring(0, 6) != "https:") {
+                // Use full URL, see http://support.microsoft.com/kb/925014 and
+                // http://weblogs.asp.net/rchartier/archive/2008/03/12/ie7-this-page-contains-both-secure-and-nonsecure-items.aspx
+                url = document.location.protocol + "//" + document.location.hostname + 
+                        (document.location.port ? (":" + document.location.port) : "") + url;
+            }
+        }
+        if (Core.Web.Env.PROPRIETARY_IE_PNG_ALPHA_FILTER_REQUIRED &&
+                flags && (flags & this.FLAG_ENABLE_IE_PNG_ALPHA_FILTER)) {
             // IE6 PNG workaround required.
             element.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + url + "', sizingMethod='scale')";
         } else {
@@ -730,6 +740,376 @@ Echo.Sync.FillImage = {
             element.style.backgroundImage = "";
             element.style.backgroundPosition = "";
             element.style.backgroundRepeat = "";
+        }
+    }
+};
+
+/**
+ * Provides tools for rendering fill image border properties (borders composed of eight graphic images).
+ * 
+ * A relative-positioned DIV may be added to the created FillImageBorder container DIV.
+ * Note that you should ALWAYS set the "zoom" CSS property to 1 to workaround "hasLayout" bugs in Internet Explorer's
+ * rendering engine.  Use the following code to set this property on any relative positioned DIVs you create:
+ * <code>if (Core.Web.Env.QUIRK_IE_HAS_LAYOUT) { div.style.zoom = 1; }</code>.
+ * See http://msdn.microsoft.com/en-us/library/bb250481.aspx 
+ * 
+ * @class
+ */
+Echo.Sync.FillImageBorder = {
+    
+    /**
+     * Mapping between child node indices of container element and fill image property names of a FillImageBorder.
+     * @type Array
+     */
+    _NAMES: ["top", "topRight", "right", "bottomRight", "bottom", "bottomLeft", "left", "topLeft"],
+    
+    /**
+     * Two dimensional mapping array representing which FillImageBorder side configurations have which elements.
+     * First index represents FillImageBorder configuration, from 0-15, with bitwise 1=top, 2=right, 4=bottom 8=left
+     * flags ORed together.  Second index represents border side in order top, top-right, right, 
+     * bottom-right, bottom, bottom-left, left.  Value is 1 when side/corner element exists for this configuration, 0 otherwise.
+     * @type Array
+     */
+    _MAP: [
+    //   0  1  2  3  4  5  6  7
+    //   T TR  R BR  B BL  L  TL
+        [0, 0, 0, 0, 0, 0, 0, 0], // ----
+        [1, 0, 0, 0, 0, 0, 0, 0], // ---t
+        [0, 0, 1, 0, 0, 0, 0, 0], // --r-
+        [1, 1, 1, 0, 0, 0, 0, 0], // --rt
+        [0, 0, 0, 0, 1, 0, 0, 0], // -b--
+        [1, 0, 0, 0, 1, 0, 0, 0], // -b-t
+        [0, 0, 1, 1, 1, 0, 0, 0], // -br-
+        [1, 1, 1, 1, 1, 0, 0, 0], // -brt
+        [0, 0, 0, 0, 0, 0, 1, 0], // l---
+        [1, 0, 0, 0, 0, 0, 1, 1], // l--t
+        [0, 0, 1, 0, 0, 0, 1, 0], // l-r-
+        [1, 1, 1, 0, 0, 0, 1, 1], // l-rt
+        [0, 0, 0, 0, 1, 1, 1, 0], // lb--
+        [1, 0, 0, 0, 1, 1, 1, 1], // lb-t
+        [0, 0, 1, 1, 1, 1, 1, 0], // lbr-
+        [1, 1, 1, 1, 1, 1, 1, 1]  // lbrt
+    ],
+
+    /**
+     * Prototype storage.  Indices of this array store lazily-created DOM hierarchies for various FillImageBorder
+     * side configurations.  Valid indices of this array are form 0-15, representing the following values ORed
+     * together to describe possible configurations of sides:
+     * <ul>
+     *  <li><code>1</code>: bit indicating the top border should be rendered</li> 
+     *  <li><code>2</code>: bit indicating the right border should be rendered</li> 
+     *  <li><code>4</code>: bit indicating the bottom border should be rendered</li> 
+     *  <li><code>8</code>: bit indicating the left border should be rendered</li> 
+     * </li>
+     */
+    _PROTOTYPES: [],
+    
+    /**
+     * Generates a segment of a rendered FillImageBorder DOM and adds it to its parent.
+     * 
+     * @param {Element} parent the parent element
+     * @param {String} css the CSS text add to the rendered element
+     */
+    _createSegment: function(parent, css) {
+        var child = document.createElement("div");
+        child.style.cssText = "font-size:1px;line-height:0;position:absolute;" + css;
+        parent.appendChild(child);
+    },
+    
+    /**
+     * Creates a prototype rendered DOM element hierarchy to display a fill image border.
+     * The values returned by this method are stored and cloned for performance.
+     * This method will be invoked at most 16 times, once per key (0-15).
+     * 
+     * @param key the fill image border key, any combination of the following values ORed together:
+     *        <ul>
+     *         <li><code>1</code>: bit indicating the top border should be rendered</li> 
+     *         <li><code>2</code>: bit indicating the right border should be rendered</li> 
+     *         <li><code>4</code>: bit indicating the bottom border should be rendered</li> 
+     *         <li><code>8</code>: bit indicating the left border should be rendered</li> 
+     *        </li>
+     * @return the created border prototype
+     */
+    _createPrototype: function(key) {
+        var div = document.createElement("div");
+        if (Core.Web.Env.QUIRK_IE_HAS_LAYOUT) {
+            div.style.zoom = 1;
+        }
+        
+        if (key & 0x1) { // Top
+            this._createSegment(div, "top:0;");
+            if (key & 0x2) { // Right
+                this._createSegment(div, "top:0;right:0;");
+            }
+        }
+        if (key & 0x2) { // Right
+            this._createSegment(div, "right:0;");
+            if (key & 0x4) { // Bottom
+                this._createSegment(div, "bottom:0;right:0;");
+            }
+        }
+        if (key & 0x4) { // Bottom
+            this._createSegment(div, "bottom:0;");
+            if (key & 0x8) { // Left
+                this._createSegment(div, "bottom:0;left:0;");
+            }
+        }
+        if (key & 0x8) { // Left
+            this._createSegment(div, "left:0;");
+            if (key & 0x1) { // Top
+                this._createSegment(div, "top:0;left:0;");
+            }
+        }
+        return div;
+    },
+    
+    /***
+     * Rerturns the array of border DIV elements, in  the following order:
+     * top, top-right, right, bottom-right, bottom, bottom-left, left, top-left.
+     * The array will have a value of null for any position that is not rendered due to the border having a zero dimension on 
+     * that side.
+     * 
+     * @param {Element} containerDiv the container element generated by <code>renderContainer()</code>
+     * @return the array of border DIV elements
+     * @type Array
+     */
+    getBorder: function(containerDiv) {
+        var border = [];
+        var child = containerDiv.firstChild;
+        while (child) {
+            if (child.__FIB_segment != null) {
+                border[child.__FIB_segment] = child;
+            }
+            child = child.nextSibling;
+        }
+        return border;
+    },
+    
+    /**
+     * Returns the content element (to which children may be added) of a FillImageBorder container element created with
+     * <code>renderContainer()</code>.
+     * 
+     * @param {Element} containerDiv the container element generated by <code>renderContainer()</code>
+     * @return the content element to which child nodes may be added
+     * @type Element
+     */
+    getContainerContent: function(containerDiv) {
+        if (!containerDiv.__FIB_hasContent) {
+            return null;
+        }
+        var child = containerDiv.firstChild;
+        while (child) {
+            if (child.__FIB_content) {
+                return child;
+            }
+            child = child.nextSibling;
+        }
+        return null;
+    },
+    
+    /**
+     * Creates a DOM hierarchy representing a FillImageBorder.
+     * The provided childElement will be added to it, if specified.
+     * The outer container DIV element of the rendered DOM hierarchy is returned.  Width and height values may be configured
+     * on this returned value.
+     * 
+     * The <code>renderContainerDisplay()</code> method should be invoked by the <code>renderDisplay()</code> method of any
+     * synchronization peer making use of a rendered FillImageBorder container in order to support Internet Explorer 6 browsers
+     * (the rendered border uses virtual positioning to appear properly in IE6).
+     * 
+     * @param {#FillImageBorder} fillImageBorder the FillImageBorder to be rendered.
+     * @param configuration (optional) configuration options, an object containing one or more of the following properties:
+     *        <ul>
+     *         <li><code>update</code>: the containerDiv to update (normally null, which will result in a new one being
+     *          created; note that it is less efficient to update a container than to create a new one; currently does not 
+     *          support adding content)</li>
+     *         <li><code>content</code>: flag indicating that a content element should be created/managed (implied by child)</li>
+     *         <li><code>child</code>: a content element to added inside the border (implies content)</li>
+     *         <li><code>absolute</code>: boolean flag indicating whether the DIV shold be absolutely (true) or relatively
+     *         (false) positioned</li>
+     *        </ul>
+     * @return the outer container DIV element of the rendered DOM hierarchy
+     * @type Element
+     */
+    renderContainer: function(fillImageBorder, configuration) {
+        fillImageBorder = fillImageBorder || {};
+        configuration = configuration || {};
+        
+        // Load pixel border insets.
+        var bi = Echo.Sync.Insets.toPixels(fillImageBorder.borderInsets);
+        
+        // Create bitset "key" based on which sides of border are present.
+        var key = (bi.left && 0x8) | (bi.bottom && 0x4) | (bi.right && 0x2) | (bi.top && 0x1);
+        var map = this._MAP[key];
+        var prototypeDiv = this._PROTOTYPES[key] ? this._PROTOTYPES[key] : this._PROTOTYPES[key] = this._createPrototype(key); 
+        var div, child, childClone, firstChild, i, content = null, border = [], insertBefore = null, testChild, insets;
+        
+        if (configuration.update) {
+            // Updating existing FillImageBorder container DIV: load element specified in update property.
+            div = configuration.update;
+
+            // Remove current fill image border children, store references to important elements.
+            child = div.firstChild;
+            while (child) {
+                testChild = child;
+                child = child.nextSibling;
+                if (testChild.__FIB_segment != null) {
+                    // Mark position where children should be inserted.
+                    insertBefore = child;
+                    div.removeChild(testChild);
+                }
+                if (testChild.__FIB_content) {
+                    // Store content child.
+                    content = testChild;
+                }
+            }
+            
+            // Add children from prototype.
+            child = prototypeDiv.firstChild;
+            while (child) {
+                childClone = child.cloneNode(true);
+                if (!firstChild) {
+                    // Store reference to first added child.
+                    firstChild = childClone;
+                }
+                
+                // Insert child.
+                if (insertBefore) {
+                    div.insertBefore(childClone, insertBefore);
+                } else {
+                    div.appendChild(childClone);
+                }
+                child = child.nextSibling;
+            }
+        } else {
+            // Creating new FillImageBorder container DIV: clone the prototype.
+            div = prototypeDiv.cloneNode(true);
+            firstChild = div.firstChild;
+
+            // Create and append content container if required.
+            if (configuration.content || configuration.child) {
+                content = document.createElement("div");
+                content.__FIB_content = true;
+                if (configuration.child) {
+                    content.appendChild(configuration.child);
+                }
+                div.__FIB_hasContent = true;
+                div.appendChild(content);
+            }
+            
+            // Set positioning based on configuration.
+            if (configuration.absolute) {
+                div.__FIB_absolute = true;
+                div.style.position = "absolute";
+            } else {
+                div.style.position = "relative";
+                if (content) {
+                    content.style.position = "relative";
+                    if (Core.Web.Env.QUIRK_IE_HAS_LAYOUT) {
+                        content.style.zoom = 1;
+                    }
+                }
+            }
+        }
+        div.__key = key;
+        
+        // Render FillImageBorder.
+        child = firstChild;
+        for (i = 0; i < 8; ++i) {
+            if (!map[i]) {
+                // Loaded map indicates no border element in this position: skip.
+                continue;
+            }
+            // Set identifier on segment element.
+            child.__FIB_segment = i;
+            
+            // Store segment element in array for convenient access later.
+            border[i] = child;
+            
+            if (fillImageBorder.color) {
+                child.style.backgroundColor = fillImageBorder.color; 
+            }
+            if (i === 0 || i === 1 || i === 7) { // 0,1,7 = top
+                child.style.height = bi.top + "px";
+            } else if (i >= 3 && i <= 5) { // 3,4,5 = bottom
+                child.style.height = bi.bottom + "px";
+            }
+            if (i >= 1 && i <= 3) { // 1,2,3 = right
+                child.style.width = bi.right + "px";
+            } else if (i >= 5) { // 5,6,7 = left
+                child.style.width = bi.left + "px";
+            }
+            Echo.Sync.FillImage.render(fillImageBorder[this._NAMES[i]], child, Echo.Sync.FillImage.FLAG_ENABLE_IE_PNG_ALPHA_FILTER);
+            child = child.nextSibling;
+        }
+
+        // Set left/right, top/bottom positions of border sides (where elements exist).
+        if (bi.top) {
+            border[0].style.left = bi.left + "px";
+            border[0].style.right = bi.right + "px";
+        }
+        if (bi.right) {
+            border[2].style.top = bi.top + "px";
+            border[2].style.bottom = bi.bottom + "px";
+        }
+        if (bi.bottom) {
+            border[4].style.left = bi.left + "px";
+            border[4].style.right = bi.right + "px";
+        }
+        if (bi.left) {
+            border[6].style.top = bi.top + "px";
+            border[6].style.bottom = bi.bottom + "px";
+        }
+        
+        if (div.__FIB_absolute) {
+            if (content) {
+                // Set content positioning.
+                var ci = Echo.Sync.Insets.toPixels(fillImageBorder.contentInsets);
+                content.style.position = "absolute"; 
+                content.style.overflow = "auto";
+                content.style.top = ci.top + "px";
+                content.style.right = ci.right + "px";
+                content.style.bottom = ci.bottom + "px";
+                content.style.left = ci.left + "px";
+            }
+        } else {
+            if (content) {
+                // Set content positioning.
+                Echo.Sync.Insets.render(fillImageBorder.contentInsets, content, "padding");
+            }
+            if (!configuration.update) {
+                div.style.position = "relative";
+                if (content) {
+                    content.style.position = "relative";
+                }
+            }
+        }
+        
+        return div;
+    },
+    
+    /**
+     * Performs renderDisplay() operations on a FillImageBorder container DOM hierarchy.
+     * This method should be invoked the renderDisplay() method of a synchronization peer on each FillImageBorder container
+     * which it is using.  It is required for IE6 virtual positioning support.
+     * 
+     * @param {Element} containerDiv the container element generated by <code>renderContainer()</code>
+     */
+    renderContainerDisplay: function(containerDiv) {
+        var content;
+        if (Core.Web.VirtualPosition.enabled) {
+            if (containerDiv.__FIB_absolute) {
+                Core.Web.VirtualPosition.redraw(containerDiv);
+                if ((content = this.getContainerContent(containerDiv))) {
+                    Core.Web.VirtualPosition.redraw(content);
+                }
+            }
+            var border = this.getBorder(containerDiv);
+            for (var i = 0; i < 8; i += 2) {
+                if (border[i]) {
+                    Core.Web.VirtualPosition.redraw(border[i]);
+                }
+            }
         }
     }
 };
@@ -883,8 +1263,8 @@ Echo.Sync.Insets = {
      * Renders an insets property to an element.
      * 
      * @param {#Insets} insets the insets property
-     * @param {Element} the target element
-     * @param {String} the style attribute name, e.g., "padding" or "margin" 
+     * @param {Element} element the target element
+     * @param {String} styleAttribute the style attribute name, e.g., "padding" or "margin" 
      */
     render: function(insets, element, styleAttribute) {
         switch(typeof(insets)) {
@@ -901,6 +1281,20 @@ Echo.Sync.Insets = {
             }
             break;
         }
+    },
+    
+    /**
+     * Renders an insets property to an element as absolute position coordinates (i.e., top/right/bottom/left values).
+     * 
+     * @param {#Insts} insets the insets propert
+     * @param {Element} element the target element
+     */
+    renderPosition: function(insets, element) {
+        var insetsPx = this.toPixels(insets);
+        element.style.top = insetsPx.top + "px";
+        element.style.right = insetsPx.right + "px";
+        element.style.bottom = insetsPx.bottom + "px";
+        element.style.left = insetsPx.left + "px";
     },
     
     /**

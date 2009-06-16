@@ -106,6 +106,8 @@ DemoApp = Core.extend(Echo.Application, {
             "lib/echo/Sync.TextComponent.js",
             "lib/extras/Application.ColorSelect.js",
             "lib/extras/Sync.ColorSelect.js",
+            "lib/extras/Application.RichTextInput.js",
+            "lib/extras/Sync.RichTextInput.js",
             "lib/extras/Application.RichTextArea.js",
             "lib/extras/Sync.RichTextArea.js",
             "app/RichTextScreen.js"

@@ -77,14 +77,25 @@ Echo.Render = {
      * @param {Echo.Component} component the component on which to invoke renderDisplay()
      */
     _doRenderDisplayImpl: function(component) {
-        if (component.peer) {
-            // components that are present on the client, but are not rendered (lazy rendered as in tree), 
-            // have no peer installed.
-            if (component.peer.renderDisplay) {
-                component.peer.renderDisplay();
+        if (!component.peer) {
+            // Do nothing for components that are not rendered. 
+            return;
+        }
+        
+        if (component.peer.renderDisplay) {
+            component.peer.renderDisplay();
+        }
+        component.peer.displayed = true;
+        
+        var i;
+        if (component.peer.isChildVisible) {
+            for (i = 0; i < component.children.length; ++i) {
+                if (component.peer.isChildVisible(component.children[i])) {
+                    Echo.Render._doRenderDisplayImpl(component.children[i]);
+                }
             }
-            
-            for (var i = 0; i < component.children.length; ++i) {
+        } else {
+            for (i = 0; i < component.children.length; ++i) {
                 Echo.Render._doRenderDisplayImpl(component.children[i]);
             }
         }
@@ -393,6 +404,28 @@ Echo.Render = {
     },
     
     /**
+     * Notifies a child component and its descendants that it is about to be removed from the DOM or otherwise hidden from view.
+     * The <code>renderHide()</code> methods of the peers of the specified child component and its descendants will be invoked.
+     * 
+     * @param {Echo.Component} component the child component being hidden
+     */
+    renderComponentHide: function(component) {
+        if (!component.peer || component.peer.disposed) {
+            return;
+        }
+        
+        if (component.peer.displayed) {
+            if (component.peer.renderHide) {
+                component.peer.renderHide();
+            }
+            component.peer.displayed = false;
+            for (var i = 0; i < component.children.length; ++i) {
+                Echo.Render.renderComponentHide(component.children[i]);
+            }
+        }
+    },
+    
+    /**
      * Sets the peer disposed state of a component.
      * The peer disposed state indicates whether the renderDispose()
      * method of the component has been executed since it was last rendered.
@@ -440,7 +473,7 @@ Echo.Render = {
         if (focusedComponent && focusedComponent.peer) {
             if (!focusedComponent.peer.renderFocus) {
                 throw new Error("Cannot focus component: " + focusedComponent + 
-                        ", peer does not provide renderFocus() implemnetation."); 
+                        ", peer does not provide renderFocus() implementation."); 
             }
             focusedComponent.peer.renderFocus();
         }
@@ -525,6 +558,12 @@ Echo.Render.ComponentSync = Core.extend({
     component: null,
     
     /**
+     * Flag indicating whether component is displayed or hidden.  Initially false until <code>renderDisplay()</code> has been
+     * invoked, then will be set to true.  Will again be set false after invocation of <code>renderHide()</code>.
+     */
+    displayed: false,
+    
+    /**
      * Flag indicating that the component has been disposed, i.e., the peer's <code>renderDispose()</code> method 
      * has run since the last time <code>renderAdd()</code> was last invoked.
      * @type Boolean
@@ -595,6 +634,42 @@ Echo.Render.ComponentSync = Core.extend({
     
     $virtual: {
     
+        //FIXME Experimental.
+        /**
+         * (Optional) Processes a key down event received by the client's key listeners.  
+         * Invoked by client based on current focused component of application.
+         * 
+         * @function
+         * @param e the key event, containing (processed) keyCode property
+         * @return true if higher-level containers should be allowed to process the key event as well
+         * @type Boolean
+         */
+        clientKeyDown: null,
+
+        //FIXME Experimental.
+        /**
+         * (Optional) Processes a key press event received by the client's key listeners.  
+         * Invoked by client based on current focused component of application.
+         * 
+         * @function
+         * @param e the key event, containing (processed) charCode and keyCode properties
+         * @return true if higher-level containers should be allowed to process the key event as well
+         * @type Boolean
+         */
+        clientKeyPress: null,
+        
+        //FIXME Experimental.
+        /**
+         * (Optional) Processes a key up event received by the client's key listeners.  
+         * Invoked by client based on current focused component of application.
+         * 
+         * @function
+         * @param e the key event, containing (processed) charCode and keyCode properties
+         * @return true if higher-level containers should be allowed to process the key event as well
+         * @type Boolean
+         */
+        clientKeyUp: null,
+        
         /**
          * Returns the focus flags for the component, one or more of the following values, ORed together.
          * <ul>
@@ -610,6 +685,7 @@ Echo.Render.ComponentSync = Core.extend({
          *   any arrow key is pressed (this is a shorthand for up, left, down, and right ORed together).</li>
          * </ul>
          * 
+         * @function
          * @return the focus flags
          * @type Number
          */
@@ -621,6 +697,7 @@ Echo.Render.ComponentSync = Core.extend({
          * the space provided to the child component.  If implemented, this method should return
          * an object containing height and/or width properties specifying integer pixel values.
          * 
+         * @function
          * @param dimension the dimension to be calculated, one of the following values, or null
          *        to specify that all dimensions should be calculated:
          *        <ul>
@@ -632,14 +709,42 @@ Echo.Render.ComponentSync = Core.extend({
         getPreferredSize: null,
         
         /**
+         * (Optional) Determines if the specified child component is currently displayed.  Implementations
+         * should return true if the specified child component is on-screen and should have its <code>renderDisplay()</code>
+         * method invoked when required, or false if the component is off-screen.
+         * 
+         * @function
+         * @param component the child component
+         * @return true if the component should have its renderDisplay() method invoked
+         * @type Boolean
+         */
+        isChildVisible: null,
+        
+        /**
          * (Optional) Invoked when component is rendered focused.
+         * 
+         * @function
          */
         renderFocus: null,
         
         /**
-         * (Optional) Invoked when the component has been added to the hierarchy and first appears
+         * (Optional) Invoked when a parent/ancestor component is hiding the content of this component, possibly removing it from
+         * the DOM.  An parent/ancestor DOM element will automatically be removed/hidden, but the component may need to take action 
+         * to remove any rendered items not contained within that element.
+         * The renderDisplay() method will be invoked the when/if the component is displayed again.
+         * This method may be invoked on components which are already in a hidden state.
+         * This method will not necessarily be invoked prior to disposal.
+         * 
+         * @function
+         */
+        renderHide: null,
+        
+        /**
+         * (Optional) Invoked when the component has been added (or-readded) to the hierarchy and first appears
          * on screen, and when ancestors of the component (or the containing window) have
-         * resized.         
+         * resized.
+         * 
+         * @function
          */
         renderDisplay: null
     }

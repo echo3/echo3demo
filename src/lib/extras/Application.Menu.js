@@ -1,4 +1,51 @@
 /**
+ * Abstract base class for menu components. Provides common functionality.
+ */
+Extras.MenuComponent = Core.extend(Echo.Component, {
+    
+    $abstract: true,
+    
+    /** @see Echo.Component#modalSupport */
+    modalSupport: true,
+    
+    /** @see Echo.Component#focusable */
+    focusable: true,
+    
+    /**
+     * Processes the user selection an item.
+     * 
+     * @param {Extras.ItemModel} itemModel the selected item
+     */
+    doAction: function(itemModel) {
+        var path = itemModel.getItemPositionPath().join(".");
+        if (itemModel instanceof Extras.ToggleOptionModel) {
+            this._toggleItem(itemModel);
+        }
+        this.fireEvent({type: "action", source: this, data: path, modelId: itemModel.modelId});
+    },
+    
+    /**
+     * Toggles the state of an toggle option model.
+     * 
+     * @param {Extras.ToggleOptionModel} itemModel the option to toggle
+     */
+    _toggleItem: function(itemModel) {
+        var model = this.get("model");
+        var stateModel = this.get("stateModel");
+        if (itemModel.groupId) {
+            var groupItems = model.findItemGroup(itemModel.groupId);
+            for (var i = 0; i < groupItems.length; ++i) {
+                stateModel.setSelected(groupItems[i].modelId, false);
+            }
+        }
+        if (stateModel) {
+            stateModel.setSelected(itemModel.modelId, !stateModel.isSelected(itemModel.modelId));
+        }
+    }
+    
+});
+
+/**
  * ContextMenu component. May not contain child components.
  * 
  * @sp {#FillImage} backgroundImage the background image that will be displayed
@@ -26,7 +73,7 @@
  *     activate menu when contents are context-clicked.</li>
  *     </ul>
  */
-Extras.ContextMenu = Core.extend(Echo.Component, {
+Extras.ContextMenu = Core.extend(Extras.MenuComponent, {
 
     $static: {
     
@@ -54,23 +101,7 @@ Extras.ContextMenu = Core.extend(Echo.Component, {
     },
 
     /** @see Echo.Component#componentType */
-    componentType: "Extras.ContextMenu",
-    
-    /** @see Echo.Component#modalSupport */
-    modalSupport: true,
-    
-    /** @see Echo.Component#focusable */
-    focusable: true,
-    
-    /**
-     * Processes the user selection an item.
-     * 
-     * @param {Extras.ItemModel} itemModel the selected item
-     */
-    doAction: function(itemModel) {
-        var path = itemModel.getItemPositionPath().join(".");
-        this.fireEvent({type: "action", source: this, data: path, modelId: itemModel.modelId});
-    }
+    componentType: "Extras.ContextMenu"
 });
 
 /**
@@ -125,30 +156,14 @@ Extras.ContextMenu = Core.extend(Echo.Component, {
  *     item is selected
  * @sp {#Extent} width the width of the drop down box
  */
-Extras.DropDownMenu = Core.extend(Echo.Component, {
+Extras.DropDownMenu = Core.extend(Extras.MenuComponent, {
 
     $load: function() {
         Echo.ComponentFactory.registerType("Extras.DropDownMenu", this);
     },
 
     /** @see Echo.Component#componentType */
-    componentType: "Extras.DropDownMenu",
-
-    /** @see Echo.Component#modalSupport */
-    modalSupport: true,
-    
-    /** @see Echo.Component#focusable */
-    focusable: true,
-
-    /**
-     * Processes the user selection an item.
-     * 
-     * @param {Extras.ItemModel} itemModel the selected item
-     */
-    doAction: function(itemModel) {
-        var path = itemModel.getItemPositionPath().join(".");
-        this.fireEvent({type: "action", source: this, data: path, modelId: itemModel.modelId});
-    }
+    componentType: "Extras.DropDownMenu"
 });
 
 /**
@@ -190,30 +205,14 @@ Extras.DropDownMenu = Core.extend(Echo.Component, {
  * @sp {#Color} selectionForeground the foreground color used to highlight the
  *     currently selected menu item
  */
-Extras.MenuBarPane = Core.extend(Echo.Component, {
+Extras.MenuBarPane = Core.extend(Extras.MenuComponent, {
 
     $load: function() {
         Echo.ComponentFactory.registerType("Extras.MenuBarPane", this);
     },
     
     /** @see Echo.Component#componentType */
-    componentType: "Extras.MenuBarPane",
-    
-    /** @see Echo.Component#modalSupport */
-    modalSupport: true,
-    
-    /** @see Echo.Component#focusable */
-    focusable: true,
-
-    /**
-     * Processes the user selection an item.
-     * 
-     * @param {Extras.ItemModel} itemModel the selected item
-     */
-    doAction: function(itemModel) {
-        var path = itemModel.getItemPositionPath().join(".");
-        this.fireEvent({type: "action", source: this, data: path, modelId: itemModel.modelId});
-    }
+    componentType: "Extras.MenuBarPane"
 });
 
 /**
@@ -320,6 +319,29 @@ Extras.MenuModel = Core.extend(Extras.ItemModel, {
     },
     
     /**
+     * Finds all items with the specified group id in the <code>MenuModel</code>, searching descendant <code>MenuModel</code>s 
+     * as necessary.
+     * 
+     * @param groupId the id of the group to find
+     * @return an array of items with the specified group id (an empty array if no items exists)
+     * @type Array
+     */
+    findItemGroup: function(groupId) {
+        var groupItems = [];
+        for (var i = 0; i < this.items.length; ++i) {
+            if (this.items[i] instanceof Extras.MenuModel) {
+                var subGroupItems = this.items[i].findItemGroup(groupId);
+                for (var j = 0; j < subGroupItems.length; ++j) {
+                    groupItems.push(subGroupItems[j]);
+                }
+            } else if (this.items[i].groupId == groupId) {
+                groupItems.push(this.items[i]);
+            }
+        }
+        return groupItems;
+    },
+    
+    /**
      * Returns the <code>ItemModel</code> at a specific path within this menu model.
      * 
      * @param {Array} itemPositions array of integers describing path, e.g., [0,1,2] would
@@ -422,11 +444,9 @@ Extras.ToggleOptionModel = Core.extend(Extras.OptionModel, {
      *
      * @param {String} modelId the id of the menu model
      * @param {String} text the menu item title
-     * @param {Boolean} initial selection state
      */ 
-    $construct: function(modelId, text, selected) {
+    $construct: function(modelId, text) {
         Extras.OptionModel.call(this, modelId, text, null);
-        this.selected = selected;
     }
 });
 
@@ -436,14 +456,22 @@ Extras.ToggleOptionModel = Core.extend(Extras.OptionModel, {
 Extras.RadioOptionModel = Core.extend(Extras.ToggleOptionModel, {
 
     /**
+     * The identifier of the group to which the radio button belongs.
+     * Only one radio button in a group may be selected at a given time.
+     * @type String 
+     */
+    groupId: null,
+    
+    /**
      * Creates a radio option.
      *
      * @param {String} modelId the id of the menu model
      * @param {String} text the menu item title
-     * @param {Boolean} initial selection state
+     * @param {String} groupId the group identifier (only one radio button in a group may be selected at a given time)
      */ 
-    $construct: function(modelId, text, selected) {
-        Extras.ToggleOptionModel.call(this, modelId, text, selected);
+    $construct: function(modelId, text, groupId) {
+        Extras.ToggleOptionModel.call(this, modelId, text);
+        this.groupId = groupId;
     }
 });
 

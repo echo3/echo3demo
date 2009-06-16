@@ -10,13 +10,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
          * Array mapping CSS cursor types to indices of the _borderDivs property.
          * @type Array 
          */
-        CURSORS: ["nw-resize", "n-resize", "ne-resize", "w-resize", "e-resize", "sw-resize", "s-resize", "se-resize"],
-        
-        /** 
-         * Array mapping fill image border properties to indices of the _borderDivs property.
-         * @type Array 
-         */
-        FIB_POSITIONS: ["topLeft", "top", "topRight", "left", "right", "bottomLeft", "bottom", "bottomRight"],
+        CURSORS: ["n-resize", "ne-resize", "e-resize", "se-resize", "s-resize", "sw-resize", "w-resize", "nw-resize"],
         
         /** Map containing properties whose update can be rendered without replacing component. */
         PARTIAL_PROPERTIES: {background: true, backgroundImage: true, border: true, closable: true, closeIcon: true, 
@@ -199,14 +193,14 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         this._dragOrigin = { x: e.clientX, y: e.clientY };
         
         switch (e.target) {
-        case this._borderDivs[0]: this._resizeIncrement = { x: -1, y: -1 }; break;
-        case this._borderDivs[1]: this._resizeIncrement = { x:  0, y: -1 }; break; 
-        case this._borderDivs[2]: this._resizeIncrement = { x:  1, y: -1 }; break; 
-        case this._borderDivs[3]: this._resizeIncrement = { x: -1, y:  0 }; break; 
-        case this._borderDivs[4]: this._resizeIncrement = { x:  1, y:  0 }; break; 
+        case this._borderDivs[0]: this._resizeIncrement = { x:  0, y: -1 }; break; 
+        case this._borderDivs[1]: this._resizeIncrement = { x:  1, y: -1 }; break; 
+        case this._borderDivs[2]: this._resizeIncrement = { x:  1, y:  0 }; break; 
+        case this._borderDivs[3]: this._resizeIncrement = { x:  1, y:  1 }; break; 
+        case this._borderDivs[4]: this._resizeIncrement = { x:  0, y:  1 }; break; 
         case this._borderDivs[5]: this._resizeIncrement = { x: -1, y:  1 }; break; 
-        case this._borderDivs[6]: this._resizeIncrement = { x:  0, y:  1 }; break; 
-        case this._borderDivs[7]: this._resizeIncrement = { x:  1, y:  1 }; break; 
+        case this._borderDivs[6]: this._resizeIncrement = { x: -1, y:  0 }; break; 
+        case this._borderDivs[7]: this._resizeIncrement = { x: -1, y: -1 }; break;
         }
             
         Core.Web.Event.add(document.body, "mousemove", this._processBorderMouseMoveRef, true);
@@ -223,6 +217,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
             width: this._dragInit.width + (this._resizeIncrement.x * (e.clientX - this._dragOrigin.x)),
             height: this._dragInit.height + (this._resizeIncrement.y * (e.clientY - this._dragOrigin.y))
         }, true);
+        Echo.Sync.FillImageBorder.renderContainerDisplay(this._div);
     },
 
     /**
@@ -248,6 +243,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
             height: this._rendered.height
         };
         
+        Echo.Sync.FillImageBorder.renderContainerDisplay(this._div);
         Core.Web.VirtualPosition.redraw(this._contentDiv);
         Core.Web.VirtualPosition.redraw(this._maskDiv);
         Echo.Render.notifyResize(this.component);
@@ -294,22 +290,13 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     /**
      * Processes a key down event in the window.
      */
-    _processKeyDown: function(e) {
+    clientKeyDown: function(e) {
         if (e.keyCode == 27) {
-            this.component.userClose();
-            Core.Web.DOM.preventEventDefault(e);
-            return false;
-        }
-        return true;
-    },
-
-    /**
-     * Processes a key press event in the window.
-     */
-    _processKeyPress: function(e) {
-        if (e.keyCode == 27) {
-            Core.Web.DOM.preventEventDefault(e);
-            return false;
+            if (this.component.render("closable", true)) {
+                this.component.userClose();
+                Core.Web.DOM.preventEventDefault(e.domEvent);
+                return false;
+            }
         }
         return true;
     },
@@ -404,19 +391,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     
         this._titleBarDiv.style.width = (this._rendered.width - this._contentInsets.left - this._contentInsets.right) + "px";
         
-        if (this._borderDivs[1]) {
-            this._borderDivs[1].style.width = borderSideWidth + "px";
-        }
-        if (this._borderDivs[6]) {
-            this._borderDivs[6].style.width = borderSideWidth + "px";
-        }
-        if (this._borderDivs[3]) {
-            this._borderDivs[3].style.height = borderSideHeight + "px";
-        }
-        if (this._borderDivs[4]) {
-            this._borderDivs[4].style.height = borderSideHeight + "px";   
-        }
-        
+        Echo.Sync.FillImageBorder.renderContainerDisplay(this._div);
         Core.Web.VirtualPosition.redraw(this._contentDiv);
         Core.Web.VirtualPosition.redraw(this._maskDiv);
     },
@@ -440,12 +415,6 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
         this._initialAutoSizeComplete = false;
-
-        // Create main component DIV.
-        this._div = document.createElement("div");
-        this._div.id = this.component.renderId;
-        this._div.tabIndex = "0";
-        
         this._rtl = !this.component.getRenderLayoutDirection().isLeftToRight();
         
         // Create content DIV.
@@ -473,13 +442,10 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
             this._maskDiv.appendChild(maskIFrameElement);
         }
     
-        // Render window frame.
-        this._renderAddFrame();
-        
         Echo.Sync.LayoutDirection.render(this.component.getLayoutDirection(), this._div);
-    
-        // Append main DIV to parent.
-        parentElement.appendChild(this._div);
+        
+        // Render window frame.
+        this._renderAddFrame(parentElement);
     },
     
     /**
@@ -487,9 +453,16 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
      * initially been rendered to update the window content.
      * _renderDisposeFrame() must be invoked between invocations of _renderAddFrame() to dispose resources.
      * _contentDiv will be appended to rendered DOM structure.
+     * 
+     * @param {Element} parentElement the parent element to which the rendered frame should be appended 
      */
-    _renderAddFrame: function() {
+    _renderAddFrame: function(parentElement) {
         this._loadPositionAndSize();
+
+        // Create main component DIV.
+        this._div = document.createElement("div");
+        this._div.id = this.component.renderId;
+        this._div.tabIndex = "0";
 
         // Load property states.
         this._minimumWidth = Echo.Sync.Extent.toPixels(
@@ -509,84 +482,20 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         var hasControlIcons = closable || maximizeEnabled || minimizeEnabled;
         var fillImageFlags = this.component.render("ieAlphaRenderBorder") ? Echo.Sync.FillImage.FLAG_ENABLE_IE_PNG_ALPHA_FILTER : 0;
         
-        this._div.style.cssText = "outline-style:none;position:absolute;z-index:1;overflow:hidden;";
+        this._div = Echo.Sync.FillImageBorder.renderContainer(border, { absolute: true });
+        this._div.style.outlineStyle = "none";
+        this._div.style.overflow = "hidden";
+        this._div.style.zIndex = 1;
         
-        this._borderDivs = [];
-        
-        var borderBaseCss = "z-index:2;font-size:1px;position:absolute;";
-        // Render top row
-        if (this._borderInsets.top > 0) {
-            // Render top left corner
-            if (this._borderInsets.left > 0) {
-                this._borderDivs[0] = document.createElement("div");
-                this._borderDivs[0].style.cssText = borderBaseCss + "left:0;top:0;" +
-                        "width:" + this._borderInsets.left + "px;height:" + this._borderInsets.top + "px;";
-            }
-            
-            // Render top side
-            this._borderDivs[1] = document.createElement("div");
-            this._borderDivs[1].style.cssText = borderBaseCss + "top:0;" +
-                    "left:" + this._borderInsets.left + "px;height:" + this._borderInsets.top + "px;";
-    
-            // Render top right corner
-            if (this._borderInsets.right > 0) {
-                this._borderDivs[2] = document.createElement("div");
-                this._borderDivs[2].style.cssText = borderBaseCss + "right:0;top:0;" +
-                        "width:" + this._borderInsets.right + "px;height:" + this._borderInsets.top + "px;";
-            }
-        }
-    
-        // Render left side
-        if (this._borderInsets.left > 0) {
-            this._borderDivs[3] = document.createElement("div");
-            this._borderDivs[3].style.cssText = borderBaseCss + "left:0;" +
-                    "top:" + this._borderInsets.top + "px;width:" + this._borderInsets.left + "px;";
-        }
-        
-        // Render right side
-        if (this._borderInsets.right > 0) {
-            this._borderDivs[4] = document.createElement("div");
-            this._borderDivs[4].style.cssText = borderBaseCss + "right:0;" +
-                    "top:" + this._borderInsets.top + "px;width:" + this._borderInsets.right + "px;";
-        }
-        
-        // Render bottom row
-        if (this._borderInsets.bottom > 0) {
-            // Render bottom left corner
-            if (this._borderInsets.left > 0) {
-                this._borderDivs[5] = document.createElement("div");
-                this._borderDivs[5].style.cssText = borderBaseCss + "left:0;bottom:0;" +
-                        "width:" + this._borderInsets.left + "px;height:" + this._borderInsets.bottom + "px;";
-            }
-            
-            // Render bottom side
-            this._borderDivs[6] = document.createElement("div");
-            this._borderDivs[6].style.cssText = borderBaseCss + "bottom:0;" +
-                    "left:" + this._borderInsets.left + "px;height:" + this._borderInsets.bottom + "px;";
-    
-            // Render bottom right corner
-            if (this._borderInsets.right > 0) {
-                this._borderDivs[7] = document.createElement("div");
-                this._borderDivs[7].style.cssText = borderBaseCss + "right:0;bottom:0;" +
-                        "width:" + this._borderInsets.right + "px;height:" + this._borderInsets.bottom + "px;";
-            }
-        }
-        
+        this._borderDivs = Echo.Sync.FillImageBorder.getBorder(this._div);
+        var mouseDownHandler = this._resizable ? Core.method(this, this._processBorderMouseDown) : null; 
         for (var i = 0; i < 8; ++i) {
             if (this._borderDivs[i]) {
-                if (border.color != null) {
-                    this._borderDivs[i].style.backgroundColor = border.color;
-                }
                 if (this._resizable) {
+                    this._borderDivs[i].style.zIndex = 2;
                     this._borderDivs[i].style.cursor = Echo.Sync.WindowPane.CURSORS[i];
-                    Core.Web.Event.add(this._borderDivs[i], "mousedown", 
-                            Core.method(this, this._processBorderMouseDown), true);
+                    Core.Web.Event.add(this._borderDivs[i], "mousedown", mouseDownHandler, true);
                 }
-                var borderImage = border[Echo.Sync.WindowPane.FIB_POSITIONS[i]];
-                if (borderImage) {
-                    Echo.Sync.FillImage.render(borderImage, this._borderDivs[i], fillImageFlags);
-                }
-                this._div.appendChild(this._borderDivs[i]);
             }
         }
         
@@ -669,8 +578,6 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
             // Close Button
             if (closable) {
                 this._renderControlIcon("close", this.client.getResourceUrl("Echo", "resource/WindowPaneClose.gif"), "[X]");
-                Core.Web.Event.add(this._div, "keydown", Core.method(this, this._processKeyDown), false);
-                Core.Web.Event.add(this._div, "keypress", Core.method(this, this._processKeyPress), false);
             }
             if (maximizeEnabled) {
                 this._renderControlIcon("maximize", this.client.getResourceUrl("Echo", "resource/WindowPaneMaximize.gif"), "[+]");
@@ -708,6 +615,9 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         }
         Core.Web.Event.add(this._div, "click", 
                 Core.method(this, this._processFocusClick), true);
+
+        // Append main DIV to parent.
+        parentElement.appendChild(this._div);
     },
 
     /**
@@ -782,7 +692,6 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     renderDispose: function(update) {
         this._overlayRemove();
         this._renderDisposeFrame();
-        this._div = null;
         this._maskDiv = null;
         this._contentDiv = null;
     },
@@ -812,6 +721,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         Core.Web.Event.removeAll(this._titleBarDiv);
         this._titleBarDiv = null;
         
+        this._div = null;
     },
     
     /** @see Echo.Render.ComponentSync#renderFocus */
@@ -846,15 +756,11 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
      * Renders an update to the window frame.  Disposes existing frame, removes rendered elements, adds new frame.
      */
     _renderUpdateFrame: function() {
+        var element = this._div;
+        var containerElement = element.parentNode;
         this._renderDisposeFrame();
-    
-        // Remove all child components from main DIV (necessary in cases where frame is being redrawn
-        // on previously rendered WindowPane in response to property update). 
-        while (this._div.childNodes.length > 0) {
-            this._div.removeChild(this._div.lastChild);
-        }
-
-        this._renderAddFrame();
+        containerElement.removeChild(element);
+        this._renderAddFrame(containerElement);
     },
     
     /**

@@ -262,41 +262,44 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
         
         var bottom = bounds.top + bounds.height,
             right = bounds.left + bounds.width,
-            domainBounds = new Core.Web.Measure.Bounds(this.client.domainElement);
+            domainBounds = new Core.Web.Measure.Bounds(document.body);
         this._overlay = { };
 
         if (bounds.top > 0) {
             this._overlay.top = document.createElement("div");
             this._overlay.top.style.cssText = "position:absolute;z-index:32767;top:0;left:0;width:100%;" +
                     "height:" + bounds.top + "px;";
-            this.client.domainElement.appendChild(this._overlay.top);
+            document.body.appendChild(this._overlay.top);
         }
         
         if (bottom < domainBounds.height) {
             this._overlay.bottom = document.createElement("div");
             this._overlay.bottom.style.cssText = "position:absolute;z-index:32767;bottom:0;left:0;width:100%;" +
                     "top:" + bottom + "px;";
-            this.client.domainElement.appendChild(this._overlay.bottom);
+            document.body.appendChild(this._overlay.bottom);
         }
 
         if (bounds.left > 0) {
             this._overlay.left = document.createElement("div");
             this._overlay.left.style.cssText = "position:absolute;z-index:32767;left:0;" +
                     "width:" + bounds.left + "px;top:" + bounds.top + "px;height:" + bounds.height + "px;";
-            this.client.domainElement.appendChild(this._overlay.left);
+            document.body.appendChild(this._overlay.left);
         }
 
         if (right < domainBounds.width) {
             this._overlay.right = document.createElement("div");
             this._overlay.right.style.cssText = "position:absolute;z-index:32767;right:0;" +
                     "left:" + right + "px;top:" + bounds.top + "px;height:" + bounds.height + "px;";
-            this.client.domainElement.appendChild(this._overlay.right);
+            document.body.appendChild(this._overlay.right);
         }
         
         for (var name in this._overlay) {
             Echo.Sync.FillImage.render(this.client.getResourceUrl("Echo", "resource/Transparent.gif"), this._overlay[name]);
             Core.Web.VirtualPosition.redraw(this._overlay[name]);
         }
+      
+        // Force redraw after body modification.
+        this.client.forceRedraw();
     },
     
     /**
@@ -307,9 +310,12 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
             return;
         }
         for (var name in this._overlay) {
-            this.client.domainElement.removeChild(this._overlay[name]);
+            document.body.removeChild(this._overlay[name]);
         }
         this._overlay = null;
+
+        // Force redraw after body modification.
+        this.client.forceRedraw();
     },
     
     /**
@@ -547,6 +553,8 @@ Extras.Sync.Menu.RenderedMenu = Core.extend({
     close: function() {
         Core.Web.Event.removeAll(this.element);
         document.body.removeChild(this.element);
+        // Force redraw after body modification.
+        this.client.forceRedraw();
         this.element = null;
         this.itemElements = null;
         this._activeItem = null;
@@ -815,6 +823,8 @@ Extras.Sync.Menu.RenderedMenu = Core.extend({
             fadeAnimation.start();
         }
         document.body.appendChild(this.element);
+        // Force redraw after body modification.
+        this.client.forceRedraw();
 
         Core.Web.Event.add(this.element, "click", Core.method(this, this._processClick), false);
         Core.Web.Event.add(this.element, "mouseover", Core.method(this, this._processItemEnter), false);
@@ -1466,9 +1476,10 @@ Extras.Sync.MenuBarPane = Core.extend(Extras.Sync.Menu, {
         
         Echo.Sync.renderComponentDefaults(this.component, menuBarDiv);
         var border = this.component.render("border", Extras.Sync.Menu.DEFAULTS.border);
-        this._menuBarBorderHeight = Echo.Sync.Border.getPixelSize(border, "top") + Echo.Sync.Border.getPixelSize(border, "bottom"); 
-        Echo.Sync.Border.render(border, menuBarDiv, "borderTop");
-        Echo.Sync.Border.render(border, menuBarDiv, "borderBottom");
+        var multisided = Echo.Sync.Border.isMultisided(border);
+        this._menuBarBorderHeight = Echo.Sync.Border.getPixelSize(border, "top") + Echo.Sync.Border.getPixelSize(border, "bottom");
+        Echo.Sync.Border.render(multisided ? border.top : border, menuBarDiv, "borderTop");
+        Echo.Sync.Border.render(multisided ? border.bottom : border, menuBarDiv, "borderBottom");
         Echo.Sync.FillImage.render(this.component.render("backgroundImage"), menuBarDiv); 
         
         this._menuBarTable = document.createElement("table");

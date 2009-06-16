@@ -196,7 +196,6 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
         Core.Web.Event.remove(this.div, "mouseover", this._processInitEventRef);
         
         Core.Web.Event.add(this.div, "click", Core.method(this, this._processClick), false);
-        Core.Web.Event.add(this.div, "keypress", Core.method(this, this._processKeyPress), false);
         if (this.component.render("rolloverEnabled")) {
             Core.Web.Event.add(this.div, Core.Web.Env.PROPRIETARY_EVENT_MOUSE_ENTER_LEAVE_SUPPORTED ? "mouseenter" : "mouseover", 
                     Core.method(this, this._processRolloverEnter), false);
@@ -211,6 +210,22 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
         Core.Web.Event.add(this.div, "blur", Core.method(this, this._processBlur), false);
         
         Core.Web.Event.Selection.disable(this.div);
+    },
+    
+    /** 
+     * Processes a key press event.  Invokes <code>doAction()</code> in the case of enter being pressed.
+     * @see Echo.Render.ComponentSync#clientKeyDown 
+     */
+    clientKeyDown: function(e) {
+        if (!this.client || !this.client.verifyInput(this.component)) {
+            return true;
+        }
+        if (e.keyCode == 13) {
+            this.doAction();
+            return false;
+        } else {
+            return true;
+        }
     },
     
     /** @see Echo.Render.ComponentSync#getFocusFlags */ 
@@ -259,19 +274,6 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
         }
     },
     
-    /** Processes a key press event.  Invokes <code>doAction()</code> in the case of enter being pressed. */
-    _processKeyPress: function(e) {
-        if (!this.client || !this.client.verifyInput(this.component)) {
-            return true;
-        }
-        if (e.keyCode == 13) {
-            this.doAction();
-            return false;
-        } else {
-            return true;
-        }
-    },
-    
     /** Processes a mouse button press event, displaying the button's pressed appearance. */
     _processPress: function(e) {
         if (!this.client || !this.client.verifyInput(this.component)) {
@@ -296,6 +298,7 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
         }
         this.client.application.addListener("focus", this._processRolloverExitRef);
         this.setRolloverState(true);
+        return true;
     },
     
     /** Processes a mouse roll over exit event, displaying the button's normal appearance. */
@@ -307,6 +310,7 @@ Echo.Sync.Button = Core.extend(Echo.Render.ComponentSync, {
             this.client.application.removeListener("focus", this._processRolloverExitRef);
         }
         this.setRolloverState(false);
+        return true;
     },
     
     /** @see Echo.Render.ComponentSync#renderAdd */

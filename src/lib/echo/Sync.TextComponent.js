@@ -10,16 +10,21 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
     
     $abstract: true,
     
-    $static: {
-    
-        /**
-         * Array containing properties that may be updated without full re-render.
-         * @type Array
-         */
-        _supportedPartialProperties: ["text", "editable"]
-    },
-    
     $virtual: {
+        
+        getSupportedPartialProperties: function() {
+           return ["text", "editable", "selectionStart", "selectionEnd"];
+        },
+        
+        /**
+         * Processes a focus blur event.
+         */
+        processBlur: function(e) {
+            this._focused = false;
+            this._storeSelection();
+            this._storeValue();
+            return true;
+        },
         
         /**
          * Invoked to ensure that input meets requirements of text field.  Default implementation ensures input
@@ -66,6 +71,18 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
      * @type Boolean
      */
     percentWidth: false,
+    
+    /**
+     * First index of cursor selection.
+     * @type Nunber
+     */
+    _selectionStart: 0,
+    
+    /**
+     * Last index of cursor selection.
+     * @type Nunber
+     */
+    _selectionEnd: 0,
     
     /**
      * Renders style information: colors, borders, font, insets, etc.
@@ -117,9 +134,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
     _addEventHandlers: function() {
         Core.Web.Event.add(this.input, "click", Core.method(this, this._processClick), false);
         Core.Web.Event.add(this.input, "focus", Core.method(this, this._processFocus), false);
-        Core.Web.Event.add(this.input, "blur", Core.method(this, this._processBlur), false);
-        Core.Web.Event.add(this.input, "keypress", Core.method(this, this._processKeyPress), false);
-        Core.Web.Event.add(this.input, "keyup", Core.method(this, this._processKeyUp), false);
+        Core.Web.Event.add(this.input, "blur", Core.method(this, this.processBlur), false);
     },
     
     /**
@@ -135,14 +150,6 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
     },
     
     /**
-     * Processes a focus blur event.
-     */
-    _processBlur: function(e) {
-        this._focused = false;
-        return this._storeValue();
-    },
-    
-    /**
      * Processes a mouse click event. Notifies application of focus.
      */
     _processClick: function(e) {
@@ -150,6 +157,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
             return true;
         }
         this.client.application.setFocusedComponent(this.component);
+        this._storeSelection();
     },
 
     /**
@@ -163,18 +171,33 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
         this.client.application.setFocusedComponent(this.component);
     },
     
-    /**
-     * Processes a key press event.  Prevents input when client is not ready. 
-     */
-    _processKeyPress: function(e) {
-        return this._storeValue(e);
+    /** @see Echo.Render.ComponentSync#clientKeyDown */
+    clientKeyDown: function(e) {
+        this._storeValue(e);
+        if (this.client && this.component.isActive()) {
+            if (!this.component.doKeyDown(e.keyCode)) {
+                Core.Web.DOM.preventEventDefault(e.domEvent);
+            }
+        }
+        return true;
     },
     
-    /**
-     * Processes a key up event.  
-     */
-    _processKeyUp: function(e) {
-        return this._storeValue(e);
+    /** @see Echo.Render.ComponentSync#clientKeyPress */
+    clientKeyPress: function(e) {
+        this._storeValue(e);
+        if (this.client && this.component.isActive()) {
+            if (!this.component.doKeyPress(e.keyCode, e.charCode)) {
+                Core.Web.DOM.preventEventDefault(e.domEvent);
+            }
+        }
+        return true;
+    },
+    
+    /** @see Echo.Render.ComponentSync#clientKeyPress */
+    clientKeyUp: function(e) {
+        this._storeSelection();
+        this._storeValue(e);
+        return true;
     },
     
     /**
@@ -194,7 +217,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
         }
 
         // All-clear, store current text value.
-        this.component.set("text", this.input.value);
+        this.component.set("text", this.input.value, true);
     },
 
     /**
@@ -257,8 +280,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
     
     /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
-        var fullRender = !Core.Arrays.containsAll(Echo.Sync.TextComponent._supportedPartialProperties, 
-                    update.getUpdatedPropertyNames(), true);
+        var fullRender = !Core.Arrays.containsAll(this.getSupportedPartialProperties(), update.getUpdatedPropertyNames(), true);
     
         if (fullRender) {
             var element = this.container ? this.container : this.input;
@@ -287,6 +309,37 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
     },
 
     /**
+     * Stores the selection/cursor position within the input field.
+     */
+    _storeSelection: function() {
+        if (!this.component) {
+            return;
+        }
+        var range, measureRange;
+        if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
+            //FIXME Move to Core.Web.Env variable describing selection
+            range = document.selection.createRange();
+            if (range.parentElement() != this.input) {
+                return;
+            }
+            measureRange = range.duplicate();
+            if (this.input.nodeName.toLowerCase() == "textarea") {
+                measureRange.moveToElementText(this.input);
+            } else {
+                measureRange.expand("textedit");
+            }
+            measureRange.setEndPoint("EndToEnd", range);
+            this._selectionStart = measureRange.text.length - range.text.length;
+            this._selectionEnd = this._selectionStart + range.text.length;
+        } else {
+            this._selectionStart = this.input.selectionStart;
+            this._selectionEnd = this.input.selectionEnd;
+        }
+        this.component.set("selectionStart", this._selectionStart, true);
+        this.component.set("selectionEnd", this._selectionEnd, true);
+    },
+    
+    /**
      * Stores the current value of the input field, if the client will allow it.
      * If the client will not allow it, but the component itself is active, registers
      * a restriction listener to be notified when the client is clear of input restrictions
@@ -300,7 +353,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
                 // Prevent input.
                 Core.Web.DOM.preventEventDefault(keyEvent);
             }
-            return true;
+            return;
         }
 
         this.sanitizeInput();
@@ -310,18 +363,16 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
             // Register listener to be notified when client input restrictions have been removed, 
             // but allow the change to be reflected in the text field temporarily.
             this.client.registerRestrictionListener(this.component, Core.method(this, this._processRestrictionsClear)); 
-            return true;
+            return;
         }
 
         // Component and client are ready to receive input, set the component property and/or fire action event.
-        this.component.set("text", this.input.value);
+        this.component.set("text", this.input.value, true);
         this._lastProcessedValue = this.input.value;
         
-        if (keyEvent && keyEvent.keyCode == 13) {
+        if (keyEvent && keyEvent.keyCode == 13 && keyEvent.type == "keydown") {
             this.component.doAction();
         }
-
-        return true;
     }
 });
 

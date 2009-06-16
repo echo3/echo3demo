@@ -159,7 +159,8 @@ Extras.Sync.AccordionPane = Core.extend(Echo.Render.ComponentSync, {
         }
         
         if (notifyComponentUpdate) {
-            Echo.Render.renderComponentDisplay(this.component);
+            Echo.Render.notifyResize(this.component);
+            this.renderDisplayTabs();
         }
     },
     
@@ -193,6 +194,13 @@ Extras.Sync.AccordionPane = Core.extend(Echo.Render.ComponentSync, {
         if (!this.rotation) {
             this.redrawTabs(false);
         }
+        this.renderDisplayTabs();
+    },
+    
+    /**
+     * Invokes renderDisplay() implementations on tabs.
+     */
+    renderDisplayTabs: function() {
         for (var i = 0; i < this.tabs.length; ++i) {
             this.tabs[i].renderDisplay();
         }
@@ -240,26 +248,12 @@ Extras.Sync.AccordionPane = Core.extend(Echo.Render.ComponentSync, {
 
         return fullRender;
     },
-
-    /**
-     * Removes a tab from an AccordionPane.
-     *
-     * @param tab the tab to remove
-     */
-    _removeTab: function(tab) {
-        var tabIndex = Core.Arrays.indexOf(this.tabs, tab);
-        this.tabs.splice(tabIndex, 1);
-    
-        tab.tabDiv.parentNode.removeChild(tab.tabDiv);
-        tab.containerDiv.parentNode.removeChild(tab.containerDiv);
-        tab.dispose();
-    },
     
     /**
      * "Rotates" the AccordionPane to display the specified tab.
      *
-     * @param oldTabId {String} the currently displayed tab id
-     * @param newTabId {String} the id of the tab that will be displayed
+     * @param {String} oldTabId the currently displayed tab id
+     * @param {String} newTabId the id of the tab that will be displayed
      */
     _rotateTabs: function(oldTabId, newTabId) {
         var oldTab = this._getTabById(oldTabId);
@@ -284,7 +278,7 @@ Extras.Sync.AccordionPane = Core.extend(Echo.Render.ComponentSync, {
     /**
      * Selects a specific tab.
      * 
-     * @param tabId {String} the id of the tab to select
+     * @param {String} tabId the id of the tab to select
      */
     _selectTab: function(tabId) {
         if (tabId == this._activeTabId) {
@@ -420,7 +414,7 @@ Extras.Sync.AccordionPane.Tab = Core.extend({
         if (!this._parent || !this._parent.client || !this._parent.client.verifyInput(this._parent.component)) {
             return;
         }
-        this._renderActiveState(true);
+        this._renderState(true);
     },
     
     /**
@@ -432,7 +426,7 @@ Extras.Sync.AccordionPane.Tab = Core.extend({
         if (!this._parent || !this._parent.client || !this._parent.client.verifyInput(this._parent.component)) {
             return;
         }
-        this._renderActiveState(false);
+        this._renderState(false);
     },
     
     /**
@@ -471,23 +465,23 @@ Extras.Sync.AccordionPane.Tab = Core.extend({
         
         this.containerDiv.appendChild(this.contentDiv);
         
-        this._renderActiveState(false);
+        this._renderState(false);
         this._addEventListeners();
     },
     
     /**
      * Renders the tab active or inactive, updating header state.
      * 
-     * @param {Boolean} state the state of the tab, true for active, false for inactive
+     * @param {Boolean} rollover the rollover state of the tab, true for active, false for inactive
      */
-    _renderActiveState: function(state) {
+    _renderState: function(rollover) {
         var tabDiv = this.tabDiv,
             border = this._parent.component.render("tabBorder", Extras.Sync.AccordionPane._DEFAULTS.tabBorder),
             borderData,
             borderDataBottom,
             background = this._parent.component.render("tabBackground", Extras.Sync.AccordionPane._DEFAULTS.tabBackground);
             
-        if (state) {
+        if (rollover) {
             var rolloverBackground = this._parent.component.render("tabRolloverBackground");
             if (!rolloverBackground) {
                 rolloverBackground = Echo.Sync.Color.adjust(background, 20, 20, 20);
@@ -504,6 +498,7 @@ Extras.Sync.AccordionPane.Tab = Core.extend({
             if (foreground) {
                 Echo.Sync.Color.render(foreground, tabDiv, "color");
             }
+            Echo.Sync.Font.render(this._parent.component.render("tabRolloverFont"), tabDiv);
             var rolloverBorder = this._parent.component.render("tabRolloverBorder");
             if (!rolloverBorder) {
                 rolloverBorder = border;
@@ -526,6 +521,7 @@ Extras.Sync.AccordionPane.Tab = Core.extend({
             Echo.Sync.Color.render(background, tabDiv, "backgroundColor");
             Echo.Sync.Color.render(this._parent.component.render("tabForeground", 
                     Extras.Sync.AccordionPane._DEFAULTS.tabForeground), tabDiv, "color");
+            Echo.Sync.Font.renderClear(this._parent.component.render("tabFont"), tabDiv);
             tabDiv.style.backgroundImage = "";
             tabDiv.style.backgroundPosition = "";
             tabDiv.style.backgroundRepeat = "";

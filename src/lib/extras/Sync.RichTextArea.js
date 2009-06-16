@@ -1,679 +1,4 @@
 /**
- * Component rendering peer: Extras.RichTextInput.
- * This class should not be extended by developers, the implementation is subject to change.
- */
-Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
-
-    $load: function() {
-        Echo.Render.registerPeer("Extras.RichTextInput", this);
-    },
-    
-    $static: {
-
-        DEFAULTS: {
-            border: "1px inset #7f7f7f"
-        },
-        
-        /**
-         * HTML manipulation/cleaning utilities.
-         */
-        Html: {
-        
-            //FIXME Verify no illegal tags are present or correct.
-            //FIXME Verify no unclosed tags are present or correct.
-            //FIXME Verify no illegal characters are present or correct.
-            //FIXME Provide option to only remove the one trailing BR we add by default.
-            
-            /**
-             * Regular expression to find P element blocks (open and closing tags).
-             * @type RegExp
-             */
-            _P_BLOCK_FIND: /<p\b[^>]*>(.*?)<\/p>/ig,
-            
-            /**
-             * Regular expression to find standalone P elements.
-             * @type RegExp
-             */
-            _P_STANDALONE_FIND: /<p\/?>/ig,
-        
-            /**
-             * Regular expression to capture leading whitespace.
-             * @type RegExp
-             */
-            _LEADING_WHITESPACE: /^(\s|<br\/?>|&nbsp;)+/i,
-        
-            /**
-             * Regular expression to capture trailing whitespace.
-             * @type RegExp
-             */
-            _TRAILING_WHITESPACE: /(\s|<br\/?>|&nbsp;)+$/i,
-            
-            /**
-             * Regular expression used to correct MSIE's FONT element color attributes which do not enclose attribute values 
-             * in quotes.
-             * @type RegExp
-             */
-            _MSIE_INVALID_FONT_COLOR_REPL: /(<font .*?color\=)(#[0-9a-fA-F]{3,6})(.*?>)/ig,
-        
-            /**
-             * Regular expression used to correct MSIE's FONT element background attributes which do not enclose attribute values 
-             * in quotes.
-             * @type RegExp
-             */
-            _MSIE_INVALID_FONT_BACKGROUND_REPL: /(<font .*?)(background-color)/ig,
-            
-            /**
-             * Regular expression to determine if a style attribute is setting a bold font.
-             * @type RegExp 
-             */
-            _CSS_BOLD: /font-weight\:\s*bold/i,
-    
-            /**
-             * Regular expression to determine if a style attribute is setting a foreground color.
-             * @type RegExp 
-             */
-            _CSS_FOREGROUND_TEST: /^-?color\:/i,
-            
-            /**
-             * Regular expression to determine the foreground color being set by a style attribute.
-             * @type RegExp 
-             */
-            _CSS_FOREGROUND_RGB: /^-?color\:\s*rgb\s*\(\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})/i,
-                    
-            /**
-             * Regular expression to determine if a style attribute is setting a background color.
-             * @type RegExp 
-             */
-            _CSS_BACKGROUND_TEST: /background-color\:/i,
-    
-            /**
-             * Regular expression to determine the background color being set by a style attribute.
-             * @type RegExp 
-             */
-            _CSS_BACKGROUND_RGB: /background-color\:\s*rgb\s*\(\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})/i,
-                    
-            /**
-             * Regular expression to determine if a style attribute is setting an italic font.
-             * @type RegExp 
-             */
-            _CSS_ITALIC: /font-style\:\s*italic/i,
-            
-            /**
-             * Regular expression to determine if a style attribute is setting an underline font.
-             * @type RegExp 
-             */
-            _CSS_UNDERLINE: /text-decoration\:\s*underline/i,
-            
-            /**
-             * An object which reports style information about a specific node's text content, including inherited style properties.
-             */
-            StyleData: Core.extend({
-                
-                /**
-                 * Flag indicating whether the text is bold.
-                 * @type Boolean
-                 */
-                bold: false,
-                
-                /**
-                 * Flag indicating whether the text is italicized.
-                 * @type Boolean
-                 */
-                italic: false,
-                
-                /**
-                 * Flag indicating whether the text is underlined.
-                 * @type Boolean
-                 */
-                underline: false,
-                
-                /**
-                 * The paragraph style, one of the following values:
-                 * <ul>
-                 *  <li>p</li>
-                 *  <li>pre</li>
-                 *  <li>h1</li>
-                 *  <li>h2</li>
-                 *  <li>h3</li>
-                 *  <li>h4</li>
-                 *  <li>h5</li>
-                 *  <li>h6</li>
-                 * </ul>
-                 * 
-                 * @type String
-                 */
-                paragraphStyle: null,
-                
-                /**
-                 * The text foreground color.
-                 * @type #Color
-                 */
-                foreground: null,
-                
-                /**
-                 * The text background color.
-                 * @type #Color
-                 */
-                background: null,
-                
-                /**
-                 * Creates a new style for a specific DOM node.
-                 * 
-                 * @param {Node} node the node
-                 */
-                $construct: function(node) {
-                    var rgb;
-            
-                    while (node) { 
-                        if (node.nodeType == 1) {
-                            switch (node.nodeName.toLowerCase()) {
-                            case "b": case "strong":
-                                this.bold = true;
-                                break;
-                            case "i": case "em":
-                                this.italic = true;
-                                break;
-                            case "u":
-                                this.underline = true;
-                                break;
-                            case "h1": case "h2": case "h3": case "h4": case "h5": case "h6": case "p": case "pre":
-                                if (!this.paragraphStyle) {
-                                    this.paragraphStyle = node.nodeName.toLowerCase();
-                                }
-                                break;
-                            }
-                        
-                            var css = node.style.cssText;
-                            this.bold |= Extras.Sync.RichTextInput.Html._CSS_BOLD.test(css);
-                            this.italic |= Extras.Sync.RichTextInput.Html._CSS_ITALIC.test(css);
-                            this.underline |= Extras.Sync.RichTextInput.Html._CSS_UNDERLINE.test(css);
-                            
-                            if (!this.foreground && Extras.Sync.RichTextInput.Html._CSS_FOREGROUND_TEST.test(css)) {
-                                rgb = Extras.Sync.RichTextInput.Html._CSS_FOREGROUND_RGB.exec(css);
-                                if (rgb) {
-                                    this.foreground = Echo.Sync.Color.toHex(
-                                            parseInt(rgb[1], 10), parseInt(rgb[2], 10), parseInt(rgb[3], 10));
-                                }
-                            }
-            
-                            if (!this.background && Extras.Sync.RichTextInput.Html._CSS_BACKGROUND_TEST.test(css)) {
-                                rgb = Extras.Sync.RichTextInput.Html._CSS_BACKGROUND_RGB.exec(css);
-                                if (rgb) {
-                                    this.background = Echo.Sync.Color.toHex(
-                                            parseInt(rgb[1], 10), parseInt(rgb[2], 10), parseInt(rgb[3], 10));
-                                }
-                            }
-                        }
-                        node = node.parentNode;
-                    }
-                }
-            }),
-            
-            /**
-             * Cleans HTML input/output.
-             * 
-             * @param {String} html the HTML to clean
-             * @return the cleaned HTML
-             * @type String
-             */
-            clean: function(html) {
-                html = html.replace(Extras.Sync.RichTextInput.Html._P_BLOCK_FIND, "$1<br/>");
-                html = html.replace(Extras.Sync.RichTextInput.Html._P_STANDALONE_FIND, "<br/>");
-                html = html.replace(Extras.Sync.RichTextInput.Html._LEADING_WHITESPACE, "");
-                html = html.replace(Extras.Sync.RichTextInput.Html._TRAILING_WHITESPACE, "");
-                if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
-                    html = html.replace(Extras.Sync.RichTextInput.Html._MSIE_INVALID_FONT_COLOR_REPL, "$1\"$2\"$3");
-                    html = html.replace(Extras.Sync.RichTextInput.Html._MSIE_INVALID_FONT_BACKGROUND_REPL, "$1background-color");
-                }
-                return html;
-            }
-        },
-        
-        /**
-         * Key codes which may result in cursor navigating into new style, resulting in a "cursorStyleChange" event being fired.
-         */
-        _NAVIGATION_KEY_CODES: {
-            38: 1, 40: 1, 37: 1, 39: 1, 33: 1, 34: 1, 36: 1, 35: 1, 8: 1, 46: 1
-        }
-    },
-    
-    /**
-     * Flag indicating whether a style information update is required due to the cursor/selection having been moved/changed.
-     * @type Boolean
-     */
-    _cursorStyleUpdateRequired: false,
-
-    /**
-     * Flag indicating whether an action event should be fired.
-     * Set by _processKeyPress(), used by _processKeyUp().
-     * @type Boolean
-     */
-    _fireAction: false,
-    
-    /**
-     * The most recently retrieved document HTML.  This value is used to avoid updating the HTML when unnecessary.
-     * @type String 
-     */
-    _renderedHtml: null,
-    
-    /**
-     * Listener to receive property events from component.
-     * @type Function
-     */
-    _propertyListener: null,
-
-    /**
-     * Listener to receive insertHtml events from component.
-     * @type Function
-     */
-    _insertHtmlListener: null,
-    
-    /**
-     * Listener to receive execCommand events from component.
-     * @type Function
-     */
-    _execCommandListener: null,
-    
-    /**
-     * Root DIV element of rendered DOM hierarchy.
-     * @type Element
-     */
-    _div: null,
-    
-    /**
-     * Rendered IFRAME element containing editable document.
-     * @type Element
-     */
-    _iframe: null,
-
-    /**
-     * Constructor.
-     */
-    $construct: function() { 
-        this._propertyListener = Core.method(this, function(e) {
-            if (e.propertyName == "text") {
-                this._loadData();
-            }
-        });
-        this._insertHtmlListener = Core.method(this, function(e) {
-            this._insertHtml(e.html);
-        });
-        this._execCommandListener = Core.method(this, function(e) {
-            this._execCommand(e.commandName, e.value);
-        });
-    },
-    
-    /**
-     * Adds listeners to supported Extras.RichTextInput object.
-     */
-    _addComponentListeners: function() {
-        this.component.addListener("execCommand", this._execCommandListener);
-        this.component.addListener("insertHtml", this._insertHtmlListener);
-        this.component.addListener("property", this._propertyListener);
-    },
-
-    /**
-     * Executes a rich text editing command (via document.execCommand()).
-     * 
-     * @param {String} commandName the command name
-     * @param {String} value the command value
-     */
-    _execCommand: function(commandName, value) {
-        this._loadRange();
-        this._iframe.contentWindow.document.execCommand(commandName, false, value);
-        this._storeData();
-        
-        this.client.forceRedraw();
-        
-        // Flag that cursor style update is required.  Some browsers will not render nodes until text is inserted.
-        this._cursorStyleUpdateRequired = true;
-    },
-    
-    /**
-     * Focuses the rich text input document.
-     */
-    focusDocument: function() {
-        this.client.application.setFocusedComponent(this.component);
-        this.client.forceRedraw();
-    },
-    
-    /**
-     * Returns the current selection state of the input field.
-     * The object contains the following properties:
-     * <ul>
-     *  <li><code>node</code>: specifies a current node contained in the selection</li>
-     * </ul>
-     * This is a cross-platform workaround for differences in the selection API of MSIE vs. DOM compliant browsers.
-     * 
-     * @return the selection object
-     * @type Object
-     */
-    _getSelection: function() {
-        if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
-            var textRange = this._iframe.contentWindow.document.selection.createRange();
-            return {
-                node: textRange.parentElement()
-            };
-        } else {
-            var selection = this._iframe.contentWindow.getSelection();
-            return {
-                node: selection ? selection.anchorNode : null
-            };
-        }
-    },
-    
-    /**
-     * Inserts arbitrary HTML within the document at the current cursor position.
-     * 
-     * @param {String} html the HTML code to insert
-     */
-    _insertHtml: function(html) {
-        if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
-            if (!this._selectionRange) {
-                this._selectionRange = this._iframe.contentWindow.document.body.createTextRange();
-            }
-            this._selectionRange.select();
-            this._selectionRange.pasteHTML(html);
-            this._notifyCursorStyleChange();
-            this._storeData();
-        } else {
-            this._execCommand("inserthtml", html);
-        }
-        
-        this.focusDocument();
-        this.client.forceRedraw();
-    },
-    
-    /**
-     * Loads the text data in the component's "text" property into the rendered editable document.
-     * @see #_storeData
-     */
-    _loadData: function() {
-        var html = this.component.get("text");
-        if (html == null) {
-            // Mozilla and Opera have issues with cursor appearing in proper location when text area is devoid of content.
-            html = (Core.Web.Env.BROWSER_MOZILLA || Core.Web.Env.BROWSER_OPERA) ? "<br/>" : "";
-        }
-        if (html == this._renderedHtml) {
-            // No update necessary.
-            return;
-        }
-
-        var contentDocument = this._iframe.contentWindow.document;
-        contentDocument.body.innerHTML = html;
-        this._renderedHtml = html;
-        //FIXME always grabbing focus, this may be undesired...necessary to maintain focus though.
-        this.renderFocus();
-        this.component.doCursorStyleChange(new Extras.Sync.RichTextInput.Html.StyleData(this._getSelection().node));
-    },
-    
-    /**
-     * Selects the last selected range (MSIE only).
-     * @see #_storeRange
-     */
-    _loadRange: function() {
-        if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
-            if (this._selectionRange) {
-                this._selectionRange.select();
-            }
-        }
-    },
-    
-    /**
-     * Notifies component object of a potential cursor style change (such that it may notify registered listeners).
-     */
-    _notifyCursorStyleChange: function() {
-        this._cursorStyleUpdateRequired = false;
-        Core.Web.Scheduler.run(Core.method(this, function() {
-            this.component.doCursorStyleChange(new Extras.Sync.RichTextInput.Html.StyleData(this._getSelection().node));
-        }));
-    },
-    
-    /**
-     * Processes a key press event within the input document.
-     * 
-     * @param e the event
-     */
-    _processKeyPress: function(e) {
-        if (!this.client || !this.client.verifyInput(this.component)) {
-            Core.Web.DOM.preventEventDefault(e);
-            return;
-        }
-
-        if (e.keyCode == 13) {
-            this._fireAction = true;
-        }
-    },
-    
-    /**
-     * Processes a key up event within the input document.
-     * 
-     * @param e the event
-     */
-    _processKeyUp: function(e) {
-        if (!this.client || !this.client.verifyInput(this.component)) {
-            Core.Web.DOM.preventEventDefault(e);
-            return;
-        }
-
-        this._storeData();
-        this._storeRange();
-        
-        if (this._cursorStyleUpdateRequired || Extras.Sync.RichTextInput._NAVIGATION_KEY_CODES[e.keyCode]) {
-            this._notifyCursorStyleChange();
-        }
-        
-        if (this._fireAction) {
-            this._fireAction = false;
-            this.component.doAction();
-        }
-    },
-    
-    /**
-     * Processes a mouse down event within the input document.
-     * 
-     * @param e the event
-     */
-    _processMouseDown: function(e) {
-        if (!this.client || !this.client.verifyInput(this.component)) {
-            Core.Web.DOM.preventEventDefault(e);
-            return;
-        }
-    },
-
-    /**
-     * Processes a mouse up event within the input document.
-     * 
-     * @param e the event
-     */
-    _processMouseUp: function(e) {
-        if (!this.client || !this.client.verifyInput(this.component)) {
-            Core.Web.DOM.preventEventDefault(e);
-            return;
-        }
-
-        this._storeRange();
-        
-        this._notifyCursorStyleChange();
-    },
-    
-    /**
-     * Removes listeners from supported Extras.RichTextInput object.
-     */
-    _removeComponentListeners: function() {
-        this.component.removeListener("execCommand", this._execCommandListener);
-        this.component.removeListener("insertHtml", this._insertHtmlListener);
-        this.component.removeListener("property", this._propertyListener);
-    },
-    
-    /** @see Echo.Render.ComponentSync#renderAdd */
-    renderAdd: function(update, parentElement) {
-        this._addComponentListeners();
-        
-        // Create IFRAME container DIV element.
-        this._div = document.createElement("div");
-        Echo.Sync.Border.render(this.component.render("border", Extras.Sync.RichTextInput.DEFAULTS.border), this._div);
-        
-        // Create IFRAME element.
-        this._iframe = document.createElement("iframe");
-        this._iframe.style.width = this.width ? this.width : "100%";
-
-        if (!this.component.get("paneRender")) {
-            this._iframe.style.height = this.height ? this.height : "200px";
-        }
-
-        this._iframe.style.border = "0px none";
-        this._iframe.frameBorder = "0";
-    
-        this._div.appendChild(this._iframe);
-    
-        parentElement.appendChild(this._div);
-    },
-    
-    /**
-     * Renders the editable content document within the created IFRAME.
-     */
-    _renderContentDocument: function() {
-        // Ensure element is on-screen before rendering content/enabling design mode.
-        var element = this._iframe;
-        while (element != document.body) {
-            if (element == null) {
-                // Not added to parent.
-                return;
-            }
-            if (element.style.display == "none") {
-                // Not rendered.
-                return;
-            }
-            element = element.parentNode;
-        }
-        
-        var style = "height:100%;width:100%;margin:0px;padding:0px;";
-        var foreground = this.component.render("foreground");
-        if (foreground) {
-            style += "color:" + foreground + ";";
-        }
-        var background = this.component.render("background");
-        if (background) {
-            style += "background-color:" + background + ";";
-        }
-        var backgroundImage = this.component.render("backgroundImage");
-        if (backgroundImage) {
-            style += "background-attachment: fixed;";
-            style += "background-image:url(" + Echo.Sync.FillImage.getUrl(backgroundImage) + ");";
-            var backgroundRepeat = Echo.Sync.FillImage.getRepeat(backgroundImage);
-            if (backgroundRepeat) {
-                style += "background-repeat:" + backgroundRepeat + ";";
-            }
-            var backgroundPosition = Echo.Sync.FillImage.getPosition(backgroundImage);
-            if (backgroundPosition) {
-                style += "background-position:" + backgroundPosition + ";";
-            }
-        }
-        
-        var text = this.component.get("text");
-        var contentDocument = this._iframe.contentWindow.document;
-        contentDocument.open();
-        contentDocument.write("<html><body tabindex=\"0\" width=\"100%\" height=\"100%\"" +
-                (style ? (" style=\"" + style + "\"") : "") + ">" + (text == null ? "" : text) + "</body></html>");
-        contentDocument.close();
-        if (Core.Web.Env.BROWSER_MOZILLA && !Core.Web.Env.BROWSER_FIREFOX) {
-            // workaround for Mozilla (not Firefox)
-            var setDesignModeOn = function() {
-                contentDocument.designMode = "on";
-            };
-            setTimeout(setDesignModeOn, 0);
-        } else {
-            contentDocument.designMode = "on";
-        }
-        
-        Core.Web.Event.add(this._iframe.contentWindow.document, "keypress",  Core.method(this, this._processKeyPress), false);
-        Core.Web.Event.add(this._iframe.contentWindow.document, "keyup", Core.method(this, this._processKeyUp), false);
-        Core.Web.Event.add(this._iframe.contentWindow.document, "mousedown", Core.method(this, this._processMouseDown), false);
-        Core.Web.Event.add(this._iframe.contentWindow.document, "mouseup", Core.method(this, this._processMouseUp), false);
-
-        this._contentDocumentRendered = true;
-    },
-    
-    /** @see Echo.Render.ComponentSync#renderDispose */
-    renderDispose: function(update) {
-        this._removeComponentListeners();
-        Core.Web.Event.removeAll(this._iframe.contentWindow.document);
-        this._div = null;
-        this._iframe = null;
-        this._contentDocumentRendered = false;
-        this._selectionRange = null;
-    },
-    
-    /** @see Echo.Render.ComponentSync#renderDisplay */
-    renderDisplay: function() {
-        if (!this._contentDocumentRendered) {
-            this._renderContentDocument();
-        }
-
-        var bounds = new Core.Web.Measure.Bounds(this._div.parentNode);
-        
-        if (bounds.height) {
-            var border = this.component.render("border", Extras.Sync.RichTextInput.DEFAULTS.border);
-            var borderSize = Echo.Sync.Border.getPixelSize(border, "top") + Echo.Sync.Border.getPixelSize(border, "bottom");
-    
-            var calculatedHeight = (bounds.height < 100 ? 100 : bounds.height - borderSize) + "px";
-            if (this._iframe.style.height != calculatedHeight) {
-                this._iframe.style.height = calculatedHeight; 
-            }
-        }
-    },
-
-    /** @see Echo.Render.ComponentSync#renderFocus */
-    renderFocus: function() {
-        if (Core.Web.Env.BROWSER_SAFARI) {
-            // Focus window first to avoid issue where Safari issue with updating content and then focusing.
-            window.focus();
-        }
-        Core.Web.DOM.focusElement(this._iframe.contentWindow);
-        this.client.forceRedraw();
-    },
-    
-    /** @see Echo.Render.ComponentSync#renderUpdate */
-    renderUpdate: function(update) {
-        if (update.isUpdatedPropertySetIn({text: true })) {
-            this._loadData();
-            update.renderContext.displayRequired = [];
-            return;
-        }
-    
-        var element = this._div;
-        var containerElement = element.parentNode;
-        Echo.Render.renderComponentDispose(update, update.parent);
-        containerElement.removeChild(element);
-        this.renderAdd(update, containerElement);
-    },
-    
-    /**
-     * Stores the state of the editable document into the "text" property of the component.
-     * The HTML is cleaned first.
-     * @see #_loadData
-     */
-    _storeData: function() {
-        var contentDocument = this._iframe.contentWindow.document;
-        var html = contentDocument.body.innerHTML;
-        var cleanHtml = Extras.Sync.RichTextInput.Html.clean(html);
-        this._renderedHtml = cleanHtml;
-        this.component.set("text", cleanHtml);
-    },
-    
-    /**
-     * Stores the current selection range (MSIE only).
-     * @see #_loadRange
-     */
-    _storeRange: function() {
-        if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
-            this._selectionRange = this._iframe.contentWindow.document.selection.createRange();
-        }
-    }
-});
-
-/**
  * Component rendering peer: RichTextArea
  */
 Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
@@ -762,7 +87,12 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
             "Menu.InsertImage":                 "Image...",
             "Menu.InsertHyperlink":             "Hyperlink...",
             "Menu.InsertHorizontalRule":        "Horizontal Rule",
-            "Menu.InsertTable":                 "Table...",
+            "Menu.Table":                       "Table",
+            "Menu.Table.New":                   "New Table...",
+            "Menu.Table.DeleteRow":             "Delete Row",
+            "Menu.Table.DeleteColumn":          "Delete Column",
+            "Menu.Table.InsertRow":             "Insert Row",
+            "Menu.Table.InsertColumn":          "Insert Column",
             "Menu.BulletedList":                "Bulleted List",
             "Menu.NumberedList":                "Numbered List",
             "Menu.Format":                      "Format",
@@ -809,10 +139,10 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
     _processDialogCloseRef: null,
 
     /**
-     * Method reference to _processComponentInsertHtml().
+     * Listener to receive execCommand events from component.
      * @type Function
      */
-    _processComponentInsertHtmlRef: null,
+    _execCommandListener: null,
 
     $load: function() {
         Echo.Render.registerPeer("Extras.RichTextArea", this);
@@ -870,10 +200,10 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
          * 
          * @param e the event
          */
-        processInsertTable: function(e) {
+        processNewTable: function(e) {
             var tableDialog = new Extras.Sync.RichTextArea.TableDialog(this.component);
             tableDialog.addListener("tableInsert", Core.method(this, function(e) {
-                this.insertTable(e.data.columns, e.data.rows);
+                this.newTable(e.data.columns, e.data.rows);
                 this.focusDocument();
             }));
             this._openDialog(tableDialog);
@@ -888,13 +218,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
             var colorDialog = new Extras.Sync.RichTextArea.ColorDialog(this.component, true,
                     this._toolbarButtons.background.get("color"));
             colorDialog.addListener("colorSelect", Core.method(this, function(e) {
-                if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
-                    Core.Web.Scheduler.run(Core.method(this, function() {
-                        this.execCommand("backcolor", e.data);
-                    }));
-                } else {
-                    this.execCommand("hilitecolor", e.data);
-                }
+                this.execCommand("background", e.data);
                 this._toolbarButtons.background.set("color", e.data);
                 this.focusDocument();
             }));
@@ -910,7 +234,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
             var colorDialog = new Extras.Sync.RichTextArea.ColorDialog(this.component, false,
                     this._toolbarButtons.foreground.get("color"));
             colorDialog.addListener("colorSelect", Core.method(this, function(e) {
-                this.execCommand("forecolor", e.data);
+                this.execCommand("foreground", e.data);
                 this._toolbarButtons.foreground.set("color", e.data);
                 this.focusDocument();
             }));
@@ -960,7 +284,9 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
     
     /** Constructor. */
     $construct: function() {
-        this._processComponentInsertHtmlRef = Core.method(this, this._processComponentInsertHtml);
+        this._execCommandListener = Core.method(this, function(e) {
+            this.execCommand(e.commandName, e.value);
+        });
         this._processDialogCloseRef = Core.method(this, this._processDialogClose);
         this._toolbarButtons = { };
     },
@@ -969,7 +295,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
      * Adds listeners to supported Extras.RichTextArea object.
      */
     _addComponentListeners: function() {
-        this.component.addListener("insertHtml", this._processComponentInsertHtmlRef);
+        this.component.addListener("execCommand", this._execCommandListener);
     },
 
     /** @see #Echo.Arc.ComponentSync#createComponent */
@@ -1059,11 +385,13 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
             menu.addItem(editMenu);
         }
         
-        if (features.list || features.horizontalRule || features.image || features.hyperlink || features.table) {
+        if (features.list || features.horizontalRule || features.image || features.hyperlink) {
             var insertMenu = new Extras.MenuModel(null, this.msg["Menu.Insert"], null);
-            if (features.list) {
+            if (features.list || features.unorderedList) {
                 insertMenu.addItem(new Extras.OptionModel("/insertunorderedlist", this.msg["Menu.BulletedList"],
                         this.icons.bulletedList));
+            }
+            if (features.list || features.orderedList) {
                 insertMenu.addItem(new Extras.OptionModel("/insertorderedlist", this.msg["Menu.NumberedList"],
                         this.icons.numberedList));
             }
@@ -1078,10 +406,6 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
             if (features.hyperlink) {
                 insertMenu.addItem(new Extras.OptionModel("inserthyperlink", this.msg["Menu.InsertHyperlink"],
                         this.icons.hyperlink));
-            }
-            insertMenu.addItem(new Extras.SeparatorModel());
-            if (features.table) {
-                insertMenu.addItem(new Extras.OptionModel("inserttable", this.msg["Menu.InsertTable"], this.icons.table));
             }
             menu.addItem(insertMenu);
         }
@@ -1155,6 +479,23 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
                 }
             }
             menu.addItem(formatMenu);
+        }
+
+        if (features.table) {
+            var tableMenu = new Extras.MenuModel(null, this.msg["Menu.Table"], null);
+            tableMenu.addItem(new Extras.OptionModel("tableNew", this.msg["Menu.Table.New"], this.icons.table));
+            tableMenu.addItem(new Extras.SeparatorModel());
+            tableMenu.addItem(new Extras.OptionModel("/tableInsertRow", this.msg["Menu.Table.InsertRow"], 
+                    this.icons.tableInsertRow));
+            tableMenu.addItem(new Extras.OptionModel("/tableInsertColumn", this.msg["Menu.Table.InsertColumn"], 
+                    this.icons.tableInsertColumn));
+            tableMenu.addItem(new Extras.SeparatorModel());
+            tableMenu.addItem(new Extras.OptionModel("/tableDeleteRow", this.msg["Menu.Table.DeleteRow"], 
+                    this.icons.tableDeleteRow));
+            tableMenu.addItem(new Extras.OptionModel("/tableDeleteColumn", this.msg["Menu.Table.DeleteColumn"], 
+                    this.icons.tableDeleteColumn));
+            
+            menu.addItem(tableMenu);
         }
         
         return menu;
@@ -1302,9 +643,11 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
         // Insert Tools
         if (features.list || features.horizontalRule || features.image || features.hyperlink || features.table) {
             row = new Echo.Row();
-            if (features.list) {
+            if (features.list || features.unorderedList) {
                 row.add(this._createToolbarButton("Bulleted List", this.icons.bulletedList, this.msg["Menu.BulletedList"], 
                         this._processCommand, "insertunorderedlist"));
+            }
+            if (features.list || features.orderedList) {
                 row.add(this._createToolbarButton("Numbered List", this.icons.numberedList, this.msg["Menu.NumberedList"], 
                         this._processCommand, "insertorderedlist"));
             }
@@ -1321,8 +664,8 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
                         this.processInsertHyperlink));
             }
             if (features.table) {
-                row.add(this._createToolbarButton("Table", this.icons.table, this.msg["Menu.InsertTable"], 
-                        this.processInsertTable));
+                row.add(this._createToolbarButton("Table", this.icons.table, this.msg["Menu.NewTable"], 
+                        this.processNewTable));
             }
             controlsRow.add(row);
         }
@@ -1379,63 +722,52 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
         return this._mainDiv;
     },
     
-    /** 
-     * Returns the default icon URL for the specified icon name.
-     * 
-     * @param {String} name the icon name
-     * @return the icon URL
-     * @type String
-     */
-    _getDefaultIcon: function(name) {
-        return this.client.getResourceUrl("Extras", "image/richtext/" + name + ".gif");
-    },
-    
     /**
      * Creates and returns a default icon name to URL map object.
      * @type Object
      */
     _getDefaultIcons: function() {
-        var iconNames = [ "alignmentCenter", "alignmentJustify", "alignmentLeft", "alignmentRight",
-            "background", "bold", "bulletedList", "cancel", "copy", "cut", "foreground", "horizontalRule",
-            "hyperlink", "image", "ident", "italic", "numberedList", "ok", "outdent", "paste", "redo",
-            "subscript", "superscript", "table", "underline", "undo" ];
+        var iconNames = {
+            "16": [ "alignment", "alignmentCenter", "alignmentJustify", "alignmentLeft", "alignmentRight",
+                "background", "bold", "bulletedList", "cancel", "copy", "cut", "delete", "foreground", "horizontalRule",
+                "hyperlink", "image", "indent", "italic", "numberedList", "ok", "outdent", "paragraphStyle", "paste", "plainText", 
+                "redo", "selectAll", "strikethrough", 
+                "subscript", "superscript", "table", "tableInsertRow", "tableDeleteRow", "tableInsertColumn", "tableDeleteColumn",
+                "textStyle", "underline", "undo" ],
+            "24": [ "ok", "cancel" ]
+        };
         var defaultIcons = { };
-        for (var i = 0; i < iconNames.length; ++i) {
-            var iconResource = iconNames[i].charAt(0).toUpperCase() + iconNames[i].substring(1);
-            defaultIcons[iconNames[i]] = this.client.getResourceUrl("Extras", "image/richtext/" + iconResource + ".gif");
+        for (var size in iconNames) {
+            for (var i = 0; i < iconNames[size].length; ++i) {
+                var iconResource = iconNames[size][i].charAt(0).toUpperCase() + iconNames[size][i].substring(1);
+                defaultIcons[iconNames[size][i]] = this.client.getResourceUrl("Extras", 
+                        "image/richtext/Icon" + size + iconResource + ".png");
+            }
         }
         return defaultIcons;
     },
     
     /**
-     * Inserts the provided HTML string at the cursor position.  Delegates to RichTextInput peer.
-     * 
-     * @param {String} html the HTML to insert
-     */
-    insertHtml: function(html) {
-        this._richTextInput.insertHtml(html);
-    },
-    
-    /**
-     * Inserts an image at the cursor position.  This is a convenience method which invokes insertHtml().
+     * Inserts an image at the cursor position.
      * 
      * @param {String} url the image URL
      */
     insertImage: function(url) {
-        this.insertHtml("<img src=\"" + url + "\">");
+        this._richTextInput.insertHtml("<img src=\"" + url + "\">");
     },
     
     /**
-     * Inserts an HTML table at the cursor position.  This is a convenience method which invokes insertHtml().
+     * Inserts an HTML table at the cursor position.
      * 
      * @param {Number} columns the number of columns
      * @param {Number} rows the number of rows
      */
-    insertTable: function(columns, rows) {
+    newTable: function(columns, rows) {
         var rowHtml = "",
-            i;
+            i,
+            cellContent = Core.Web.Env.ENGINE_MSHTML ? "" : "<br/>";
         for (i = 0; i < columns; ++i) {
-            rowHtml += "<td></td>";
+            rowHtml += "<td>" + cellContent + "</td>";
         }
         rowHtml = "<tr>" + rowHtml + "</tr>";
         var tableHtml = "<table width=\"100%\" border=\"1\" cellspacing=\"0\" cellpadding=\"1\"><tbody>";
@@ -1443,7 +775,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
             tableHtml += rowHtml;
         }
         tableHtml += "</tbody></table>";
-        this.insertHtml(tableHtml);
+        this._richTextInput.insertHtml(tableHtml);
     },
     
     /**
@@ -1482,15 +814,6 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
     _processCommand: function(e) {
         this.execCommand(e.actionCommand);
         this.focusDocument();
-    },
-    
-    /**
-     * Processes an "insertHtml" event received from the Extras.RichTextArea component.
-     * 
-     * @param e the event
-     */
-    _processComponentInsertHtml: function(e) {
-        this._richTextInput.insertHtml(e.html);
     },
     
     /**
@@ -1561,8 +884,8 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
             case "background":
                 this.processSetBackground();
                 break;
-            case "inserttable":
-                this.processInsertTable();
+            case "tableNew":
+                this.processNewTable();
                 break;
             case "inserthyperlink":
                 this.processInsertHyperlink();
@@ -1592,7 +915,7 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
      * Removes listeners from supported Extras.RichTextArea object.
      */
     _removeComponentListeners: function() {
-        this.component.removeListener("insertHtml", this._processComponentInsertHtmlRef);
+        this.component.removeListener("execCommand", this._execCommandListener);
     },
     
     /** @see Echo.Render.ComponentSync#renderAdd */
@@ -1632,6 +955,11 @@ Extras.Sync.RichTextArea = Core.extend(Echo.Arc.ComponentSync, {
         this._removeComponentListeners();
         Echo.Arc.ComponentSync.prototype.renderDispose.call(this, update);
         this._mainDiv = null;
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderFocus */
+    renderFocus: function() {
+        this.arcApplication.setFocusedComponent(this._richTextInput);
     },
     
     /** @see Echo.Render.ComponentSync#renderUpdate */
@@ -1696,7 +1024,6 @@ Extras.Sync.RichTextArea.AbstractDialog = Core.extend(Echo.WindowPane, {
             styleName: rta.render("windowPaneStyleName"),
             iconInsets: "6px 10px",
             contentWidth: "25em",
-            contentHeight: "16em",
             modal: true,
             resizable: false,
             events: {
@@ -1811,8 +1138,7 @@ Extras.Sync.RichTextArea.ColorDialog = Core.extend(Extras.Sync.RichTextArea.Abst
                     title: rta.peer.msg[setBackground ? 
                             "ColorDialog.Title.Background" : "ColorDialog.Title.Foreground"],
                     icon: setBackground ? rta.peer.icons.background : rta.peer.icons.foreground,
-                    contentWidth: "32em",
-                    contentHeight: "22em"
+                    contentWidth: "32em"
                 },
                 new Echo.Row({
                     cellSpacing: "1em",
@@ -1942,7 +1268,7 @@ Extras.Sync.RichTextArea.ImageDialog = Core.extend(Extras.Sync.RichTextArea.Abst
                 Extras.Sync.RichTextArea.AbstractDialog.TYPE_OK_CANCEL,
                 {
                     title: rta.peer.msg["ImageDialog.Title"], 
-                    image: rta.peer.icons.image
+                    icon: rta.peer.icons.image
                 },
                 new Echo.Column({
                     insets: 10,
@@ -2072,7 +1398,7 @@ Extras.Sync.RichTextArea.MessageDialog = Core.extend(
                 new Echo.Label({
                     text: message,
                     layoutData: {
-                        insets: 30 
+                        insets: 30
                     }
                 }));
     }
@@ -2092,31 +1418,55 @@ Extras.Sync.RichTextArea.TableDialog = Core.extend(Extras.Sync.RichTextArea.Abst
         Extras.Sync.RichTextArea.AbstractDialog.call(this, rta,
                 Extras.Sync.RichTextArea.AbstractDialog.TYPE_OK_CANCEL, {
                     title: rta.peer.msg["TableDialog.Title"], 
-                    icon: rta.peer.icons.table
+                    icon: rta.peer.icons.table,
+                    contentWidth: "35em"
                 },
-                new Echo.Grid({
-                    insets: 10,
+                new Echo.Row({
+                    insets: "1em",
+                    cellSpacing: "1em",
                     children: [
-                        new Echo.Label({
-                            text: rta.peer.msg["TableDialog.PromptRows"],
-                            layoutData: {
-                                alignment: "trailing"
+                        this._sizeSelector = new Extras.Sync.RichTextArea.TableSizeSelector({
+                            rows: 2,
+                            columns: 3,
+                            events: {
+                                property: Core.method(this, this._processSelectorUpdate)
                             }
                         }),
-                        this._rowsField = new Echo.TextField({
-                            text: "2",
-                            width: 100   
-                        }),
-                        new Echo.Label({
-                            text: rta.peer.msg["TableDialog.PromptColumns"],
-                            layoutData: {
-                                alignment: "trailing"
-                            }
-                        }),
-                        this._columnsField = new Echo.TextField({
-                            text: "3",
-                            width: 100
-                        })
+                        new Echo.Grid({
+                            width: "100%",
+                            columnWidth: ["25%", "75%"],
+                            insets: 3,
+                            children: [
+                                new Echo.Label({
+                                    text: rta.peer.msg["TableDialog.PromptRows"],
+                                    layoutData: {
+                                        alignment: "trailing"
+                                    }
+                                }),
+                                this._rowsField = new Echo.TextField({
+                                    text: "2",
+                                    alignment: "center",
+                                    width: "5em",
+                                    events: {
+                                        property: Core.method(this, this._processTextUpdate)
+                                    }
+                                }),
+                                new Echo.Label({
+                                    text: rta.peer.msg["TableDialog.PromptColumns"],
+                                    layoutData: {
+                                        alignment: "trailing"
+                                    }
+                                }),
+                                this._columnsField = new Echo.TextField({
+                                    text: "3",
+                                    alignment: "center",
+                                    width: "5em",
+                                    events: {
+                                        property: Core.method(this, this._processTextUpdate)
+                                    }
+                                })
+                            ]
+                        })                    
                     ]
                 }));
     },
@@ -2141,6 +1491,199 @@ Extras.Sync.RichTextArea.TableDialog = Core.extend(Extras.Sync.RichTextArea.Abst
         }
         this.parent.remove(this);
         this.fireEvent({type: "tableInsert", source: this, data: data});
+    },
+    
+    _processSelectorUpdate: function(e) {
+        var columns = parseInt(this._sizeSelector.get("columns"), 10),
+            rows = parseInt(this._sizeSelector.get("rows"), 10);
+        this._columnsField.set("text", columns);
+        this._rowsField.set("text", rows);
+    },
+    
+    _processTextUpdate: function(e) {
+        var columns = parseInt(this._columnsField.get("text"), 10),
+            rows = parseInt(this._rowsField.get("text"), 10);
+        if (!isNaN(columns)) {
+            this._sizeSelector.set("columns", columns);
+        }
+        if (!isNaN(rows)) {
+            this._sizeSelector.set("rows", rows);
+        }
+        return true;
+    }
+});
+
+/**
+ * Component to interactively select initial number of columns/rows for a table.
+ * 
+ * @cp {Number} rows the selected number of rows
+ * @cp {Number} columns the selected number of columns
+ * @sp {Number} rowSize the number of rows to display
+ * @sp {Number} columnSize the number of columns to display
+ * @sp {#Border} border the border to use for drawing table cells
+ * @sp {#Color} selectedBackground the background color for drawing selected table cells
+ * @sp {#Border} selectedBorder the border to use for drawing selected table cells
+ */
+Extras.Sync.RichTextArea.TableSizeSelector = Core.extend(Echo.Component, {
+    
+    $load: function() {
+        Echo.ComponentFactory.registerType("Extras.RichTextTableSizeSelector", this);
+    },
+    
+    /** @see Echo.Component#componentType */
+    componentType: "Extras.RichTextTableSizeSelector"
+});
+
+Extras.Sync.RichTextArea.TableSizeSelectorPeer = Core.extend(Echo.Render.ComponentSync, {
+
+    $load: function() {
+        Echo.Render.registerPeer("Extras.RichTextTableSizeSelector", this);
+    },
+    
+    /**
+     * Main container DIV element.
+     * @type Element
+     */
+    _div: null,
+    
+    /**
+     * Table element.
+     * @type Element
+     */
+    _table: null,
+    
+    _dragInProgress: false,
+    
+    _drawSelection: function() {
+        var rows = parseInt(this.component.render("rows", 0), 10),
+            columns = parseInt(this.component.render("columns", 0), 10),
+            tr = this._table.firstChild.firstChild,
+            y = 0,
+            td, x, selected, border, background;
+            
+        while (tr) {
+            td = tr.firstChild;
+            x = 0;
+            while (td) {
+                selected = x < columns  && y < rows;
+                background = selected ? this._selectedBackground : null;
+                border = selected ? this._selectedBorder : this._border;
+                Echo.Sync.Color.renderClear(background, td, "backgroundColor");
+                Echo.Sync.Border.renderClear(border, td);
+                td = td.nextSibling;
+                ++x;
+            }
+            tr = tr.nextSibling;
+            ++y;
+        }
+    },
+    
+    _processMouseDown: function(e) {
+        this._dragInProgress = true;
+        this._processMouseSelection(e);
+        return true;
+    },
+    
+    _processMouseMove: function(e) {
+        if (this._dragInProgress) {
+            this._processMouseSelection(e);
+        }
+        return true;
+    },
+    
+    _processMouseSelection: function(e) {
+        var x = 0, y = 0,
+            element = e.target;
+        if (!element.nodeName || element.nodeName.toLowerCase() != "td") {
+            return;
+        }
+        while (element.previousSibling) {
+            ++x;
+            element = element.previousSibling;
+        }
+        element = element.parentNode;
+        while (element.previousSibling) {
+            ++y;
+            element = element.previousSibling;
+        }
+        this.component.set("columns", x + 1);
+        this.component.set("rows", y + 1);
+        
+    },
+    
+    _processMouseUp: function(e) {
+        this._dragInProgress = false;
+        return true;
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderAdd */
+    renderAdd: function(update, parentElement) {
+        var tbody, protoTr, tr, td, y, x, colGroup, col;
+        
+        this._rowSize = this.component.render("rowSize", 10);
+        this._columnSize = this.component.render("columnSize", 15);
+            
+        this._border = this.component.render("border", "1px outset #dfdfdf");
+        this._selectedBorder = this.component.render("selectedBorder", "1px outset #4f4f5f");
+        this._selectedBackground = this.component.render("selectedBackground", "#4f4f5f");
+        
+        this._div = document.createElement("div");
+        this._div.id = this.component.renderId;
+        
+        this._table = document.createElement("table");
+        this._table.cellPadding = 0;
+        this._table.cellSpacing = 0;
+        this._table.style.cssText = "padding:0;border:none;font-size:1px;";
+        Echo.Sync.Color.render(this.component.render("background", "#dfdfdf"), this._table, "backgroundColor");
+        tbody = document.createElement("tbody");
+        this._table.appendChild(tbody);
+        
+        protoTr = document.createElement("tr");
+        for (x = 0; x < this._columnSize; ++x) {
+            td = document.createElement("td");
+            td.style.cssText = "padding:0;width:16px;height:16px;";
+            td.appendChild(document.createTextNode("\u00a0"));
+            Echo.Sync.Border.render(this._border, td);
+            protoTr.appendChild(td);
+        }
+        
+        for (y = 0; y < this._rowSize; ++y) {
+            tbody.appendChild(protoTr.cloneNode(true));
+        }
+        
+        this._div.appendChild(this._table);
+        
+        Core.Web.Event.Selection.disable(this._div);
+        Core.Web.Event.add(this._div, "mousedown", Core.method(this, this._processMouseDown), false);
+        Core.Web.Event.add(this._div, "mousemove", Core.method(this, this._processMouseMove), false);
+        Core.Web.Event.add(this._div, "mouseup", Core.method(this, this._processMouseUp), false);
+        parentElement.appendChild(this._div);
+        
+        this._drawSelection();
+    },
+    
+    
+    /** @see Echo.Render.ComponentSync#renderDispose */
+    renderDispose: function(update) {
+        Core.Web.Event.removeAll(this._div);
+        this._table = null;
+        this._div = null;
+    },
+    
+    
+    /** @see Echo.Render.ComponentSync#renderUpdate */
+    renderUpdate: function(update) {
+        if (update.isUpdatedPropertySetIn({ columns: true, rows: true })) {
+            this._drawSelection();
+            return;
+        }
+
+        var element = this._div;
+        var containerElement = element.parentNode;
+        Echo.Render.renderComponentDispose(update, update.parent);
+        containerElement.removeChild(element);
+        this.renderAdd(update, containerElement);
+        return true;
     }
 });
 

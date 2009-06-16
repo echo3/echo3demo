@@ -205,7 +205,7 @@ Echo.Serial = {
                     indexValues[index] = value;
                 }
             } else {
-                // Property has property name: invoke set(Indexed)Property.
+                // Property has property name: invoke set(Index).
                 if (index == null) {
                     object.set(name, value);
                 } else {
@@ -355,24 +355,6 @@ Echo.Serial.Boolean = Core.extend(Echo.Serial.PropertyTranslator, {
 });
 
 /**
- * Float Property Translator Singleton.
- */
-Echo.Serial.Float = Core.extend(Echo.Serial.PropertyTranslator, {
-
-    $static: {
-    
-        /** @see Echo.Serial.PropertyTranslator#toProperty */
-        toProperty: function(client, pElement) {
-            return parseFloat(pElement.firstChild.data);
-        }
-    },
-
-    $load: function() {
-        Echo.Serial.addPropertyTranslator("f", this);
-    }
-});
-
-/**
  * Integer Property Translator Singleton.
  */
 Echo.Serial.Integer = Core.extend(Echo.Serial.PropertyTranslator, {
@@ -387,6 +369,24 @@ Echo.Serial.Integer = Core.extend(Echo.Serial.PropertyTranslator, {
 
     $load: function() {
         Echo.Serial.addPropertyTranslator("i", this);
+    }
+});
+
+/**
+ * Number Property Translator Singleton.
+ */
+Echo.Serial.Number = Core.extend(Echo.Serial.PropertyTranslator, {
+
+    $static: {
+    
+        /** @see Echo.Serial.PropertyTranslator#toProperty */
+        toProperty: function(client, pElement) {
+            return parseFloat(pElement.firstChild.data);
+        }
+    },
+
+    $load: function() {
+        Echo.Serial.addPropertyTranslator("n", this);
     }
 });
 
