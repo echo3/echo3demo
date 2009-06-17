@@ -211,12 +211,6 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
     },
     "Default.Top": {
         "Extras.TabPane": {
-            layoutData: {
-                backgroundImage: {
-                    url: "image/SilverBehindTabBackground.png",
-                    y: -135
-                }
-            },
             insets: 0,
             tabIconTextMargin: 3,
             tabCloseIconTextMargin: 8,
@@ -270,12 +264,6 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
     },
     "Default.Top.Surround": {
         "Extras.TabPane": {
-            layoutData: {
-                backgroundImage: {
-                    url: "image/SilverBehindTabBackground.png",
-                    y: -135
-                }
-            },
             insets: 0,
             tabIconTextMargin: 3,
             tabCloseIconTextMargin: 8,
