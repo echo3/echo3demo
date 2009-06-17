@@ -386,21 +386,21 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             }
         }
     },
-    "LaunchPanel": {
+    "Workspace.LaunchPanel": {
         "Button": {
             alignment: "center",
             background: "#1f1f1f",
             textAlignment: "center",
             textPosition: "bottom",
             rolloverEnabled: true,
-            rolloverBackgroundImage: "image/DemoSelectButtonRolloverBackground.png",
+            rolloverBackgroundImage: "image/workspace/DemoSelectButtonRolloverBackground.png",
             rolloverBorder: { 
                 top: "1px solid #1d1d1d",
                 left: "1px solid #1d1d1d",
                 bottom: "1px solid #5d5d5d",
                 right: "1px solid #5d5d5d"
             },
-            backgroundImage: "image/DemoSelectButtonBackground.png",
+            backgroundImage: "image/workspace/DemoSelectButtonBackground.png",
             foreground: "#ffffff",
             font: { size: "9pt" },
             iconTextMargin: 2,
@@ -412,7 +412,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 bottom: "1px solid #3d3d3d",
                 right: "1px solid #3d3d3d"
             },
-            pressedBackgroundImage: "image/DemoSelectButtonSelectedBackground.png",
+            pressedBackgroundImage: "image/workspace/DemoSelectButtonSelectedBackground.png",
             pressedBorder: {
                 top: "1px solid #2b2b2b",
                 left: "1px solid #2b2b2b",
@@ -424,13 +424,13 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             cellSpacing: 1
         }
     },
-    "LaunchPanel.Selected": {
+    "Workspace.LaunchPanel.Selected": {
         "Button": {
             alignment: "center",
             textAlignment: "center",
             textPosition: "bottom",
             foreground: "#ffffff",
-            backgroundImage: "image/DemoSelectButtonSelectedBackground.png",
+            backgroundImage: "image/workspace/DemoSelectButtonSelectedBackground.png",
             font: { size: "9pt" },
             iconTextMargin: 2,
             insets: 10,

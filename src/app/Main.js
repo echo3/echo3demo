@@ -674,7 +674,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         this._screenMap = { };
         for (var i = 0; i < this._sections.length; ++i) {
             var column = new Echo.Column({
-                styleName: "LaunchPanel",
+                styleName: "Workspace.LaunchPanel",
                 layoutData: {
                     title: this._sections[i].title
                 }
@@ -684,7 +684,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                 var screen = this._sections[i].screens[j];
                 column.add(new Echo.Button({
                     id: screen.id,
-                    styleName: "LaunchPanel",
+                    styleName: "Workspace.LaunchPanel",
                     icon: screen.icon64,
                     text: screen.title,
                     actionCommand: screen.id,
@@ -809,7 +809,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
             this.add(screenWindow);
         } else {
             if (this._activeScreenLaunchButton) {
-                this._activeScreenLaunchButton.setStyleName("LaunchPanel");
+                this._activeScreenLaunchButton.setStyleName("Workspace.LaunchPanel");
                 this._activeScreenLaunchButton = null;
             }
 
@@ -955,7 +955,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                 var launchButton = column.children[j];
                 if (launchButton.get("id") == screen.id) {
                     this._activeScreenLaunchButton = launchButton;
-                    this._activeScreenLaunchButton.setStyleName("LaunchPanel.Selected");
+                    this._activeScreenLaunchButton.setStyleName("Workspace.LaunchPanel.Selected");
                     this._launchPanel.set("activeTabId", column.renderId);
                 }
             }
