@@ -563,8 +563,8 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                     separatorWidth: 6,
                     separatorPosition: "18%",
                     resizable: true,
-                    separatorHorizontalImage: "image/MainSeparator.png",
-                    separatorHorizontalRolloverImage: "image/MainSeparatorRollover.png",
+                    separatorHorizontalImage: "image/workspace/MainSeparator.png",
+                    separatorHorizontalRolloverImage: "image/workspace/MainSeparatorRollover.png",
                     children: [
                         new Echo.SplitPane({
                             orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM,
