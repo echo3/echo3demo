@@ -14,7 +14,7 @@ DemoApp.RichTextScreen = Core.extend(Echo.ContentPane, {
                 "<table border=\"1\" cellpadding=\"1\" cellspacing=\"0\" width=\"100%\"><tbody>" +
                 "<tr><td>Tables</td><td>South</td><td>Northeast</td><td>Midwest</td></tr>" +
                 "<tr><td>January</td><td>1,432,958</td><td>5,323,187</td><td>1,854,122</td></tr>" +
-                "<tr><td>Februay</td><td><p><span style=\"color:#7f0000;\">(243,409)</span></p></td>" + 
+                "<tr><td>February</td><td><p><span style=\"color:#7f0000;\">(243,409)</span></p></td>" + 
                 "<td>493,332</td><td>933,865</td></tr>" +
                 "<tr><td>March</td><td>584,231</td><td>5,399,231</td><td>983,220</td></tr>" +
                 "<tr><td>April</td><td>1,043,127</td><td>1,542,361</td><td>2,742,586</td></tr>" +
