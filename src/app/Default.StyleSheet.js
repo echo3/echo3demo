@@ -373,7 +373,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
         "Label": {
             layoutData: {
                 backgroundImage: {
-                    url: "image/FpsBackground.png",
+                    url: "image/BgGlassPurple.png",
                     y: "50%"
                 },
                 insets: "5px 10px"
