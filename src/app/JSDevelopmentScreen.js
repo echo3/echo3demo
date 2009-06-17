@@ -373,12 +373,9 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                             background: "#383838",
                                             children: [
                                                 new Extras.TabPane({
-                                                    background: "#ffffff",
-                                                    tabActiveBackground: "#ffffff",
-                                                    tabInactiveBackground: "#afafaf",
+                                                    styleName: "Default.Top.Surround",
                                                     borderType: Extras.TabPane.BORDER_TYPE_SURROUND,
                                                     insets: 10,
-                                                    tabInset: 30,
                                                     children: [
                                                         new Echo.ContentPane({
                                                             layoutData: {
@@ -563,6 +560,11 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
     _createHierarchalExample: function() {
         var label;
         var content = new Echo.ContentPane({
+            layoutData: {
+                title: this._msg["JSDevelopmentScreen.Tab.RenderedComponents"],
+                activeBackground: "#4f4f5f",
+                activeForeground: "#ffffff"
+            },
             children: [
                 new Echo.SplitPane({ 
                     styleName: "DefaultResizableLarge",
@@ -605,11 +607,6 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                 })
             ]
         });
-        
-        content.set("layoutData", {
-            title: this._msg["JSDevelopmentScreen.Tab.RenderedComponents"]
-        });
-        
         return content;
     }
 });
