@@ -638,7 +638,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
         "Extras.MenuBarPane": {
             border: "0px solid #000000",
             backgroundImage: {
-                url: "image/RichTextMenuBackground.png",
+                url: "image/fill/SilverMenu.png",
                 repeat: "x",
                 y: "100%"
             },
@@ -649,11 +649,11 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
     "RichTextArea.Toolbar": {
         "Button": {
             background: "#abcdef",
-            backgroundImage: "image/RichTextToolbarBackground.png",
+            backgroundImage: "image/fill/SilverToolbar.png",
             foreground: "#000000",
             border: "1px outset #cfcfdf",
             rolloverEnabled: true,
-            rolloverBackgroundImage: "image/RichTextMenuBackground.png",
+            rolloverBackgroundImage: "image/fill/SilverMenu.png",
             rolloverBorder: "1px outset #efefff",
             pressedEnabled: true,
             pressedBorder: "1px inset #afafbf",
@@ -661,7 +661,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
         },
         "Panel": {
             backgroundImage: {
-                url: "image/RichTextToolbarBackground.png",
+                url: "image/fill/SilverToolbar.png",
                 y: "50%"
             }
         }
