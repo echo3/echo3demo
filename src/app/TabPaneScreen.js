@@ -109,7 +109,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                             tabRolloverEnabled: true,
                             tabRolloverForeground: "#ffffff",
                             tabRolloverBackgroundImage: {
-                                url: "image/ControlPaneHighlight.png",
+                                url: "image/fill/GradientBlue.png",
                                 y: "50%"
                             },
                             tabRolloverCloseIcon: "image/icon/Icon16TabCloseRollover.png",
@@ -486,7 +486,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
         this._tabPane.set("tabActiveBorder", this._imageBorder.get("selected") ? 
                 null : ("2px groove " + this._activeTabBorder.get("color")));
         this._tabPane.set("tabActiveBackgroundImage", 
-                this._activeTabBackgroundImage.get("selected") ? "image/ControlPaneFill.png" : null);
+                this._activeTabBackgroundImage.get("selected") ? "image/fill/GradientWhiteSilver.png" : null);
                 
         this._tabPane.set("tabInactiveBackground", this._inactiveTabBackground.get("color"));
         this._tabPane.set("tabInactiveForeground", this._inactiveTabForeground.get("color"));
@@ -500,7 +500,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
         this._tabPane.set("tabRolloverBorder", this._imageBorder.get("selected") ? 
                 null : ("2px groove " + this._rolloverTabBorder.get("color")));
         this._tabPane.set("tabRolloverBackgroundImage", 
-                this._rolloverTabBackgroundImage.get("selected") ? { url: "image/ControlPaneHighlight.png", y: "50%" } : null);
+                this._rolloverTabBackgroundImage.get("selected") ? { url: "image/fill/GradientBlue.png", y: "50%" } : null);
                 
         if (this._imageBorder.get("selected")) {
             this._tabPane.set("imageBorder", DemoApp.TabPaneScreen.IMAGE_BORDER);

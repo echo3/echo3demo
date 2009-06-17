@@ -3,7 +3,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
         "Row": {
             layoutData: {
                 backgroundImage: {
-                    url: "image/ControlPaneFill.png",
+                    url: "image/fill/GradientWhiteSilver.png",
                     y: "50%"
                 },
                 overflow: Echo.SplitPane.OVERFLOW_HIDDEN
@@ -20,14 +20,14 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             rolloverForeground: "#ffffff",
             rolloverBackground: "#3939d6",
             rolloverBackgroundImage: {
-                url: "image/ControlPaneHighlight.png",
+                url: "image/fill/GradientBlue.png",
                 y: "50%"
             },
             rolloverEnabled: true,
             pressedForeground: "#dfffff",
             pressedBackground: "#3939d6",
             pressedBackgroundImage: {
-                url: "image/ControlPaneHighlightLight.png",
+                url: "image/fill/GradientBlueHighlight.png",
                 y: "50%"
             },
             pressedEnabled: true
@@ -260,7 +260,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             tabRolloverEnabled: true,
             tabRolloverForeground: "#ffffff",
             tabRolloverBackgroundImage: {
-                url: "image/ControlPaneHighlight.png",
+                url: "image/fill/GradientBlue.png",
                 y: "50%"
             },
             tabRolloverCloseIcon: "image/icon/Icon16TabCloseRollover.png"
@@ -325,7 +325,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             tabRolloverEnabled: true,
             tabRolloverForeground: "#ffffff",
             tabRolloverBackgroundImage: {
-                url: "image/ControlPaneHighlight.png",
+                url: "image/fill/GradientBlue.png",
                 y: "50%"
             },
             tabRolloverCloseIcon: "image/icon/Icon16TabCloseRollover.png"
