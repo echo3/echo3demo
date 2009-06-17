@@ -104,6 +104,8 @@ DemoApp = Core.extend(Echo.Application, {
             "lib/echo/Sync.Composite.js",
             "lib/echo/Sync.List.js",
             "lib/echo/Sync.TextComponent.js",
+            "lib/extras/Application.BorderPane.js",
+            "lib/extras/Sync.BorderPane.js",
             "lib/extras/Application.ColorSelect.js",
             "lib/extras/Sync.ColorSelect.js",
             "lib/extras/Application.RichTextInput.js",
@@ -324,7 +326,7 @@ DemoApp = Core.extend(Echo.Application, {
         this.rootComponent.add(this.workspace);
         
         // Edit/Enable the following line to launch a specific screen at startup.
-        this.workspace.launchScreen(sections[3].screens[1]);
+        this.workspace.launchScreen(sections[3].screens[2]);
     }
 });
 

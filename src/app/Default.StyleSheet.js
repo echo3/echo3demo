@@ -598,8 +598,13 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
     },
     "RichTextArea.Menu": {
         "Extras.MenuBarPane": {
-            backgroundImage: "image/BlueLineBackground.png",
-            menuBackgroundIamge: "image/LightBlueLineBackground.png",
+            border: "0px solid #000000",
+            backgroundImage: {
+                url: "image/RichTextMenuBackground.png",
+                repeat: "x",
+                y: "100%"
+            },
+            menuBackgroundImage: "image/LightBlueLineBackground.png",
             selectionBackgroundImage: "image/ShadowBackgroundDarkBlue2.png"
         }
     },
