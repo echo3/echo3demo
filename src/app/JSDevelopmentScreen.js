@@ -346,7 +346,7 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                                                 x: "50%",
                                                                 y: "50%",
                                                                 repeat: "no-repeat",
-                                                                url: "image/Hierarchy.png"
+                                                                url: "image/js/Hierarchy.png"
                                                             }
 
                                                         }),
