@@ -452,11 +452,13 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
     },
     
     _processAddTab: function(e) {
+        var background = this._randomPastelColor();
         this._tabPane.add(new Echo.ContentPane({
             layoutData: {
-                title: "Tab " + this._tabCount++
+                title: "Tab " + this._tabCount++,
+                activeBackground: background
             },
-            background: this._randomPastelColor(),
+            background: background,
             children: [
                 new Echo.Column({
                     insets: 20,
