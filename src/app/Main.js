@@ -615,7 +615,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                                             cellSpacing: 100,
                                             layoutData: {
                                                 overflow: Echo.SplitPane.OVERFLOW_HIDDEN,
-                                                backgroundImage: "image/NavigationBackground.png"
+                                                backgroundImage: "image/workspace/NavigationBackground.png"
                                             },
                                             children: [
                                                 new Echo.Button({
