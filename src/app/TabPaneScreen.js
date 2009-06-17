@@ -445,6 +445,8 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
         this._rolloverTabForeground.set("color", "#ffffff");
         this._rolloverTabBackground.set("color", "#1515cf");
         this._rolloverTabBackgroundImage.set("selected", "true");
+        this._rolloverTabBorder.set("color", "#abcdef");
+        
         this._imageBorder.set("selected", "true");
         this._removeButton.setEnabled(false);
     },
@@ -495,8 +497,8 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
         this._tabPane.set("tabRolloverForeground", this._rolloverTabForeground.get("color"));
         this._tabPane.set("tabRolloverBorder", this._imageBorder.get("selected") ? 
                 null : ("2px groove " + this._rolloverTabBorder.get("color")));
-        this._tabPane.set("tabInactiveBackgroundImage", 
-                this._rolloverTabBackgroundImage.get("selected") ? "image/LightBlueLineBackground.png" : null);
+        this._tabPane.set("tabRolloverBackgroundImage", 
+                this._rolloverTabBackgroundImage.get("selected") ? { url: "image/ControlPaneHighlight.png", y: "50%" } : null);
                 
         if (this._imageBorder.get("selected")) {
             this._tabPane.set("imageBorder", DemoApp.TabPaneScreen.IMAGE_BORDER);
