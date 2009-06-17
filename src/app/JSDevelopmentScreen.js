@@ -149,7 +149,7 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
         
         Echo.ContentPane.call(this, {
             backgroundImage: {
-                url: "image/bgpictures/Moonlight.jpg",
+                url: "image/bgpictures/HoubaDetail.jpg",
                 x: "50%",
                 y: "50%"
             },
@@ -158,13 +158,67 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                     borderType: Extras.TabPane.BORDER_TYPE_SURROUND,
                     tabPosition: Extras.TabPane.TAB_POSITION_BOTTOM,
                     insets: 20,
-                    tabInset: 30,
-                    tabActiveBorder: "1px inset #3b67b4",
-                    tabInactiveBorder: "1px inset #819488",
+                    tabIconTextMargin: 3,
+                    tabCloseIconTextMargin: 8,
+                    background: "#ffffff",
+                    tabSpacing: -20,
+                    imageBorder: {
+                        contentInsets: "8px 14px 14px 8px",
+                        borderInsets: "17px 23px 23px 17px",
+                        topLeft: "image/window/simple/BorderTopLeft.png",
+                        top: "image/window/simple/BorderTop.png",
+                        topRight: "image/window/simple/BorderTopRight.png",
+                        left: "image/window/simple/BorderLeft.png",
+                        right: "image/window/simple/BorderRight.png",
+                        bottomLeft: "image/window/simple/BorderBottomLeft.png",
+                        bottom: "image/window/simple/BorderBottom.png",
+                        bottomRight: "image/window/simple/BorderBottomRight.png"
+                    },
                     tabActiveBackground: "#0f0f1f",
-                    tabActiveForeground: "#ffdfaf",
-                    tabInactiveBackground: "#0f0f0f",
-                    tabInactiveForeground: "#af7f6f",
+                    tabActiveForeground: "#ffffff",
+                    tabActiveFont: { bold: true },
+                    tabActiveBackgroundInsets: "0px 14px 14px 8px",
+                    tabActiveHeightIncrease: 3,
+                    tabActiveImageBorder: {
+                        contentInsets: "0px 14px 14px 8px",
+                        borderInsets: "0px 23px 23px 17px",
+                        topLeft: null,
+                        top: null,
+                        topRight: null,
+                        left: "image/window/simple/BorderLeft.png",
+                        right: "image/window/simple/BorderRight.png",
+                        bottomLeft: "image/window/simple/BorderBottomLeft.png",
+                        bottom: "image/window/simple/BorderBottom.png",
+                        bottomRight: "image/window/simple/BorderBottomRight.png"
+                    },
+                    tabActiveInsets: "4px 10px",
+                    tabInactiveBackground: "#e7e7e7",
+                    tabInactiveBackgroundInsets: "1px 14px 14px 8px",
+                    tabInactiveFont: { bold: true },
+                    tabInactiveImageBorder: {
+                        contentInsets: "1px 14px 14px 8px",
+                        borderInsets: "1px 23px 23px 17px",
+                        topLeft: null,
+                        top: null,
+                        topRight: null,
+                        left: "image/window/simple/BorderLeft.png",
+                        right: "image/window/simple/BorderRight.png",
+                        bottomLeft: "image/window/simple/BorderBottomLeft.png",
+                        bottom: "image/window/simple/BorderBottom.png",
+                        bottomRight: "image/window/simple/BorderBottomRight.png"
+                    },
+                    tabInactiveBackgroundImage: {
+                        url: "image/fill/LightedSilver.png",
+                        repeat: "repeat-x",
+                        y: "53%"
+                    },
+                    tabInactiveInsets: "4px 10px",
+                    tabRolloverEnabled: true,
+                    tabRolloverForeground: "#ffffff",
+                    tabRolloverBackgroundImage: {
+                        url: "image/fill/GradientBlue.png",
+                        y: "50%"
+                    },
                     children: [
                         new Echo.ContentPane({
                             background: "#0f0f1f",
