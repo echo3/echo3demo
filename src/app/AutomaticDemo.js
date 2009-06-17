@@ -191,6 +191,7 @@ DemoApp.AutomaticDemo.StopDialog = Core.extend(Echo.WindowPane, {
             closable: false,
             resizable: false,
             movable: false,
+            minimumHeight: "50px",
             positionX: "100%",
             positionY: "100%",
             width: "20em"
