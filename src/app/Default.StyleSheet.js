@@ -170,6 +170,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             controlPaneButtonStyleName: "ControlPane.Button", 
             menuStyleName: "RichTextArea.Menu",
             toolbarButtonStyleName: "RichTextArea.Toolbar",
+            toolbarPanelStyleName: "RichTextArea.Toolbar",
             windowPaneStyleName: "Default"
         },
         "TextComponent": {
@@ -613,16 +614,22 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
     },
     "RichTextArea.Toolbar": {
         "Button": {
-            background: "#cfcfdf",
+            background: "#abcdef",
+            backgroundImage: "image/RichTextToolbarBackground.png",
             foreground: "#000000",
             border: "1px outset #cfcfdf",
             rolloverEnabled: true,
-            rolloverBackground: "#efefff",
+            rolloverBackgroundImage: "image/RichTextMenuBackground.png",
             rolloverBorder: "1px outset #efefff",
             pressedEnabled: true,
-            pressedBackground: "#afafbf",
             pressedBorder: "1px inset #afafbf",
             insets: "1px 3px"
+        },
+        "Panel": {
+            backgroundImage: {
+                url: "image/RichTextToolbarBackground.png",
+                y: "50%"
+            }
         }
     },
     "TransGreen": {
