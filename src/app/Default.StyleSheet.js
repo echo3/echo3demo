@@ -139,31 +139,6 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             menuOpacity: 80,
             selectionBackgroundImage: "image/ShadowBlueGrey.png"
         },
-        "Extras.MenuBarPane": {
-            animationTime: 150,
-            border: "0px solid #000000",
-            backgroundImage: {
-                url: "image/PulldownMenuBackground.png",
-                y: "50%"
-            },
-            foreground: "#ffffff",
-            menuBackground: "#000000",
-            menuOpacity: 92,
-            menuBackgroundImage: "image/fill/InterlaceDarkGrey.png",
-            menuBorder: {
-                top: "1px solid #3f3f3f",
-                left: "1px solid #3f3f3f",
-                right: "1px solid #1f1f1f",
-                bottom: "1px solid #1f1f1f"
-            },
-            selectionBackground: "#fffac1",
-            selectionBackgroundImage: { 
-                url:"image/fill/LightedBeige.png",
-                x: "50%", 
-                y: "50%"
-            },
-            selectionForeground: "#000000"
-        },
         "Extras.RichTextArea": {
             controlPaneSplitPaneStyleName: "ControlPane.Container.Bottom",
             controlPaneRowStyleName: "ControlPane",
@@ -384,6 +359,33 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 bold: true,
                 size: "10pt"
             }
+        }
+    },
+    "Workspace": {
+        "Extras.MenuBarPane": {
+            animationTime: 150,
+            border: "0px solid #000000",
+            backgroundImage: {
+                url: "image/workspace/MenuBarBackground.png",
+                y: "50%"
+            },
+            foreground: "#ffffff",
+            menuBackground: "#000000",
+            menuOpacity: 92,
+            menuBackgroundImage: "image/fill/InterlaceDarkGrey.png",
+            menuBorder: {
+                top: "1px solid #3f3f3f",
+                left: "1px solid #3f3f3f",
+                right: "1px solid #1f1f1f",
+                bottom: "1px solid #1f1f1f"
+            },
+            selectionBackground: "#fffac1",
+            selectionBackgroundImage: { 
+                url:"image/fill/LightedBeige.png",
+                x: "50%", 
+                y: "50%"
+            },
+            selectionForeground: "#000000"
         }
     },
     "Workspace.LaunchPanel": {

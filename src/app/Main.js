@@ -597,7 +597,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                             separatorColor: "#000000",
                             children: [
                                 this._menu = new Extras.MenuBarPane({
-                                    styleName: "Default",
+                                    styleName: "Workspace",
                                     model: this.createMenuModel(),
                                     events: {
                                         action: Core.method(this, this._processMenuAction)
