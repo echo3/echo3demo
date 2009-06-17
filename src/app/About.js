@@ -24,7 +24,10 @@ DemoApp.AboutDialog = Core.extend(Echo.WindowPane, {
             },
             children: [
                 new Echo.ContentPane({
-                    backgroundImage: "image/BlueLineBackground.png",
+                    backgroundImage: {
+                        url: "image/SilverBehindTabBackground.png",
+                        y: -135
+                    },
                     children: [
                         new Extras.TabPane({
                             styleName: "Default.Top.Surround",
