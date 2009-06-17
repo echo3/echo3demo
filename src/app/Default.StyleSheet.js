@@ -68,13 +68,13 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             tabForeground: "#ffffff",
             tabBackground: "#514f58",
             tabBackgroundImage: {
-                url: "image/TabBackground.png",
+                url: "image/fill/BlueGrey.png",
                 y: "50%"
             },
             tabRolloverEnabled: true,
             tabRolloverBackground: "#86899a",
             tabRolloverBackgroundImage: {
-                url: "image/TabBackgroundRollover.png",
+                url: "image/fill/BlueGreyLight.png",
                 y: "50%"
             }
         },
