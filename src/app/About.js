@@ -40,7 +40,7 @@ DemoApp.AboutDialog = Core.extend(Echo.WindowPane, {
                                     },
                                     children: [
                                         new Echo.Label({
-                                            icon: "image/NextApp.png"
+                                            icon: "image/logo/NextApp.png"
                                         }),
                                         new Echo.Label({
                                             text: this._msg["About.General1"]
