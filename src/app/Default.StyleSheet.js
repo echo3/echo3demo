@@ -114,7 +114,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 bottom: "1px solid #7f7f8f"
             },
             menuOpacity: 80,
-            selectionBackgroundImage: "image/ShadowBackgroundDarkBlue2.png"
+            selectionBackgroundImage: "image/ShadowBlueGrey.png"
         },
         "Extras.DropDownMenu": {
             animationTime: 350,
@@ -137,7 +137,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 bottom: "1px solid #7f7f8f"
             },
             menuOpacity: 80,
-            selectionBackgroundImage: "image/ShadowBackgroundDarkBlue2.png"
+            selectionBackgroundImage: "image/ShadowBlueGrey.png"
         },
         "Extras.MenuBarPane": {
             animationTime: 150,
@@ -641,7 +641,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 y: "100%"
             },
             menuBackgroundImage: "image/fill/LightBlueLine.png",
-            selectionBackgroundImage: "image/ShadowBackgroundDarkBlue2.png"
+            selectionBackgroundImage: "image/fill/ShadowBlueGrey.png"
         }
     },
     "RichTextArea.Toolbar": {
