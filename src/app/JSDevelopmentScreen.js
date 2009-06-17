@@ -224,7 +224,7 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                                 new Echo.Label({
                                                     layoutData: {
                                                         insets: 15,
-                                                        backgroundImage: "image/LightBlueLineBackground.png"
+                                                        backgroundImage: "image/fill/LightBlueLine.png"
                                                     },
                                                     text: this._msg["JSDevelopmentScreen.CoreJS.RolloverDirection"]
                                                 }),

@@ -67,7 +67,7 @@ DemoApp.BasicComponentsScreen = Core.extend(Echo.ContentPane, {
                                     children: [
                                         new Echo.Label({
                                             layoutData: {
-                                                backgroundImage: "image/LightBlueLineBackground.png",
+                                                backgroundImage: "image/fill/LightBlueLine.png",
                                                 columnSpan: 2
                                             },
                                             font: { bold: true, italic: true },
@@ -145,7 +145,7 @@ DemoApp.BasicComponentsScreen = Core.extend(Echo.ContentPane, {
                                         }),
                                         new Echo.Label({
                                             layoutData: {
-                                                backgroundImage: "image/LightBlueLineBackground.png",
+                                                backgroundImage: "image/fill/LightBlueLine.png",
                                                 columnSpan: 2
                                             },
                                             font: { bold: true, italic: true },
@@ -186,7 +186,7 @@ DemoApp.BasicComponentsScreen = Core.extend(Echo.ContentPane, {
                                         }),
                                         new Echo.Label({
                                             layoutData: {
-                                                backgroundImage: "image/LightBlueLineBackground.png",
+                                                backgroundImage: "image/fill/LightBlueLine.png",
                                                 columnSpan: 2
                                             },
                                             font: { bold: true, italic: true },

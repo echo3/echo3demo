@@ -103,10 +103,10 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
         "Extras.ContextMenu": {
             animationTime: 350,
             backgroundImage: {
-                url: "image/LightBlueLineBackground.png",
+                url: "image/fill/LightBlueLine.png",
                 y: "50%"
             },
-            menuBackgroundIamge: "image/LightBlueLineBackground.png",
+            menuBackgroundIamge: "image/fill/LightBlueLine.png",
             menuBorder: {
                 top: "1px solid #dfdfef",
                 left: "1px solid #dfdfef",
@@ -119,7 +119,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
         "Extras.DropDownMenu": {
             animationTime: 350,
             backgroundImage: {
-                url: "image/LightBlueLineBackground.png",
+                url: "image/fill/LightBlueLine.png",
                 y: "50%"
             },
             border: {
@@ -129,7 +129,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 bottom: "1px solid #7f7f8f"
             },
             insets: "2px 10px",
-            menuBackgroundIamge: "image/LightBlueLineBackground.png",
+            menuBackgroundIamge: "image/fill/LightBlueLine.png",
             menuBorder: {
                 top: "1px solid #dfdfef",
                 left: "1px solid #dfdfef",
@@ -158,7 +158,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             },
             selectionBackground: "#fffac1",
             selectionBackgroundImage: { 
-                url:"image/BeigeLightedBackground.png",
+                url:"image/fill/LightedBeige.png",
                 x: "50%", 
                 y: "50%"
             },
@@ -640,7 +640,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 repeat: "x",
                 y: "100%"
             },
-            menuBackgroundImage: "image/LightBlueLineBackground.png",
+            menuBackgroundImage: "image/fill/LightBlueLine.png",
             selectionBackgroundImage: "image/ShadowBackgroundDarkBlue2.png"
         }
     },

@@ -155,7 +155,7 @@ DemoApp.LayoutContainersScreen = Core.extend(Echo.ContentPane, {
                                     width: "19em",
                                     closable: false,
                                     resizable: false,
-                                    backgroundImage: "image/LightBlueLineBackground.png",
+                                    backgroundImage: "image/fill/LightBlueLine.png",
                                     insets: 5,
                                     children: [
                                         new Echo.Label({
