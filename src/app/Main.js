@@ -15,8 +15,9 @@ DemoApp = Core.extend(Echo.Application, {
         
         /** Required JavaScript module URLs for Automatic demo system. */
         MODULE_AUTOMATIC_DEMO: [
-            "lib/echo/Sync.ToggleButton.js",
+            "lib/echo/Sync.Composite.js",
             "lib/echo/Sync.List.js",
+            "lib/echo/Sync.ToggleButton.js",
             "app/AutomaticDemo.js"
         ],
     

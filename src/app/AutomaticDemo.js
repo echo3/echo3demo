@@ -251,10 +251,9 @@ DemoApp.AutomaticDemo.StopDialog = Core.extend(Echo.WindowPane, {
                 ]
             }));
         } else {
-            this.add(new Echo.ContentPane({
-                overflow: Echo.ContentPane.OVERFLOW_HIDDEN,
+            this.add(new Echo.Panel({
                 backgroundImage: {
-                    url: "image/StopBackground.png",
+                    url: "image/fill/GlassRed.png",
                     y: "50%"
                 },
                 children: [
