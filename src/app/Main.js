@@ -619,8 +619,8 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                                             },
                                             children: [
                                                 new Echo.Button({
-                                                    icon: "image/PreviousArrow.png",
-                                                    rolloverIcon: "image/PreviousArrowRollover.png",
+                                                    icon: "image/workspace/PreviousArrow.png",
+                                                    rolloverIcon: "image/workspace/PreviousArrowRollover.png",
                                                     text: this._msg["Navigation.Previous"], 
                                                     foreground: "#ffffff",
                                                     rolloverForeground: "#c9fdd2",
@@ -633,8 +633,8 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                                                     }
                                                 }),
                                                 new Echo.Button({
-                                                    icon: "image/NextArrow.png",
-                                                    rolloverIcon: "image/NextArrowRollover.png",
+                                                    icon: "image/workspace/NextArrow.png",
+                                                    rolloverIcon: "image/workspace/NextArrowRollover.png",
                                                     text: this._msg["Navigation.Next"], 
                                                     foreground: "#ffffff",
                                                     rolloverForeground: "#c9fdd2",
