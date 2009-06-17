@@ -61,7 +61,10 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             background: "#cfdfff"
         },
         "Extras.AccordionPane": {
-            tabBorder: "1px outset #514f58",
+            tabBorder: { 
+                top: "1px solid #817f88",
+                bottom: "1px solid #312f38"
+            },
             tabForeground: "#ffffff",
             tabBackground: "#514f58",
             tabBackgroundImage: {
