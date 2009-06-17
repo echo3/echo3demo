@@ -149,7 +149,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             foreground: "#ffffff",
             menuBackground: "#000000",
             menuOpacity: 92,
-            menuBackgroundImage: "image/GreyMenuBackground.png",
+            menuBackgroundImage: "image/fill/InterlaceDarkGrey.png",
             menuBorder: {
                 top: "1px solid #3f3f3f",
                 left: "1px solid #3f3f3f",
