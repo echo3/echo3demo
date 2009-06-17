@@ -1,5 +1,47 @@
 DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
 
+    $static: {
+        
+        IMAGE_BORDER: {
+            contentInsets: "8px 14px 14px 8px",
+            borderInsets: "17px 23px 23px 17px",
+            topLeft: "image/window/simple/BorderTopLeft.png",
+            top: "image/window/simple/BorderTop.png",
+            topRight: "image/window/simple/BorderTopRight.png",
+            left: "image/window/simple/BorderLeft.png",
+            right: "image/window/simple/BorderRight.png",
+            bottomLeft: "image/window/simple/BorderBottomLeft.png",
+            bottom: "image/window/simple/BorderBottom.png",
+            bottomRight: "image/window/simple/BorderBottomRight.png"
+        },
+
+        TAB_ACTIVE_IMAGE_BORDER: {
+            contentInsets: "8px 14px 0px 8px",
+            borderInsets: "17px 23px 0px 17px",
+            topLeft: "image/window/simple/BorderTopLeft.png",
+            top: "image/window/simple/BorderTop.png",
+            topRight: "image/window/simple/BorderTopRight.png",
+            left: "image/window/simple/BorderLeft.png",
+            right: "image/window/simple/BorderRight.png",
+            bottomLeft: null,
+            bottom: null,
+            bottomRight: null
+        },
+        
+        TAB_INACTIVE_IMAGE_BORDER: {
+            contentInsets: "8px 14px 1px 8px",
+            borderInsets: "17px 23px 1px 17px",
+            topLeft: "image/window/simple/BorderTopLeft.png",
+            top: "image/window/simple/BorderTop.png",
+            topRight: "image/window/simple/BorderTopRight.png",
+            left: "image/window/simple/BorderLeft.png",
+            right: "image/window/simple/BorderRight.png",
+            bottomLeft: null,
+            bottom: null,
+            bottomRight: null
+        }
+    },
+    
     _msg: null,
     _tabPane: null,
     _activeTabBorder: null,
@@ -42,15 +84,35 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                             layoutData: {
                                 backgroundImage: "image/bgpictures/Airplane.jpg"
                             },
-                            styleName: "Default.Top.Surround",
                             insets: 20,
                             borderType: Extras.TabPane.BORDER_TYPE_SURROUND,
-//                            tabActiveBorder: "2px groove #3bb467",
-//                            tabInactiveBorder: "2px groove #819488",
-//                            tabInset: 30,
-//                            tabActiveBackground: "#ffffff",
-//                            background: "#ffffff",
-//                            tabInactiveBackgroundImage: "image/LightBlueLineBackground.png",
+                            tabIconTextMargin: 3,
+                            tabCloseIconTextMargin: 8,
+                            background: "#ffffff",
+                            tabSpacing: -20,
+                            imageBorder: DemoApp.TabPaneScreen.IMAGE_BORDER,
+                            tabActiveBackground: "#ffffff",
+                            tabActiveBackgroundInsets: "8px 14px 0px 8px",
+                            tabActiveHeightIncrease: 3,
+                            tabActiveImageBorder: DemoApp.TabPaneScreen.TAB_ACTIVE_IMAGE_BORDER,
+                            tabActiveInsets: "4px 10px",
+                            tabInactiveBackground: "#e7e7e7",
+                            tabInactiveBackgroundInsets: "8px 14px 1px 8px",
+                            tabInactiveImageBorder: DemoApp.TabPaneScreen.TAB_INACTIVE_IMAGE_BORDER,
+                            tabInactiveBackgroundImage: {
+                                url: "image/SilverLightedBackground.png",
+                                repeat: "repeat-x",
+                                y: "53%"
+                            },
+                            tabInactiveInsets: "4px 10px",
+                            tabCloseIcon: "image/Icon16TabClose.png",
+                            tabRolloverEnabled: true,
+                            tabRolloverForeground: "#ffffff",
+                            tabRolloverBackgroundImage: {
+                                url: "image/ControlPaneHighlight.png",
+                                y: "50%"
+                            },
+                            tabRolloverCloseIcon: "image/Icon16TabCloseRollover.png",
                             children: [
                                 new Echo.Column({
                                     layoutData: {
@@ -437,7 +499,15 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                 this._rolloverTabBackgroundImage.get("selected") ? "image/LightBlueLineBackground.png" : null);
                 
         if (this._imageBorder.get("selected")) {
+            this._tabPane.set("imageBorder", DemoApp.TabPaneScreen.IMAGE_BORDER);
+            this._tabPane.set("tabInactiveImageBorder", DemoApp.TabPaneScreen.TAB_INACTIVE_IMAGE_BORDER);
+            this._tabPane.set("tabActiveImageBorder", DemoApp.TabPaneScreen.TAB_ACTIVE_IMAGE_BORDER);
+            this._tabPane.set("tabSpacing", -20);
         } else {
+            this._tabPane.set("imageBorder", null);
+            this._tabPane.set("tabInactiveImageBorder", null);
+            this._tabPane.set("tabActiveImageBorder", null);
+            this._tabPane.set("tabSpacing", null);
         }
     },
     
