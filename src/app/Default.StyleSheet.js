@@ -38,16 +38,16 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             border: "1px outset #709bcd",
             foreground: "#000000",
             backgroundImage: {
-                url: "image/InputFieldBackground.png",
+                url: "image/fill/InputField.png",
                 y: "50%"
             },
             pressedBackgroundImage: {
-                url: "image/InputFieldBackgroundPressed.png",
+                url: "image/fill/InputFieldPressed.png",
                 y: "50%"
             },
             pressedBorder: "1px inset #709bcd",
             rolloverBackgroundImage: {
-                url: "image/InputFieldBackgroundHighlight.png",
+                url: "image/fill/InputFieldHighlight.png",
                 y: "50%"
             },
             rolloverBorder: "1px outset #bcd6f4",
@@ -177,7 +177,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             background: "#cfdfff",
             border: "2px groove #cfdfff",
             backgroundImage: {
-                url: "image/InputFieldBackground.png",
+                url: "image/fill/InputField.png",
                 repeat: "repeat-x",
                 y: "50%"
             }

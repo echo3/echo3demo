@@ -132,11 +132,11 @@ DemoApp.AccordionPaneScreen.PhotoBrowser = Core.extend(Echo.SplitPane, {
                 this._accordion = new Extras.AccordionPane({
                     background: "#494857",
                     tabBackgroundImage: {
-                        url: "image/InputFieldBackground.png",
+                        url: "image/fill/InputField.png",
                         y: "50%"
                     },
                     tabRolloverBackgroundImage: {
-                        url: "image/InputFieldBackgroundHighlight.png",
+                        url: "image/fill/InputFieldHighlight.png",
                         y: "50%"
                     }
                 }),
