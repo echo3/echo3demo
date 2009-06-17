@@ -357,6 +357,7 @@ DemoApp.Messages = new Core.ResourceBundle({
     "TabPaneScreen.WindowPanesTab":                         "WindowPanes",
     "TabPaneScreen.PromptActiveTab":                        "Active Tab",
     "TabPaneScreen.PromptInactiveTab":                      "Inactive Tab",
+    "TabPaneScreen.PromptRolloverTab":                      "Rollover",
     "TabPaneScreen.PromptForeground":                       "Foreground",
     "TabPaneScreen.PromptBackground":                       "Background",
     "TabPaneScreen.PromptBorder":                           "Border",

@@ -40,16 +40,17 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                         }),
                         this._tabPane = new Extras.TabPane({
                             layoutData: {
-                                backgroundImage: "image/bgpictures/Coral.jpg"
+                                backgroundImage: "image/bgpictures/Poinsettia.jpg"
                             },
+                            styleName: "Default.Top.Surround",
                             insets: 20,
-                            tabActiveBorder: "2px groove #3bb467",
-                            tabInactiveBorder: "2px groove #819488",
                             borderType: Extras.TabPane.BORDER_TYPE_SURROUND,
-                            tabInset: 30,
-                            tabActiveBackground: "#ffffff",
-                            background: "#ffffff",
-                            tabInactiveBackgroundImage: "image/LightBlueLineBackground.png",
+//                            tabActiveBorder: "2px groove #3bb467",
+//                            tabInactiveBorder: "2px groove #819488",
+//                            tabInset: 30,
+//                            tabActiveBackground: "#ffffff",
+//                            background: "#ffffff",
+//                            tabInactiveBackgroundImage: "image/LightBlueLineBackground.png",
                             children: [
                                 new Echo.Column({
                                     layoutData: {
@@ -66,18 +67,23 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                             children: [
                                                 new Echo.Label({
                                                     layoutData: {
-                                                        background: "#f0dcbb"
+                                                        background: "#f0dcbb",
+                                                        rowSpan: 2
                                                     }
                                                 }),
                                                 new Echo.Label({
                                                     layoutData: {
-                                                        background: "#f0ecbb"
+                                                        alignment: "top",
+                                                        background: "#f0ecbb",
+                                                        rowSpan: 2
                                                     },
                                                     text: this._msg["TabPaneScreen.PromptForeground"]
                                                 }),
                                                 new Echo.Label({
                                                     layoutData: {
-                                                        background: "#f0ecbb"
+                                                        alignment: "top",
+                                                        background: "#f0ecbb",
+                                                        rowSpan: 2
                                                     },
                                                     text: this._msg["TabPaneScreen.PromptBackground"]
                                                 }),
@@ -86,6 +92,17 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                                         background: "#f0ecbb"
                                                     },
                                                     text: this._msg["TabPaneScreen.PromptBorder"]
+                                                }),
+                                                this._imageBorder = new Echo.CheckBox({
+                                                    text: "Use Image Border",
+                                                    events: {
+                                                        property: Core.method(this, function(e) {
+                                                            var selected = this._imageBorder.get("selected");
+                                                            this._activeTabBorder.setEnabled(!selected);
+                                                            this._inactiveTabBorder.setEnabled(!selected);
+                                                            this._rolloverTabBorder.setEnabled(!selected);
+                                                        })
+                                                    }
                                                 }),
                                                 new Echo.Label({
                                                     layoutData: {
@@ -109,7 +126,13 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                                             styleName: "Junior"
                                                         }),
                                                         this._activeTabBackgroundImage = new Echo.CheckBox({
-                                                            text: "Image"
+                                                            text: "Image",
+                                                            events: {
+                                                                property: Core.method(this, function(e) {
+                                                                    this._activeTabBackground.setEnabled(
+                                                                            !this._activeTabBackgroundImage.get("selected"));
+                                                                })
+                                                            }
                                                         })
                                                     ]
                                                 }),
@@ -141,11 +164,55 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                                             styleName: "Junior"
                                                         }),
                                                         this._inactiveTabBackgroundImage = new Echo.CheckBox({
-                                                            text: "Image"
+                                                            text: "Image",
+                                                            events: {
+                                                                property: Core.method(this, function(e) {
+                                                                    this._inactiveTabBackground.setEnabled(
+                                                                            !this._inactiveTabBackgroundImage.get("selected"));
+                                                                })
+                                                            }
                                                         })
                                                     ]
                                                 }),
                                                 this._inactiveTabBorder = new Extras.ColorSelect({
+                                                    layoutData: {
+                                                        alignment: "top"
+                                                    },
+                                                    styleName: "Junior"
+                                                }),
+                                                new Echo.Label({
+                                                    layoutData: {
+                                                        background: "#f0d6c1",
+                                                        alignment: "trailing"
+                                                    },
+                                                    text: this._msg["TabPaneScreen.PromptRolloverTab"]
+                                                }),
+                                                this._rolloverTabForeground = new Extras.ColorSelect({
+                                                    layoutData: {
+                                                        alignment: "top"
+                                                    },
+                                                    styleName: "Junior"
+                                                }),
+                                                new Echo.Column({
+                                                    layoutData: {
+                                                        alignment: "top"
+                                                    },
+                                                    children: [
+                                                        this._rolloverTabBackground = new Extras.ColorSelect({
+                                                            styleName: "Junior"
+                                                        }),
+                                                        this._rolloverTabBackgroundImage = new Echo.CheckBox({
+                                                            text: "Image",
+                                                            events: {
+                                                                property: Core.method(this, function(e) {
+                                                                    this._rolloverTabBackground.setEnabled(
+                                                                            !this._rolloverTabBackgroundImage.get("selected"));
+                                                                })
+                                                            }
+                                                        })
+                                                    ]
+                                                }),
+                                                this._rolloverTabBorder = new Extras.ColorSelect({
                                                     layoutData: {
                                                         alignment: "top"
                                                     },
@@ -313,6 +380,10 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
         this._inactiveTabForeground.set("color", "#000000");
         this._inactiveTabBorder.set("color", "#819488");
         this._inactiveTabBackgroundImage.set("selected", "true");
+        this._rolloverTabForeground.set("color", "#ffffff");
+        this._rolloverTabBackground.set("color", "#1515cf");
+        this._rolloverTabBackgroundImage.set("selected", "true");
+        this._imageBorder.set("selected", "true");
         this._removeButton.setEnabled(false);
     },
     
@@ -346,15 +417,28 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
     _processUpdateTabPane: function(e) {
         this._tabPane.set("tabActiveBackground", this._activeTabBackground.get("color"));
         this._tabPane.set("tabActiveForeground", this._activeTabForeground.get("color"));
-        this._tabPane.set("tabActiveBorder", "2px groove " + this._activeTabBorder.get("color"));
+        this._tabPane.set("tabActiveBorder", this._imageBorder.get("selected") ? 
+                null : ("2px groove " + this._activeTabBorder.get("color")));
         this._tabPane.set("tabActiveBackgroundImage", 
                 this._activeTabBackgroundImage.get("selected") ? "image/ControlPaneFill.png" : null);
+                
         this._tabPane.set("tabInactiveBackground", this._inactiveTabBackground.get("color"));
         this._tabPane.set("tabInactiveForeground", this._inactiveTabForeground.get("color"));
-        this._tabPane.set("tabInactiveBorder", "2px groove " + this._inactiveTabBorder.get("color"));
+        this._tabPane.set("tabInactiveBorder", this._imageBorder.get("selected") ? 
+                null : ("2px groove " + this._inactiveTabBorder.get("color")));
         this._tabPane.set("tabInactiveBackgroundImage", 
                 this._inactiveTabBackgroundImage.get("selected") ? "image/LightBlueLineBackground.png" : null);
     
+        this._tabPane.set("tabRolloverBackground", this._rolloverTabBackground.get("color"));
+        this._tabPane.set("tabRolloverForeground", this._rolloverTabForeground.get("color"));
+        this._tabPane.set("tabRolloverBorder", this._imageBorder.get("selected") ? 
+                null : ("2px groove " + this._rolloverTabBorder.get("color")));
+        this._tabPane.set("tabInactiveBackgroundImage", 
+                this._rolloverTabBackgroundImage.get("selected") ? "image/LightBlueLineBackground.png" : null);
+                
+        if (this._imageBorder.get("selected")) {
+        } else {
+        }
     },
     
     _randomPastelColor: function() {
