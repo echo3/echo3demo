@@ -616,28 +616,28 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                                             },
                                             children: [
                                                 new Echo.Button({
-                                                    icon: "image/PreviousArrow.gif",
-                                                    rolloverIcon: "image/PreviousArrowRollover.gif",
+                                                    icon: "image/PreviousArrow.png",
+                                                    rolloverIcon: "image/PreviousArrowRollover.png",
                                                     text: this._msg["Navigation.Previous"], 
                                                     foreground: "#ffffff",
                                                     rolloverForeground: "#c9fdd2",
                                                     font: { bold: true, italic: true },
-                                                    iconTextMargin: 10,
-                                                    textPosition: "left",
+                                                    iconTextMargin: 5,
+                                                    textPosition: "right",
                                                     rolloverEnabled: true,
                                                     events: {
                                                         action: Core.method(this, this._processPrevious)
                                                     }
                                                 }),
                                                 new Echo.Button({
-                                                    icon: "image/NextArrow.gif",
-                                                    rolloverIcon: "image/NextArrowRollover.gif",
+                                                    icon: "image/NextArrow.png",
+                                                    rolloverIcon: "image/NextArrowRollover.png",
                                                     text: this._msg["Navigation.Next"], 
                                                     foreground: "#ffffff",
                                                     rolloverForeground: "#c9fdd2",
                                                     font: { bold: true, italic: true },
-                                                    iconTextMargin: 10,
-                                                    textPosition: "right",
+                                                    iconTextMargin: 5,
+                                                    textPosition: "left",
                                                     rolloverEnabled: true,
                                                     events: {
                                                         action: Core.method(this, this._processNext)
