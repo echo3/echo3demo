@@ -226,7 +226,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 bottomRight: null
             },
             tabInactiveBackgroundImage: {
-                url: "image/SilverLightedBackground.png",
+                url: "image/fill/LightedSilver.png",
                 repeat: "repeat-x",
                 y: "53%"
             },
@@ -291,7 +291,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 bottomRight: null
             },
             tabInactiveBackgroundImage: {
-                url: "image/SilverLightedBackground.png",
+                url: "image/fill/LightedSilver.png",
                 repeat: "repeat-x",
                 y: "53%"
             },

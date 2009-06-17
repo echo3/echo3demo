@@ -100,7 +100,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                             tabInactiveBackgroundInsets: "8px 14px 1px 8px",
                             tabInactiveImageBorder: DemoApp.TabPaneScreen.TAB_INACTIVE_IMAGE_BORDER,
                             tabInactiveBackgroundImage: {
-                                url: "image/SilverLightedBackground.png",
+                                url: "image/fill/LightedSilver.png",
                                 repeat: "repeat-x",
                                 y: "53%"
                             },
@@ -493,7 +493,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
         this._tabPane.set("tabInactiveBorder", this._imageBorder.get("selected") ? 
                 null : ("2px groove " + this._inactiveTabBorder.get("color")));
         this._tabPane.set("tabInactiveBackgroundImage", 
-                this._inactiveTabBackgroundImage.get("selected") ? "image/SilverLightedBackground.png" : null);
+                this._inactiveTabBackgroundImage.get("selected") ? "image/fill/LightedSilver.png" : null);
     
         this._tabPane.set("tabRolloverBackground", this._rolloverTabBackground.get("color"));
         this._tabPane.set("tabRolloverForeground", this._rolloverTabForeground.get("color"));
