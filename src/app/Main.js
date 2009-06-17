@@ -117,6 +117,7 @@ DemoApp = Core.extend(Echo.Application, {
     
         /** Required JavaScript module URLs for Extras Widgets demo screen. */
         MODULE_DEMO_EXTRAS_WIDGETS: [
+            "lib/echo/Sync.Composite.js",
             "lib/echo/Sync.ToggleButton.js",
             "lib/extras/Application.CalendarSelect.js",
             "lib/extras/Sync.CalendarSelect.js",
@@ -326,7 +327,7 @@ DemoApp = Core.extend(Echo.Application, {
         this.rootComponent.add(this.workspace);
         
         // Edit/Enable the following line to launch a specific screen at startup.
-        this.workspace.launchScreen(sections[3].screens[2]);
+        this.workspace.launchScreen(sections[3].screens[1]);
     }
 });
 

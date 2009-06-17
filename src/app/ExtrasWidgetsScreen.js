@@ -7,6 +7,7 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
     $construct: function() {
         this._msg = DemoApp.getMessages(null);
         Echo.ContentPane.call(this, {
+            backgroundImage: "image/bgpictures/Sky.jpg",
             children: [
                 new Echo.Row({
                     children: [
@@ -15,31 +16,42 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                 alignment: "top"
                             },
                             insets: "1em",
-                            cellSpacing: "1em",
+                            cellSpacing: "0.5em",
                             children: [
-                                new Extras.Group({
-                                    title: this._msg["ExtrasWidgetsScreen.CalendarSelect.Title"],
+                                new Echo.Panel({
+                                    styleName: "DisplayPanel",
                                     children: [
-                                        new Echo.Row({
-                                            cellSpacing: "1em",
+                                        new Echo.Column({
                                             children: [
-                                                new Extras.CalendarSelect({
-                                                    styleName: "Default",
-                                                    layoutData: {
-                                                        alignment: "top"
-                                                    }
+                                                new Echo.Label({
+                                                    styleName: "DisplayPanel",
+                                                    text: this._msg["ExtrasWidgetsScreen.CalendarSelect.Title"]
                                                 }),
-                                                new Echo.Column({
+                                                new Echo.Row({
                                                     layoutData: {
-                                                        alignment: "top"
+                                                        insets: "5px 10px"
                                                     },
                                                     cellSpacing: "1em",
                                                     children: [
-                                                        new Echo.Label({
-                                                            text: this._msg["ExtrasWidgetsScreen.CalendarSelect.Desc1"]
+                                                        new Extras.CalendarSelect({
+                                                            styleName: "Default",
+                                                            layoutData: {
+                                                                alignment: "top"
+                                                            }
                                                         }),
-                                                        new Echo.Label({
-                                                            text: this._msg["ExtrasWidgetsScreen.CalendarSelect.Desc2"]
+                                                        new Echo.Column({
+                                                            layoutData: {
+                                                                alignment: "top"
+                                                            },
+                                                            cellSpacing: "1em",
+                                                            children: [
+                                                                new Echo.Label({
+                                                                    text: this._msg["ExtrasWidgetsScreen.CalendarSelect.Desc1"]
+                                                                }),
+                                                                new Echo.Label({
+                                                                    text: this._msg["ExtrasWidgetsScreen.CalendarSelect.Desc2"]
+                                                                })
+                                                            ]
                                                         })
                                                     ]
                                                 })
@@ -47,42 +59,37 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                         })
                                     ]
                                 }),
-                                new Extras.Group({
-                                    title: this._msg["ExtrasWidgetsScreen.Menu.Title"],
+                                new Echo.Panel({
+                                    styleName: "DisplayPanel",
                                     children: [
-                                        new Echo.Row({
-                                            cellSpacing: "1em",
+                                        new Echo.Column({
                                             children: [
-                                                new Echo.Column({
+                                                new Echo.Label({
+                                                    styleName: "DisplayPanel",
+                                                    text: this._msg["ExtrasWidgetsScreen.Menu.Title"]
+                                                }),
+                                                new Echo.Row({
                                                     layoutData: {
-                                                        alignment: "top"
+                                                        insets: "5px 10px"
                                                     },
-                                                    insets: "1em",
-                                                    cellSpacing: "2em",
+                                                    cellSpacing: "1em",
                                                     children: [
-                                                        new Extras.ContextMenu({
-                                                            styleName: "Default",
-                                                            children: [
-                                                                new Echo.Button({
-                                                                    styleName: "Default",
-                                                                    insets: "5px 10px",
-                                                                    text: this._msg["ExtrasWidgetsScreen.Menu.ContextButton"]
-                                                                })
-                                                            ],
-                                                            events: {
-                                                                init: Core.method(this, function(e) {
-                                                                    e.source.set("model",
-                                                                            this.application.workspace.createMenuModel());
-                                                                })
-                                                            }
-                                                        }),
                                                         new Echo.Column({
-                                                            cellSpacing: 5,
+                                                            layoutData: {
+                                                                alignment: "top"
+                                                            },
+                                                            insets: "1em",
+                                                            cellSpacing: "2em",
                                                             children: [
-                                                                this._dropDownMenu = new Extras.DropDownMenu({
+                                                                new Extras.ContextMenu({
                                                                     styleName: "Default",
-                                                                    selectionText: this._msg[
-                                                                            "ExtrasWidgetsScreen.Menu.DropDownButton"],
+                                                                    children: [
+                                                                        new Echo.Button({
+                                                                            styleName: "Default",
+                                                                            insets: "5px 10px",
+                                                                            text: this._msg["ExtrasWidgetsScreen.Menu.ContextButton"]
+                                                                        })
+                                                                    ],
                                                                     events: {
                                                                         init: Core.method(this, function(e) {
                                                                             e.source.set("model",
@@ -90,39 +97,55 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                                                         })
                                                                     }
                                                                 }),
-                                                                new Echo.CheckBox({
-                                                                    text: this._msg["ExtrasWidgetsScreen.Menu.DropDownSelection"],
-                                                                    events: {
-                                                                        action: Core.method(this, function(e) {
-                                                                            this._dropDownMenu.set("selectionEnabled",
-                                                                                    e.source.get("selected"));
+                                                                new Echo.Column({
+                                                                    cellSpacing: 5,
+                                                                    children: [
+                                                                        this._dropDownMenu = new Extras.DropDownMenu({
+                                                                            styleName: "Default",
+                                                                            selectionText: this._msg[
+                                                                                    "ExtrasWidgetsScreen.Menu.DropDownButton"],
+                                                                            events: {
+                                                                                init: Core.method(this, function(e) {
+                                                                                    e.source.set("model",
+                                                                                            this.application.workspace.createMenuModel());
+                                                                                })
+                                                                            }
+                                                                        }),
+                                                                        new Echo.CheckBox({
+                                                                            text: this._msg["ExtrasWidgetsScreen.Menu.DropDownSelection"],
+                                                                            events: {
+                                                                                action: Core.method(this, function(e) {
+                                                                                    this._dropDownMenu.set("selectionEnabled",
+                                                                                            e.source.get("selected"));
+                                                                                })
+                                                                            }
                                                                         })
-                                                                    }
+                                                                    ]
+                                                                }),
+                                                                new Echo.Label({
+                                                                    font: {
+                                                                        size: "8pt"
+                                                                    },
+                                                                    text: this._msg["ExtrasWidgetsScreen.Menu.Note"]
                                                                 })
                                                             ]
                                                         }),
-                                                        new Echo.Label({
-                                                            font: {
-                                                                size: "8pt"
+                                                        new Echo.Column({
+                                                            layoutData: {
+                                                                alignment: "top"
                                                             },
-                                                            text: this._msg["ExtrasWidgetsScreen.Menu.Note"]
-                                                        })
-                                                    ]
-                                                }),
-                                                new Echo.Column({
-                                                    layoutData: {
-                                                        alignment: "top"
-                                                    },
-                                                    cellSpacing: "1em",
-                                                    children: [
-                                                        new Echo.Label({
-                                                            text: this._msg["ExtrasWidgetsScreen.Menu.MenuBarPane.Desc"]
-                                                        }),
-                                                        new Echo.Label({
-                                                            text: this._msg["ExtrasWidgetsScreen.Menu.ContextMenu.Desc"]
-                                                        }),
-                                                        new Echo.Label({
-                                                            text: this._msg["ExtrasWidgetsScreen.Menu.DropDownMenu.Desc"]
+                                                            cellSpacing: "1em",
+                                                            children: [
+                                                                new Echo.Label({
+                                                                    text: this._msg["ExtrasWidgetsScreen.Menu.MenuBarPane.Desc"]
+                                                                }),
+                                                                new Echo.Label({
+                                                                    text: this._msg["ExtrasWidgetsScreen.Menu.ContextMenu.Desc"]
+                                                                }),
+                                                                new Echo.Label({
+                                                                    text: this._msg["ExtrasWidgetsScreen.Menu.DropDownMenu.Desc"]
+                                                                })
+                                                            ]
                                                         })
                                                     ]
                                                 })
@@ -136,45 +159,56 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                             layoutData: {
                                 alignment: "top"
                             },
-                            cellSpacing: "1em",
+                            cellSpacing: "0.5em",
                             insets: "1em",
                             children: [
-                                new Extras.Group({
-                                    title: this._msg["ExtrasWidgetsScreen.ToolTip.Title"],
+                                new Echo.Panel({
+                                    styleName: "DisplayPanel",
                                     children: [
-                                        new Echo.Row({
-                                            cellSpacing: "1em",
+                                        new Echo.Column({
                                             children: [
-                                                new Extras.ToolTipContainer({
-                                                    children: [
-                                                        new Echo.Button({
-                                                            styleName: "Default",
-                                                            insets: "5px 10px",
-                                                            text: this._msg["ExtrasWidgetsScreen.ToolTip.Button"]
-                                                        }),
-                                                        new Echo.Column({
-                                                            background: "#ffffaf",
-                                                            insets: "1ex",
-                                                            border: "1px outset #ffffaf",
-                                                            children: [
-                                                                new Echo.Button({
-                                                                     textPosition: "top",
-                                                                     alignment: "center",
-                                                                     icon: "image/demoicon/ChartIcon64.gif",
-                                                                     text: this._msg["ExtrasWidgetsScreen.ToolTip.Tip"]
-                                                                })
-                                                            ]
-                                                        })
-                                                    ]
+                                                new Echo.Label({
+                                                    styleName: "DisplayPanel",
+                                                    text: this._msg["ExtrasWidgetsScreen.ToolTip.Title"]
                                                 }),
-                                                new Echo.Column({
+                                                new Echo.Row({
                                                     layoutData: {
-                                                        alignment: "top"
+                                                        insets: "5px 10px"
                                                     },
                                                     cellSpacing: "1em",
                                                     children: [
-                                                        new Echo.Label({
-                                                            text: this._msg["ExtrasWidgetsScreen.ToolTip.Desc"]
+                                                        new Extras.ToolTipContainer({
+                                                            children: [
+                                                                new Echo.Button({
+                                                                    styleName: "Default",
+                                                                    insets: "5px 10px",
+                                                                    text: this._msg["ExtrasWidgetsScreen.ToolTip.Button"]
+                                                                }),
+                                                                new Echo.Column({
+                                                                    background: "#ffffaf",
+                                                                    insets: "1ex",
+                                                                    border: "1px outset #ffffaf",
+                                                                    children: [
+                                                                        new Echo.Button({
+                                                                             textPosition: "top",
+                                                                             alignment: "center",
+                                                                             icon: "image/demoicon/ChartIcon64.gif",
+                                                                             text: this._msg["ExtrasWidgetsScreen.ToolTip.Tip"]
+                                                                        })
+                                                                    ]
+                                                                })
+                                                            ]
+                                                        }),
+                                                        new Echo.Column({
+                                                            layoutData: {
+                                                                alignment: "top"
+                                                            },
+                                                            cellSpacing: "1em",
+                                                            children: [
+                                                                new Echo.Label({
+                                                                    text: this._msg["ExtrasWidgetsScreen.ToolTip.Desc"]
+                                                                })
+                                                            ]
                                                         })
                                                     ]
                                                 })
@@ -182,47 +216,58 @@ DemoApp.ExtrasWidgetsScreen = Core.extend(Echo.ContentPane, {
                                         })
                                     ]
                                 }),
-                                new Extras.Group({
-                                    title: this._msg["ExtrasWidgetsScreen.ColorSelect.Title"],
+                                new Echo.Panel({
+                                    styleName: "DisplayPanel",
                                     children: [
-                                        new Echo.Row({
-                                            cellSpacing: "1em",
+                                        new Echo.Column({
                                             children: [
-                                                this._colorSelect = new Extras.ColorSelect({
-                                                    layoutData: {
-                                                        alignment: "top"
-                                                    },
-                                                    color: "#3f3f7f",
-                                                    displayValue: true,
-                                                    events: {
-                                                        property: Core.method(this, function(e) {
-                                                            if (e.propertyName == "color") {
-                                                                this._colorSelectLabel.set("foreground", e.source.get("color"));
-                                                            }
-                                                        })
-                                                    }
+                                                new Echo.Label({
+                                                    styleName: "DisplayPanel",
+                                                    text: this._msg["ExtrasWidgetsScreen.ColorSelect.Title"]
                                                 }),
-                                                new Echo.Column({
+                                                new Echo.Row({
                                                     layoutData: {
-                                                        alignment: "top"
+                                                        insets: "5px 10px"
                                                     },
                                                     cellSpacing: "1em",
                                                     children: [
-                                                        new Echo.Label({
-                                                            text: this._msg["ExtrasWidgetsScreen.ColorSelect.Desc"]
-                                                        }),
-                                                        this._colorSelectLabel = new Echo.Label({
-                                                            foreground: "#3f3f7f",
-                                                            text: this._msg["ExtrasWidgetsScreen.ColorSelect.ChangeText"]
-                                                        }),
-                                                        new Echo.CheckBox({
-                                                            text: this._msg["ExtrasWidgetsScreen.ColorSelect.DisplayHex"],
-                                                            selected: true,
+                                                        this._colorSelect = new Extras.ColorSelect({
+                                                            layoutData: {
+                                                                alignment: "top"
+                                                            },
+                                                            color: "#7f3f55",
+                                                            displayValue: true,
                                                             events: {
-                                                                action: Core.method(this, function(e) {
-                                                                    this._colorSelect.set("displayValue", e.source.get("selected"));
+                                                                property: Core.method(this, function(e) {
+                                                                    if (e.propertyName == "color") {
+                                                                        this._colorSelectLabel.set("foreground", e.source.get("color"));
+                                                                    }
                                                                 })
                                                             }
+                                                        }),
+                                                        new Echo.Column({
+                                                            layoutData: {
+                                                                alignment: "top"
+                                                            },
+                                                            cellSpacing: "1em",
+                                                            children: [
+                                                                new Echo.Label({
+                                                                    text: this._msg["ExtrasWidgetsScreen.ColorSelect.Desc"]
+                                                                }),
+                                                                this._colorSelectLabel = new Echo.Label({
+                                                                    foreground: "#3f3f7f",
+                                                                    text: this._msg["ExtrasWidgetsScreen.ColorSelect.ChangeText"]
+                                                                }),
+                                                                new Echo.CheckBox({
+                                                                    text: this._msg["ExtrasWidgetsScreen.ColorSelect.DisplayHex"],
+                                                                    selected: true,
+                                                                    events: {
+                                                                        action: Core.method(this, function(e) {
+                                                                            this._colorSelect.set("displayValue", e.source.get("selected"));
+                                                                        })
+                                                                    }
+                                                                })
+                                                            ]
                                                         })
                                                     ]
                                                 })

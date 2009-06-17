@@ -354,6 +354,38 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             }
         }
     },
+    "DisplayPanel": {
+        "Panel": {
+            background: "#ffffff",
+            imageBorder: {
+                contentInsets: "7px 13px 13px 7px",
+                borderInsets: "17px 23px 23px 17px",
+                topLeft: "image/window/simple/BorderTopLeft.png",
+                top: "image/window/simple/BorderTop.png",
+                topRight: "image/window/simple/BorderTopRight.png",
+                left: "image/window/simple/BorderLeft.png",
+                right: "image/window/simple/BorderRight.png",
+                bottomLeft: "image/window/simple/BorderBottomLeft.png",
+                bottom: "image/window/simple/BorderBottom.png",
+                bottomRight: "image/window/simple/BorderBottomRight.png"
+            }
+        },
+        "Label": {
+            layoutData: {
+                backgroundImage: {
+                    url: "image/FpsBackground.png",
+                    y: "50%"
+                },
+                insets: "5px 10px"
+            },
+            foreground: "#ffffff",
+            font: {
+                italic: true,
+                bold: true,
+                size: "10pt"
+            }
+        }
+    },
     "LaunchPanel": {
         "Button": {
             alignment: "center",

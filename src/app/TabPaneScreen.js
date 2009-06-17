@@ -82,7 +82,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                         }),
                         this._tabPane = new Extras.TabPane({
                             layoutData: {
-                                backgroundImage: "image/bgpictures/HoubaDetail.jpg"
+                                backgroundImage: "image/bgpictures/Sisters.jpg"
                             },
                             insets: 20,
                             borderType: Extras.TabPane.BORDER_TYPE_SURROUND,
