@@ -347,7 +347,7 @@ DemoApp.DownloadWindow = Core.extend(Echo.WindowPane, {
         Echo.WindowPane.call(this, {
             styleName: DemoApp.pref.windowStyleName,
             title: this._msg["DownloadWindow.Title"],
-            icon:  "image/Icon16Download.gif",
+            icon:  "image/icon/Icon16Download.gif",
             iconInsets: "6px 10px",
             insets: 10,
             events: {
@@ -718,13 +718,13 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         launchMenu.addItem(new Extras.SeparatorModel());
         launchMenu.addItem(windowedLaunchMenu);
         launchMenu.addItem(new Extras.SeparatorModel());
-        launchMenu.addItem(new Extras.OptionModel("autodemo", this._msg["Menu.StartAutoDemo"], "image/Icon16Play.gif"));
-        launchMenu.addItem(new Extras.OptionModel("perftest", this._msg["Menu.PerformanceTest"], "image/Icon16Performance.gif"));
+        launchMenu.addItem(new Extras.OptionModel("autodemo", this._msg["Menu.StartAutoDemo"], "image/icon/Icon16Play.gif"));
+        launchMenu.addItem(new Extras.OptionModel("perftest", this._msg["Menu.PerformanceTest"], "image/icon/Icon16Performance.gif"));
     
         var menuModel = new Extras.MenuModel(null, null, null, [
             launchMenu,
             new Extras.MenuModel(null, this._msg["Menu.ToolsMenu"], null, [
-                new Extras.OptionModel("viewsource", this._msg["Menu.ViewSource"], "image/Icon16JavaScript.gif"),
+                new Extras.OptionModel("viewsource", this._msg["Menu.ViewSource"], "image/icon/Icon16JavaScript.gif"),
                 new Extras.MenuModel(null, this._msg["Menu.ViewSourceMenu"], null, [
                     new Extras.OptionModel("viewsource.main", this._msg["Menu.ViewSourceMain"], null),
                     new Extras.OptionModel("viewsource.ss", this._msg["Menu.ViewSourceStyleSheet"], null),
@@ -733,16 +733,16 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                     new Extras.OptionModel("viewsource.html", this._msg["Menu.ViewSourceHtml"], null)
                 ]),
                 new Extras.SeparatorModel(),
-                new Extras.OptionModel("preferences", this._msg["Menu.Preferences"], "image/Icon16Preferences.gif"),
+                new Extras.OptionModel("preferences", this._msg["Menu.Preferences"], "image/icon/Icon16Preferences.gif"),
                 new Extras.MenuModel(null, this._msg["Menu.Locale"], null, [
                     new Extras.OptionModel("locale.en", "English/US", null),
                     new Extras.OptionModel("locale.1337", "1337", null)
                 ]),
                 new Extras.SeparatorModel(),
-                new Extras.OptionModel("download", this._msg["Menu.Download"], "image/Icon16Download.gif")
+                new Extras.OptionModel("download", this._msg["Menu.Download"], "image/icon/Icon16Download.gif")
             ]),
             new Extras.MenuModel(null, this._msg["Menu.HelpMenu"], null, [
-                new Extras.OptionModel("about", this._msg["Menu.About"], "image/Icon16Info.gif")
+                new Extras.OptionModel("about", this._msg["Menu.About"], "image/icon/Icon16Info.gif")
             ])
         ]);
         return menuModel;

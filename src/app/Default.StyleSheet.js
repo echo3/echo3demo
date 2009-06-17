@@ -82,17 +82,17 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             background: "#6f87af",
             dateBackground: "#bcbcbc",
             dateBackgroundImage: {
-                url: "image/CalendarSelectGradient.png",
+                url: "image/calendarselect/CalendarSelectGradient.png",
                 repeat: "repeat-x"
             },
             headerForeground: "#ffffff",
             headerBackgroundImage: {
-                url: "image/CalendarHeaderBackground.png",
+                url: "image/calendarselect/CalendarHeaderBackground.png",
                 y: "50%"
             },
             rolloverDateBackground: "#ffffff",
             selectedDateBackground: "#1579c7",
-            selectedDateBackgroundImage: "image/CalendarSelectSelectedDateFill.png",
+            selectedDateBackgroundImage: "image/calendarselect/CalendarSelectSelectedDateFill.png",
             selectedDateBorder:  {
                 left: "1px solid #0e4f82",
                 top: "1px solid #0e4f82",
@@ -256,14 +256,14 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 y: "53%"
             },
             tabInactiveInsets: "4px 10px",
-            tabCloseIcon: "image/Icon16TabClose.png",
+            tabCloseIcon: "image/icon/Icon16TabClose.png",
             tabRolloverEnabled: true,
             tabRolloverForeground: "#ffffff",
             tabRolloverBackgroundImage: {
                 url: "image/ControlPaneHighlight.png",
                 y: "50%"
             },
-            tabRolloverCloseIcon: "image/Icon16TabCloseRollover.png"
+            tabRolloverCloseIcon: "image/icon/Icon16TabCloseRollover.png"
         }
     },
     "Default.Top.Surround": {
@@ -321,14 +321,14 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 y: "53%"
             },
             tabInactiveInsets: "4px 10px",
-            tabCloseIcon: "image/Icon16TabClose.png",
+            tabCloseIcon: "image/icon/Icon16TabClose.png",
             tabRolloverEnabled: true,
             tabRolloverForeground: "#ffffff",
             tabRolloverBackgroundImage: {
                 url: "image/ControlPaneHighlight.png",
                 y: "50%"
             },
-            tabRolloverCloseIcon: "image/Icon16TabCloseRollover.png"
+            tabRolloverCloseIcon: "image/icon/Icon16TabCloseRollover.png"
         }
     },
     "DefaultResizableLarge": {

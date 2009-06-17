@@ -88,14 +88,14 @@ DemoApp.BasicComponentsScreen = Core.extend(Echo.ContentPane, {
                                                 }),
                                                 this._componentsDefault.button2 = new Echo.Button({
                                                     styleName: "Default",
-                                                    icon: "image/Icon24ArrowCyanRight.gif",
-                                                    rolloverIcon: "image/Icon24ArrowLightCyanRight.gif"
+                                                    icon: "image/icon/Icon24ArrowCyanRight.gif",
+                                                    rolloverIcon: "image/icon/Icon24ArrowLightCyanRight.gif"
                                                 }),
                                                 this._componentsDefault.button3 = new Echo.Button({
                                                     styleName: "Default",
                                                     text: this._msg["BasicComponentsScreen.ButtonText"],
-                                                    icon: "image/Icon24ArrowCyanRight.gif",
-                                                    rolloverIcon: "image/Icon24ArrowLightCyanRight.gif"
+                                                    icon: "image/icon/Icon24ArrowCyanRight.gif",
+                                                    rolloverIcon: "image/icon/Icon24ArrowLightCyanRight.gif"
                                                 })
                                             ]
                                         }),

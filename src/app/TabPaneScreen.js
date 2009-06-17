@@ -105,14 +105,14 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                 y: "53%"
                             },
                             tabInactiveInsets: "4px 10px",
-                            tabCloseIcon: "image/Icon16TabClose.png",
+                            tabCloseIcon: "image/icon/Icon16TabClose.png",
                             tabRolloverEnabled: true,
                             tabRolloverForeground: "#ffffff",
                             tabRolloverBackgroundImage: {
                                 url: "image/ControlPaneHighlight.png",
                                 y: "50%"
                             },
-                            tabRolloverCloseIcon: "image/Icon16TabCloseRollover.png",
+                            tabRolloverCloseIcon: "image/icon/Icon16TabCloseRollover.png",
                             children: [
                                 new Echo.Column({
                                     layoutData: {
@@ -287,7 +287,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                                 this._addButton = new Echo.Button({
                                                     styleName: "Default",
                                                     text: this._msg["TabPaneScreen.AddTab"],
-                                                    icon: "image/Icon24Yes.gif",
+                                                    icon: "image/icon/Icon24Yes.gif",
                                                     events: {
                                                         action: Core.method(this, this._processAddTab)
                                                     }
@@ -295,7 +295,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                                 this._removeButton = new Echo.Button({
                                                     styleName: "Default",
                                                     text: this._msg["TabPaneScreen.RemoveTab"],
-                                                    icon: "image/Icon24No.gif",
+                                                    icon: "image/icon/Icon24No.gif",
                                                     events: {
                                                         action: Core.method(this, this._processRemoveTab)
                                                     }
@@ -303,7 +303,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                                 new Echo.Button({
                                                     styleName: "Default",
                                                     text: this._msg["TabPaneScreen.Update"],
-                                                    icon: "image/Icon24Refresh.gif",
+                                                    icon: "image/icon/Icon24Refresh.gif",
                                                     events: {
                                                         action: Core.method(this, this._processUpdateTabPane)
                                                     }

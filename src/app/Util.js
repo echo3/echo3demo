@@ -62,7 +62,7 @@ DemoApp.ColorSelectButton = Core.extend(Echo.Button, {
                                 new Echo.Button({
                                     styleName: "ControlPane.Button",
                                     text: this._msg["Generic.Ok"],
-                                    icon: "image/Icon24Yes.gif",
+                                    icon: "image/icon/Icon24Yes.gif",
                                     events: {
                                         action: Core.method(this, this._apply)
                                     }
@@ -70,7 +70,7 @@ DemoApp.ColorSelectButton = Core.extend(Echo.Button, {
                                 new Echo.Button({
                                     styleName: "ControlPane.Button",
                                     text: this._msg["Generic.Cancel"],
-                                    icon: "image/Icon24No.gif",
+                                    icon: "image/icon/Icon24No.gif",
                                     events: {
                                         action: Core.method(this, this._close)
                                     }

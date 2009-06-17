@@ -17,7 +17,7 @@ DemoApp.PreferencesDialog = Core.extend(Echo.WindowPane, {
             modal: true,
             width: "40em",
             title: this._msg["PrefDialog.WindowTitle"],
-            icon: "image/Icon16Preferences.gif",
+            icon: "image/icon/Icon16Preferences.gif",
             iconInsets: "6px 10px",
             events: {
                 close: Core.method(this, this._close)
@@ -33,7 +33,7 @@ DemoApp.PreferencesDialog = Core.extend(Echo.WindowPane, {
                                 new Echo.Button({
                                     styleName: "ControlPane.Button",
                                     text: this._msg["Generic.Ok"],
-                                    icon: "image/Icon24Yes.gif",
+                                    icon: "image/icon/Icon24Yes.gif",
                                     events: {
                                         action: Core.method(this, this._apply)
                                     }
@@ -41,7 +41,7 @@ DemoApp.PreferencesDialog = Core.extend(Echo.WindowPane, {
                                 new Echo.Button({
                                     styleName: "ControlPane.Button",
                                     text: this._msg["Generic.Cancel"],
-                                    icon: "image/Icon24No.gif",
+                                    icon: "image/icon/Icon24No.gif",
                                     events: {
                                         action: Core.method(this, this._close)
                                     }
