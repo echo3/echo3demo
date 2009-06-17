@@ -337,19 +337,19 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             separatorWidth: 12,
             resizable: true,
             separatorHorizontalImage: {
-                url: "image/SplitPaneHorizontalSeparatorLarge.png",
+                url: "image/splitpane/SeparatorH12.png",
                 y: "50%"
             },
             separatorHorizontalRolloverImage: {
-                url: "image/SplitPaneHorizontalSeparatorLargeRollover.png",
+                url: "image/splitpane/SeparatorH12Rollover.png",
                 y: "50%"
             },
             separatorVerticalImage: {
-                url: "image/SplitPaneVerticalSeparatorLarge.png",
+                url: "image/splitpane/SeparatorV12.png",
                 x: "50%"
             },
             separatorVerticalRolloverImage: {
-                url: "image/SplitPaneVerticalSeparatorLargeRollover.png",
+                url: "image/splitpane/SeparatorV12Rollover.png",
                 x: "50%"
             }
         }
