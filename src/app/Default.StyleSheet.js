@@ -74,7 +74,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             tabRolloverEnabled: true,
             tabRolloverBackground: "#86899a",
             tabRolloverBackgroundImage: {
-                url: "image/fill/BlueGreyLight.png",
+                url: "image/fill/BlueGreyHighlight.png",
                 y: "50%"
             }
         },
