@@ -209,6 +209,136 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             }
         }
     },
+    "Default.Top": {
+        "Extras.TabPane": {
+            layoutData: {
+                backgroundImage: {
+                    url: "image/SilverBehindTabBackground.png",
+                    y: -135
+                }
+            },
+            insets: 0,
+            tabIconTextMargin: 3,
+            tabCloseIconTextMargin: 8,
+            background: "#ffffff",
+            tabSpacing: -20,
+            border: "1px solid #7f7faf",
+            tabActiveBackground: "#ffffff",
+            tabActiveBackgroundInsets: "8px 14px 0px 8px",
+            tabActiveImageBorder: {
+                contentInsets: "8px 14px 0px 8px",
+                borderInsets: "17px 23px 0px 17px",
+                topLeft: "image/window/simple/BorderTopLeft.png",
+                top: "image/window/simple/BorderTop.png",
+                topRight: "image/window/simple/BorderTopRight.png",
+                left: "image/window/simple/BorderLeft.png",
+                right: "image/window/simple/BorderRight.png",
+                bottomLeft: null,
+                bottom: null,
+                bottomRight: null
+            },
+            tabActiveInsets: "4px 10px",
+            tabInactiveBackground: "#e7e7e7",
+            tabInactiveBackgroundInsets: "8px 14px 0px 8px",
+            tabInactiveImageBorder: {
+                contentInsets: "8px 14px 0px 8px",
+                borderInsets: "17px 23px 0px 17px",
+                topLeft: "image/window/simple/BorderTopLeft.png",
+                top: "image/window/simple/BorderTop.png",
+                topRight: "image/window/simple/BorderTopRight.png",
+                left: "image/window/simple/BorderLeft.png",
+                right: "image/window/simple/BorderRight.png",
+                bottomLeft: null,
+                bottom: null,
+                bottomRight: null
+            },
+            tabInactiveBackgroundImage: {
+                url: "image/SilverLightedBackground.png",
+                repeat: "repeat-x",
+                y: "53%"
+            },
+            tabInactiveInsets: "4px 10px",
+            tabCloseIcon: "image/Icon16TabClose.png",
+            tabRolloverEnabled: true,
+            tabRolloverForeground: "#ffffff",
+            tabRolloverBackgroundImage: {
+                url: "image/ControlPaneHighlight.png",
+                y: "50%"
+            },
+            tabRolloverCloseIcon: "image/Icon16TabCloseRollover.png"
+        }
+    },
+    "Default.Top.Surround": {
+        "Extras.TabPane": {
+            layoutData: {
+                backgroundImage: {
+                    url: "image/SilverBehindTabBackground.png",
+                    y: -135
+                }
+            },
+            insets: 0,
+            tabIconTextMargin: 3,
+            tabCloseIconTextMargin: 8,
+            background: "#ffffff",
+            tabSpacing: -20,
+            imageBorder: {
+                contentInsets: "8px 14px 14px 8px",
+                borderInsets: "17px 23px 23px 17px",
+                topLeft: "image/window/simple/BorderTopLeft.png",
+                top: "image/window/simple/BorderTop.png",
+                topRight: "image/window/simple/BorderTopRight.png",
+                left: "image/window/simple/BorderLeft.png",
+                right: "image/window/simple/BorderRight.png",
+                bottomLeft: "image/window/simple/BorderBottomLeft.png",
+                bottom: "image/window/simple/BorderBottom.png",
+                bottomRight: "image/window/simple/BorderBottomRight.png"
+            },
+            tabActiveBackground: "#ffffff",
+            tabActiveBackgroundInsets: "8px 14px 0px 8px",
+            tabActiveHeightIncrease: 3,
+            tabActiveImageBorder: {
+                contentInsets: "8px 14px 0px 8px",
+                borderInsets: "17px 23px 0px 17px",
+                topLeft: "image/window/simple/BorderTopLeft.png",
+                top: "image/window/simple/BorderTop.png",
+                topRight: "image/window/simple/BorderTopRight.png",
+                left: "image/window/simple/BorderLeft.png",
+                right: "image/window/simple/BorderRight.png",
+                bottomLeft: null,
+                bottom: null,
+                bottomRight: null
+            },
+            tabActiveInsets: "4px 10px",
+            tabInactiveBackground: "#e7e7e7",
+            tabInactiveBackgroundInsets: "8px 14px 1px 8px",
+            tabInactiveImageBorder: {
+                contentInsets: "8px 14px 1px 8px",
+                borderInsets: "17px 23px 1px 17px",
+                topLeft: "image/window/simple/BorderTopLeft.png",
+                top: "image/window/simple/BorderTop.png",
+                topRight: "image/window/simple/BorderTopRight.png",
+                left: "image/window/simple/BorderLeft.png",
+                right: "image/window/simple/BorderRight.png",
+                bottomLeft: null,
+                bottom: null,
+                bottomRight: null
+            },
+            tabInactiveBackgroundImage: {
+                url: "image/SilverLightedBackground.png",
+                repeat: "repeat-x",
+                y: "53%"
+            },
+            tabInactiveInsets: "4px 10px",
+            tabCloseIcon: "image/Icon16TabClose.png",
+            tabRolloverEnabled: true,
+            tabRolloverForeground: "#ffffff",
+            tabRolloverBackgroundImage: {
+                url: "image/ControlPaneHighlight.png",
+                y: "50%"
+            },
+            tabRolloverCloseIcon: "image/Icon16TabCloseRollover.png"
+        }
+    },
     "DefaultResizableLarge": {
         "SplitPane" : {
             separatorHeight: 12,

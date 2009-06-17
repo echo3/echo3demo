@@ -28,13 +28,10 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
             background: "#524f47",
             children: [
                 new Extras.TabPane({
+                    styleName: "Default.Top.Surround",
                     insets: "10px 20px",
-                    tabActiveBorder: "2px groove #595b6c",
-                    tabInactiveBorder: "1px outset #b6aebc",
                     borderType: Extras.TabPane.BORDER_TYPE_SURROUND,
                     tabInset: 28,
-                    tabInactiveBackground: "#dcd6fb",
-                    tabActiveBackground: "#ffffff",
                     children: [
                         new Echo.ContentPane({
                             styleName: "Photo.Countryside",
@@ -82,7 +79,7 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                 }),
                 this._configWindow = new Echo.WindowPane({
                     styleName: "Default",
-                    width: "22em",
+                    width: "25em",
                     height: "22em",
                     positionX: "48%",
                     positionY: "10%",
@@ -94,7 +91,7 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                     },
                     children: [
                         new Extras.TabPane({
-                            tabActiveBackground: "#ffffff",
+                            styleName: "Default.Top",
                             insets: "3px 8px",
                             defaultContentInsets: "3px 8px",
                             children: [
