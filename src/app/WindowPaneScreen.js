@@ -42,6 +42,8 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                         new Echo.ContentPane({
                             styleName: "Photo.Coral",
                             layoutData: {
+                                activeForeground: "#ffffff",
+                                activeBackground: "#000000",
                                 title: this._msg["WindowPaneScreen.TabCoral"]
                             }
                         }),
@@ -344,5 +346,9 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
     
     _processSetColor: function(e) {
         this._colorContent.set("background", this._colorSelect.get("color"));
+        this._colorContent.set("layoutData", {
+            title: this._msg["WindowPaneScreen.TabColorWindowTitle"],
+            activeBackground: this._colorSelect.get("color")
+        });
     }
 });
