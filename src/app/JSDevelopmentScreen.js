@@ -316,10 +316,6 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                     closable: false,
                                     children: [
                                         new Echo.ContentPane({
-                                            backgroundImage: {
-                                                url: "image/LogoBackground.png",
-                                                repeat: "repeat-x"
-                                            },
                                             background: "#383838",
                                             children: [
                                                 new Extras.TabPane({

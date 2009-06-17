@@ -575,11 +575,11 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                             },
                             children: [
                                 new Echo.Label({
-                                    icon: "image/Logo.png",
+                                    icon: "image/workspace/Logo.png",
                                     layoutData: {
                                         overflow: Echo.SplitPane.OVERFLOW_HIDDEN,
                                         alignment: "center",
-                                        backgroundImage: { url: "image/LogoBackground.png", repeat: "repeat-x" }
+                                        backgroundImage: { url: "image/workspace/LogoBackground.png", repeat: "repeat-x" }
                                     }
                                 }),
                                 this._launchPanel = new Extras.AccordionPane({
