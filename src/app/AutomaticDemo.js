@@ -208,7 +208,7 @@ DemoApp.AutomaticDemo.StopDialog = Core.extend(Echo.WindowPane, {
                         foreground: "#ffffff",
                         layoutData: {
                             backgroundImage: {
-                                url: "image/BgGlassPurple.png",
+                                url: "image/fill/GlassPurple.png",
                                 y: "50%"
                             }
                         },
@@ -232,7 +232,7 @@ DemoApp.AutomaticDemo.StopDialog = Core.extend(Echo.WindowPane, {
                     new Echo.Button({
                         layoutData: {
                             backgroundImage: {
-                                url: "image/BgGlassRed.png",
+                                url: "image/fill/GlassRed.png",
                                 y: "50%"
                             }
                         },
@@ -500,7 +500,7 @@ DemoApp.AutomaticDemo.PerformanceTestResultDialog = Core.extend(Echo.WindowPane,
                         }),
                         new Echo.Row({
                             layoutData: {
-                                backgroundImage: "image/BgGlassPurple.png" 
+                                backgroundImage: "image/fill/GlassPurple.png" 
                             },
                             insets: "10px 30px",
                             cellSpacing: 8,
