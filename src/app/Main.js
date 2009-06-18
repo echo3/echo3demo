@@ -735,7 +735,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                 ]),
                 new Extras.SeparatorModel(),
                 new Extras.OptionModel("preferences", this._msg["Menu.Preferences"], "image/icon/Icon16Preferences.png"),
-                new Extras.MenuModel(null, this._msg["Menu.Locale"], null, [
+                new Extras.MenuModel(null, this._msg["Menu.Locale"], "image/icon/Icon16Flags.png", [
                     new Extras.OptionModel("locale.en", "English/US", null),
                     new Extras.OptionModel("locale.1337", "1337", null)
                 ]),
