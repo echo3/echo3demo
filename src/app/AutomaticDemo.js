@@ -42,7 +42,7 @@ DemoApp.AutomaticDemo.StartDialog = Core.extend(Echo.WindowPane, {
                                 new Echo.Button({
                                     styleName: "ControlPane.Button",
                                     text: this._msg["Generic.Start"],
-                                    icon: "image/icon/Icon24Play.gif",
+                                    icon: "image/icon/Icon24Play.png",
                                     events: {
                                         action: Core.method(this, this._start)
                                     }
@@ -50,7 +50,7 @@ DemoApp.AutomaticDemo.StartDialog = Core.extend(Echo.WindowPane, {
                                 new Echo.Button({
                                     styleName: "ControlPane.Button",
                                     text: this._msg["Generic.Cancel"],
-                                    icon: "image/icon/Icon24No.gif",
+                                    icon: "image/icon/Icon24Cancel.png",
                                     events: {
                                         action: Core.method(this, this._close)
                                     }
@@ -415,7 +415,7 @@ DemoApp.AutomaticDemo.PerformanceTestDialog = Core.extend(Echo.WindowPane, {
                                 new Echo.Button({
                                     styleName: "ControlPane.Button",
                                     text: this._msg["Generic.Start"],
-                                    icon: "image/icon/Icon24Play.gif",
+                                    icon: "image/icon/Icon24Play.png",
                                     events: {
                                         action: Core.method(this, this._start)
                                     }
@@ -423,7 +423,7 @@ DemoApp.AutomaticDemo.PerformanceTestDialog = Core.extend(Echo.WindowPane, {
                                 new Echo.Button({
                                     styleName: "ControlPane.Button",
                                     text: this._msg["Generic.Cancel"],
-                                    icon: "image/icon/Icon24No.gif",
+                                    icon: "image/icon/Icon24Cancel.png",
                                     events: {
                                         action: Core.method(this, this._close)
                                     }
@@ -491,7 +491,7 @@ DemoApp.AutomaticDemo.PerformanceTestResultDialog = Core.extend(Echo.WindowPane,
                                 new Echo.Button({
                                     styleName: "ControlPane.Button",
                                     text: this._msg["Generic.Ok"],
-                                    icon: "image/icon/Icon24Yes.gif",
+                                    icon: "image/icon/Icon24Ok.png",
                                     events: {
                                         action: Core.method(this, this._close)
                                     }

@@ -297,7 +297,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                                 this._addButton = new Echo.Button({
                                                     styleName: "Default",
                                                     text: this._msg["TabPaneScreen.AddTab"],
-                                                    icon: "image/icon/Icon24Yes.gif",
+                                                    icon: "image/icon/Icon24Add.png",
                                                     events: {
                                                         action: Core.method(this, this._processAddTab)
                                                     }
@@ -305,7 +305,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                                 this._removeButton = new Echo.Button({
                                                     styleName: "Default",
                                                     text: this._msg["TabPaneScreen.RemoveTab"],
-                                                    icon: "image/icon/Icon24No.gif",
+                                                    icon: "image/icon/Icon24Remove.png",
                                                     events: {
                                                         action: Core.method(this, this._processRemoveTab)
                                                     }
@@ -313,7 +313,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                                 new Echo.Button({
                                                     styleName: "Default",
                                                     text: this._msg["TabPaneScreen.Update"],
-                                                    icon: "image/icon/Icon24Refresh.gif",
+                                                    icon: "image/icon/Icon24Refresh.png",
                                                     events: {
                                                         action: Core.method(this, this._processUpdateTabPane)
                                                     }
