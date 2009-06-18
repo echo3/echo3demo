@@ -81,10 +81,10 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                 }),
                 this._configWindow = new Echo.WindowPane({
                     styleName: "Default",
-                    width: "25em",
+                    width: "32em",
                     height: "22em",
-                    positionX: "48%",
-                    positionY: "10%",
+                    positionX: "64%",
+                    positionY: "17%",
                     closable: true,
                     maximizeEnabled: true,
                     title: this._msg["WindowPaneScreen.ConfigurationTitle"],
@@ -94,12 +94,12 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                     children: [
                         new Extras.TabPane({
                             styleName: "Default.Top",
-                            insets: "3px 8px",
-                            defaultContentInsets: "3px 8px",
+                            defaultContentInsets: "8px 15px",
                             children: [
                                 new Echo.Column({
                                     layoutData: {
-                                        title: this._msg["WindowPaneScreen.ConfigurationHelpTab"]
+                                        title: this._msg["WindowPaneScreen.ConfigurationHelpTab"],
+                                        icon: "image/icon/Icon24Help.png"
                                     },
                                     cellSpacing: 8,
                                     children: [
@@ -113,7 +113,8 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                 }),
                                 new Echo.Column({
                                     layoutData: {
-                                        title: this._msg["WindowPaneScreen.ConfigurationMoveTab"]
+                                        title: this._msg["WindowPaneScreen.ConfigurationMoveTab"],
+                                        icon: "image/icon/Icon24Move.png"
                                     },
                                     children: [
                                         this._moveEnableButton = new Echo.RadioButton({
@@ -135,7 +136,8 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                 }),
                                 new Echo.Column({
                                     layoutData: {
-                                        title: this._msg["WindowPaneScreen.ConfigurationResizeTab"]
+                                        title: this._msg["WindowPaneScreen.ConfigurationResizeTab"],
+                                        icon: "image/icon/Icon24Fullscreen.png"
                                     },
                                     cellSpacing: "1em",
                                     children: [
@@ -200,7 +202,8 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                 }),
                                 new Echo.Column({
                                     layoutData: {
-                                        title: this._msg["WindowPaneScreen.ConfigurationControlsTab"]
+                                        title: this._msg["WindowPaneScreen.ConfigurationControlsTab"],
+                                        icon: "image/icon/Icon24Preferences.png"
                                     },
                                     cellSpacing: "1em",
                                     children: [
