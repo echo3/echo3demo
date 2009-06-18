@@ -124,7 +124,8 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                             children: [
                                 new Echo.Column({
                                     layoutData: {
-                                        title: this._msg["TabPaneScreen.ConfiguratorTab"]
+                                        title: this._msg["TabPaneScreen.ConfiguratorTab"],
+                                        icon: "image/icon/Icon24Preferences.png"
                                     },
                                     insets: "10px 20px",
                                     cellSpacing: 10,
@@ -325,7 +326,8 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                 }),
                                 new Echo.ContentPane({
                                     layoutData: {
-                                        title: this._msg["TabPaneScreen.WindowPanesTab"]
+                                        title: this._msg["TabPaneScreen.WindowPanesTab"],
+                                        icon: "image/icon/Icon24Display.png"
                                     },
                                     children: [
                                         new Echo.Column({
@@ -467,6 +469,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
         this._tabPane.add(new Echo.ContentPane({
             layoutData: {
                 title: "Tab " + this._tabCount++,
+                icon: "image/icon/Icon24Document.png",
                 activeBackground: background,
                 closeEnabled: true
             },

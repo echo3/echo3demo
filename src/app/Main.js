@@ -348,7 +348,7 @@ DemoApp.DownloadWindow = Core.extend(Echo.WindowPane, {
         Echo.WindowPane.call(this, {
             styleName: DemoApp.pref.windowStyleName,
             title: this._msg["DownloadWindow.Title"],
-            icon:  "image/icon/Icon16Download.gif",
+            icon:  "image/icon/Icon16ArrowBottom.png",
             iconInsets: "6px 10px",
             insets: 10,
             events: {
@@ -734,13 +734,13 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                     new Extras.OptionModel("viewsource.html", this._msg["Menu.ViewSourceHtml"], null)
                 ]),
                 new Extras.SeparatorModel(),
-                new Extras.OptionModel("preferences", this._msg["Menu.Preferences"], "image/icon/Icon16Preferences.gif"),
+                new Extras.OptionModel("preferences", this._msg["Menu.Preferences"], "image/icon/Icon16Preferences.png"),
                 new Extras.MenuModel(null, this._msg["Menu.Locale"], null, [
                     new Extras.OptionModel("locale.en", "English/US", null),
                     new Extras.OptionModel("locale.1337", "1337", null)
                 ]),
                 new Extras.SeparatorModel(),
-                new Extras.OptionModel("download", this._msg["Menu.Download"], "image/icon/Icon16Download.gif")
+                new Extras.OptionModel("download", this._msg["Menu.Download"], "image/icon/Icon16ArrowBottom.png")
             ]),
             new Extras.MenuModel(null, this._msg["Menu.HelpMenu"], null, [
                 new Extras.OptionModel("about", this._msg["Menu.About"], "image/icon/Icon16Info.gif")
