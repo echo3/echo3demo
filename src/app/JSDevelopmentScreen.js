@@ -234,18 +234,21 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                             insets: 20,
                                             cellSpacing: 10,
                                             children: [
-                                                new Echo.Label({ 
-                                                    layoutData: {
-                                                        insets: "15px 15px",
-                                                        background: "#000000"
-                                                    },
-                                                    foreground: "#00ff00",
-                                                    font: {
-                                                        typeface: "Courier New, Courier, Monospace",
-                                                        size: 24,
-                                                        bold: true
-                                                    },
-                                                    text: this._msg["JSDevelopmentScreen.CoreJS.0"]
+                                                new Echo.Panel({
+                                                    insets: 8,
+                                                    border: "4px solid #2f2f3f",
+                                                    background: "#000000",
+                                                    children: [
+                                                        new Echo.Label({ 
+                                                            foreground: "#7fcf9f",
+                                                            font: {
+                                                                size: 24,
+                                                                bold: true,
+                                                                italic: true
+                                                            },
+                                                            text: this._msg["JSDevelopmentScreen.CoreJS.0"]
+                                                        })
+                                                    ]
                                                 }),
                                                 new DemoApp.HtmlLabel({ 
                                                     foreground: "#ffcf9f",
@@ -431,9 +434,9 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                                     },
                                                     foreground: "#af8fff",
                                                     font: {
-                                                        typeface: "Courier New, Courier, Monospace",
                                                         size: 24,
-                                                        bold: true
+                                                        bold: true,
+                                                        italic: true
                                                     },
                                                     text: this._msg["JSDevelopmentScreen.LazyJS.0"]
                                                 })
@@ -460,7 +463,7 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                     ]
                                 }),
                                 new Echo.WindowPane({
-                                    styleName: "TransGreen",
+                                    styleName: "GlassBlue",
                                     title: this._msg["JSDevelopmentScreen.LazyJS.WindowTitle"],
                                     background: "#00001f",
                                     foreground: "#afffff",
