@@ -329,7 +329,7 @@ DemoApp = Core.extend(Echo.Application, {
         this.rootComponent.add(this.workspace);
         
         // Edit/Enable the following line to launch a specific screen at startup.
-        this.workspace.launchScreen(sections[2].screens[0]);
+        // this.workspace.launchScreen(sections[2].screens[0]);
     }
 });
 

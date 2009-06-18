@@ -422,16 +422,15 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                     orientation: Echo.SplitPane.ORIENTATION_HORIZONTAL_LEFT_RIGHT,
                                     separatorPosition: "60%",
                                     children: [
-                                        new Echo.Column({
+                                        new Echo.Panel({
                                             layoutData: {
                                                 insets: 20
                                             },
+                                            insets: 8,
+                                            border: "4px solid #2f2f3f",
+                                            background: "#000000",
                                             children: [
                                                 new Echo.Label({ 
-                                                    layoutData: {
-                                                        insets: 30,
-                                                        background: "#000000"
-                                                    },
                                                     foreground: "#af8fff",
                                                     font: {
                                                         size: 24,
@@ -467,8 +466,8 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                     title: this._msg["JSDevelopmentScreen.LazyJS.WindowTitle"],
                                     background: "#00001f",
                                     foreground: "#afffff",
-                                    positionX: "0%",
-                                    positionY: "100%",
+                                    positionX: "6%",
+                                    positionY: "94%",
                                     width: "60%",
                                     height: "70%",
                                     insets: "10px 20px",
