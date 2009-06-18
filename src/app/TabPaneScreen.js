@@ -87,7 +87,6 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                             insets: 20,
                             borderType: Extras.TabPane.BORDER_TYPE_SURROUND,
                             tabIconTextMargin: 3,
-                            tabCloseIconTextMargin: 8,
                             background: "#ffffff",
                             tabSpacing: -20,
                             imageBorder: DemoApp.TabPaneScreen.IMAGE_BORDER,
@@ -96,6 +95,10 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                             tabActiveHeightIncrease: 3,
                             tabActiveImageBorder: DemoApp.TabPaneScreen.TAB_ACTIVE_IMAGE_BORDER,
                             tabActiveInsets: "4px 10px",
+                            tabCloseEnabled: true,
+                            tabCloseIcon: "image/icon/Icon16TabClose.png",
+                            tabCloseIconRolloverEnabled: true,
+                            tabCloseIconTextMargin: 8,
                             tabInactiveBackground: "#e7e7e7",
                             tabInactiveBackgroundInsets: "8px 14px 1px 8px",
                             tabInactiveImageBorder: DemoApp.TabPaneScreen.TAB_INACTIVE_IMAGE_BORDER,
@@ -105,7 +108,6 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                 y: "53%"
                             },
                             tabInactiveInsets: "4px 10px",
-                            tabCloseIcon: "image/icon/Icon16TabClose.png",
                             tabRolloverEnabled: true,
                             tabRolloverForeground: "#ffffff",
                             tabRolloverBackgroundImage: {
@@ -113,6 +115,11 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                 y: "50%"
                             },
                             tabRolloverCloseIcon: "image/icon/Icon16TabCloseRollover.png",
+                            events: {
+                                tabClose: Core.method(this, function(e) {
+                                    this._tabPane.remove(e.tab);
+                                })
+                            },
                             children: [
                                 new Echo.Column({
                                     layoutData: {
@@ -282,7 +289,10 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                                                 })
                                             ]
                                         }),
-                                        new Echo.Column({
+                                        new Echo.Row({
+                                            layoutData: {
+                                                alignment: "center"
+                                            },
                                             children: [
                                                 this._addButton = new Echo.Button({
                                                     styleName: "Default",
@@ -456,7 +466,8 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
         this._tabPane.add(new Echo.ContentPane({
             layoutData: {
                 title: "Tab " + this._tabCount++,
-                activeBackground: background
+                activeBackground: background,
+                closeEnabled: true
             },
             background: background,
             children: [

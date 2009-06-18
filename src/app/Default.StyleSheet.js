@@ -53,7 +53,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             rolloverBorder: "1px outset #bcd6f4",
             pressedEnabled: true,
             rolloverEnabled: true,
-            insets: "1px 4px",
+            insets: "1px 7px",
             disabledForeground: "#93bed5"
         },
         "AbstractListComponent": {
