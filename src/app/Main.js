@@ -743,7 +743,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                 new Extras.OptionModel("download", this._msg["Menu.Download"], "image/icon/Icon16ArrowBottom.png")
             ]),
             new Extras.MenuModel(null, this._msg["Menu.HelpMenu"], null, [
-                new Extras.OptionModel("about", this._msg["Menu.About"], "image/icon/Icon16Info.gif")
+                new Extras.OptionModel("about", this._msg["Menu.About"], "image/icon/Icon16About.png")
             ])
         ]);
         return menuModel;

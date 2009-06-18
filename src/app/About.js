@@ -14,7 +14,7 @@ DemoApp.AboutDialog = Core.extend(Echo.WindowPane, {
             height: "30em",
             title: this._msg["About.WindowTitle"],
             iconInsets: "6px 10px",
-            icon: "image/icon/Icon16Info.gif",
+            icon: "image/icon/Icon16About.png",
             modal: true,
             closable: true,
             events: {
@@ -33,11 +33,12 @@ DemoApp.AboutDialog = Core.extend(Echo.WindowPane, {
                             styleName: "Default.Top.Surround",
                             children: [
                                 new Echo.Column({
+                                    layoutData: {
+                                        title: this._msg["About.GeneralTab"],
+                                        icon: "image/icon/Icon24Help.png"
+                                    },
                                     insets: "15px 25px",
                                     cellSpacing: 10,
-                                    layoutData: {
-                                        title: this._msg["About.GeneralTab"]
-                                    },
                                     children: [
                                         new Echo.Label({
                                             icon: "image/logo/NextApp.png"
@@ -54,14 +55,18 @@ DemoApp.AboutDialog = Core.extend(Echo.WindowPane, {
                                     ]
                                 }),
                                 new Echo.Column({
+                                    layoutData: {
+                                        title: this._msg["About.ArtworkTab"],
+                                        icon: "image/icon/Icon24Image.png"
+                                    },
                                     insets: "15px 25px",
                                     cellSpacing: 10,
-                                    layoutData: {
-                                        title: this._msg["About.PhotographyTab"]
-                                    },
                                     children: [
                                         new DemoApp.HtmlLabel({
-                                            html: this._msg["About.Photography1"]
+                                            html: this._msg["About.Artwork1"]
+                                        }),
+                                        new DemoApp.HtmlLabel({
+                                            html: this._msg["About.Artwork2"]
                                         })
                                     ]
                                 })

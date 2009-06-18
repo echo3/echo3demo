@@ -57,7 +57,7 @@ DemoApp.Messages = new Core.ResourceBundle({
     
     "About.WindowTitle":                                    "About this Application",
     "About.GeneralTab":                                     "General Information",
-    "About.PhotographyTab":                                 "Photography",
+    "About.ArtworkTab":                                     "Artwork",
     
     "About.General1":                                       "Copyright 2006-2008 NextApp, Inc.",
     "About.General2":                                       "This application is distributed under the terms of the Mozilla " +
@@ -69,9 +69,13 @@ DemoApp.Messages = new Core.ResourceBundle({
                                                             "application may be found at " +
                                                             "<a href=\"http://echo.nextapp.com/site/echo3/\">" +
                                                             "http://echo.nextapp.com/site/echo3</a>.",
-    "About.Photography1":                                   "This application contains public-domain photography provided by " +
+    "About.Artwork1":                                       "This application contains public-domain photography provided by " +
                                                             "<a href=\"http://publicdomainpictures.net\">" + 
                                                             "http://publicdomainpictures.net</a>.",
+                                                            
+    "About.Artwork2":                                       "This application contains public-domain icons provided by the " +
+                                                            "<a href=\"http://tango.freedesktop.org\">" + 
+                                                            "Tango Desktop Project</a>.",
                                                             
     "Menu.LaunchMenu":                                      "Launch",
     "Menu.ToolsMenu":                                       "Tools",
