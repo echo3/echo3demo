@@ -118,6 +118,7 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                             events: {
                                 tabClose: Core.method(this, function(e) {
                                     this._tabPane.remove(e.tab);
+                                    this._updateControls();
                                 })
                             },
                             children: [
@@ -481,14 +482,12 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
                 })
             ]
         }));
-        this._addButton.setEnabled(this._tabPane.getComponentCount() < 15);
-        this._removeButton.setEnabled(true);
+        this._updateControls();
     },
     
     _processRemoveTab: function(e) {
         this._tabPane.remove(this._tabPane.getComponentCount() - 1);
-        this._addButton.setEnabled(true);
-        this._removeButton.setEnabled(this._tabPane.getComponentCount() > 2);
+        this._updateControls();
     },
     
     _processUpdateTabPane: function(e) {
@@ -530,5 +529,10 @@ DemoApp.TabPaneScreen = Core.extend(Echo.ContentPane, {
         return "#" + Math.floor(Math.random() * 64 + 192).toString(16) +
                 Math.floor(Math.random() * 64 + 192).toString(16) +
                 Math.floor(Math.random() * 64 + 192).toString(16);
+    },
+    
+    _updateControls: function() {
+        this._addButton.setEnabled(this._tabPane.getComponentCount() < 15);
+        this._removeButton.setEnabled(this._tabPane.getComponentCount() > 2);
     }
 });
