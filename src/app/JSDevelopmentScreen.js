@@ -317,21 +317,20 @@ DemoApp.JSDevelopmentScreen = Core.extend(Echo.ContentPane, {
                                     orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM,
                                     autoPositioned: true,
                                     children: [
-                                        new Echo.Column({
+                                        new Echo.Panel({
                                             layoutData: {
-                                                insets: 20
+                                                insets: "8px 15px"
                                             },
+                                            insets: 20,
+                                            border: "4px solid #2f2f3f",
+                                            background: "#000000",
                                             children: [
                                                 new Echo.Label({ 
-                                                    layoutData: {
-                                                        insets: "15px 15px",
-                                                        background: "#000000"
-                                                    },
                                                     foreground: "#ffcf3f",
                                                     font: {
-                                                        typeface: "Courier New, Courier, Monospace",
                                                         size: 24,
-                                                        bold: true
+                                                        bold: true,
+                                                        italic: true
                                                     },
                                                     text: this._msg["JSDevelopmentScreen.Hierarchal.0"]
                                                 })

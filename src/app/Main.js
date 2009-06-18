@@ -67,6 +67,7 @@ DemoApp = Core.extend(Echo.Application, {
         
         /** Required JavaScript module URLs for JavaScript Development demo screen. */
         MODULE_DEMO_JS_DEVELOPMENT: [
+            "lib/echo/Sync.Composite.js",
             "lib/extras/Application.TabPane.js",
             "lib/extras/Sync.TabPane.js",
             "lib/extras/Application.ToolTipContainer.js",
@@ -328,7 +329,7 @@ DemoApp = Core.extend(Echo.Application, {
         this.rootComponent.add(this.workspace);
         
         // Edit/Enable the following line to launch a specific screen at startup.
-        this.workspace.launchScreen(sections[3].screens[1]);
+        this.workspace.launchScreen(sections[2].screens[0]);
     }
 });
 
