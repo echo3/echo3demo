@@ -725,7 +725,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         var menuModel = new Extras.MenuModel(null, null, null, [
             launchMenu,
             new Extras.MenuModel(null, this._msg["Menu.ToolsMenu"], null, [
-                new Extras.OptionModel("viewsource", this._msg["Menu.ViewSource"], "image/icon/Icon16JavaScript.gif"),
+                new Extras.OptionModel("viewsource", this._msg["Menu.ViewSource"], "image/icon/Icon16Terminal.png"),
                 new Extras.MenuModel(null, this._msg["Menu.ViewSourceMenu"], null, [
                     new Extras.OptionModel("viewsource.main", this._msg["Menu.ViewSourceMain"], null),
                     new Extras.OptionModel("viewsource.ss", this._msg["Menu.ViewSourceStyleSheet"], null),
