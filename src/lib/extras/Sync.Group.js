@@ -11,14 +11,14 @@ Extras.Sync.Group = Core.extend(Echo.Render.ComponentSync, {
          */
         DEFAULTS: {
             borderImages: [
-                "image/group/GroupBorderTopLeft.png",
-                "image/group/GroupBorderTop.png",
-                "image/group/GroupBorderTopRight.png",
-                "image/group/GroupBorderLeft.png",
-                "image/group/GroupBorderRight.png",
-                "image/group/GroupBorderBottomLeft.png",
-                "image/group/GroupBorderBottom.png",
-                "image/group/GroupBorderBottomRight.png"
+                "image/group/TopLeft.png",
+                "image/group/Top.png",
+                "image/group/TopRight.png",
+                "image/group/Left.png",
+                "image/group/Right.png",
+                "image/group/BottomLeft.png",
+                "image/group/Bottom.png",
+                "image/group/BottomRight.png"
             ],
             borderInsets: "10px",
             titleInsets: "0px 2px"
@@ -64,6 +64,9 @@ Extras.Sync.Group = Core.extend(Echo.Render.ComponentSync, {
         
         this._div = document.createElement("div");
         this._div.id = this.component.renderId;
+        if (Core.Web.Env.QUIRK_IE_HAS_LAYOUT) {
+            this._div.style.cssText = "zoom:1;";
+        }
         Echo.Sync.Color.render(this.component.render("foreground"), this._div, "color");
         Echo.Sync.LayoutDirection.render(this.component.getLayoutDirection(), this._div);
     
@@ -81,7 +84,7 @@ Extras.Sync.Group = Core.extend(Echo.Render.ComponentSync, {
     _renderBorder: function(update) {
         var borderInsets = this.component.render("borderInsets", Extras.Sync.Group.DEFAULTS.borderInsets);
         var borderPixelInsets = Echo.Sync.Insets.toPixels(borderInsets);
-        var flags = this.component.render("ieAlphaRenderBorder") ? Echo.Sync.FillImage.FLAG_ENABLE_IE_PNG_ALPHA_FILTER : 0;
+        var flags = 0;
         
         var topRightDiv = document.createElement("div");
         topRightDiv.style.width = "100%";
