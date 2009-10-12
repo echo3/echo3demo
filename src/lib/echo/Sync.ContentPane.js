@@ -1,6 +1,21 @@
 /**
  * Component rendering peer: ContentPane.
  * This class should not be extended by developers, the implementation is subject to change.
+ * 
+ * <h3>Exit Animations</h3>
+ * 
+ * <p>Child component peers may implement a <code>renderContentPaneRemove()</code> method if they desire to run
+ * an "exit" animation.  If this method is provided, it will be used to determine if the child desires to play an exit
+ * animation and if so, allow the child to begin executing the animation when the child is to be removed.  
+ * The method must take the following form:</p>
+ * <p><code>renderContentPaneRemove(element, completionMethod)</code></p>
+ * <p>The first parameter, <code>element</code>, provides the DOM <code>Element</code> containing the child component</p>
+ * <p>The second parameter,<code>completionMethod</code> is a function which the animator should call once the animation 
+ * completes</p>
+ * <p>If the <code>renderContentPaneRemove()</code> implementation determines that it will play an animation, it should return 
+ * <code>true</code> and invoke the <code>completionMethod</code> when the animation completes.</p>
+ * <p>If the <code>renderContentPaneRemove()</code> implementation determines that it will NOT play an animation, it should return
+ * <code>false</code> and it should <strong>not invoke</strong> the <code>completionMethod</code>.</p>
  */
 Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
 
@@ -180,7 +195,7 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
                             position = Math.round((contentElement.scrollWidth - contentElement.offsetWidth) * percent / 100);
                             if (position > 0) {
                                 contentElement.scrollLeft = position;
-                                if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
+                                if (Core.Web.Env.ENGINE_MSHTML) {
                                     // IE needs to be told twice.
                                     position = Math.round((contentElement.scrollWidth - contentElement.offsetWidth) * 
                                             percent / 100);
@@ -201,7 +216,7 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
                             position = Math.round((contentElement.scrollHeight - contentElement.offsetHeight) * percent / 100);
                             if (position > 0) {
                                 contentElement.scrollTop = position;
-                                if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
+                                if (Core.Web.Env.ENGINE_MSHTML) {
                                     // IE needs to be told twice.
                                     position = Math.round((contentElement.scrollHeight - contentElement.offsetHeight) *
                                             percent / 100);
@@ -253,7 +268,23 @@ Echo.Sync.ContentPane = Core.extend(Echo.Render.ComponentSync, {
             // Child never rendered.
             return;
         }
-        childDiv.parentNode.removeChild(childDiv);
+
+        // Determine if child component would like to render removal effect (e.g., WindowPane fade).
+        // If so, inform child to start effect, provide copmletion callback to perform removal operations.
+        var selfRemove = false;
+        if (child.peer.renderContentPaneRemove) {
+            selfRemove = child.peer.renderContentPaneRemove(this._childIdToElementMap[child.renderId], 
+                    Core.method(this, function() {
+                        childDiv.parentNode.removeChild(childDiv);
+                    })
+            );
+        }
+        
+        if (!selfRemove) {
+            // Child will not render removal effect, remove immediately.
+            childDiv.parentNode.removeChild(childDiv);
+        }
+        
         delete this._childIdToElementMap[child.renderId];
     },
     

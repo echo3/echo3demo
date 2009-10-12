@@ -1345,25 +1345,40 @@ Extras.Sync.RichTextArea.OverlayPanePeer = Core.extend(Echo.Render.ComponentSync
     /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
         this._div = document.createElement("div");
-        this._div.style.cssText = "position:absolute;top:0;right:0;bottom:0;left:0;z-index:32767;";
+        this.client.addElement(this._div);
+        this._div.style.cssText = "position:absolute;top:0;right:0;bottom:0;left:0;z-index:20000;";
         if (this.component.children.length == 1) {
             Echo.Render.renderComponentAdd(update, this.component.children[0], this._div);
         } else if (this.component.children.length > 1) {
             throw new Error("Too many children added to OverlayPane.");
         }
-        this.component.rta.peer.client.domainElement.appendChild(this._div);
+        document.body.appendChild(this._div);
     },
     
     /** @see Echo.Render.ComponentSync#renderDisplay */
     renderDisplay: function(update) {
+        if (this._div.style.display != "block") {
+            this._div.style.display = "block";
+            this.client.forceRedraw();
+        }
         Core.Web.VirtualPosition.redraw(this._div);
     },
     
     /** @see Echo.Render.ComponentSync#renderDispose */
     renderDispose: function(update) {
-        if (this._div && this._div.parentNode) {
+        if (!this._div) {
+            return;
+        }
+        this.client.removeElement(this._div);
+        if (this._div.parentNode) {
             this._div.parentNode.removeChild(this._div);
         }
+        this._div = null;
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderHide */
+    renderHide: function() {
+        this._div.style.display = "none";
     },
     
     /** @see Echo.Render.ComponentSync#renderUpdate */
@@ -1434,7 +1449,6 @@ Extras.Sync.RichTextArea.TableDialog = Core.extend(Extras.Sync.RichTextArea.Abst
                         }),
                         new Echo.Grid({
                             width: "100%",
-                            columnWidth: ["25%", "75%"],
                             insets: 3,
                             children: [
                                 new Echo.Label({
@@ -1618,7 +1632,7 @@ Extras.Sync.RichTextArea.TableSizeSelectorPeer = Core.extend(Echo.Render.Compone
     
     /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
-        var tbody, protoTr, tr, td, y, x, colGroup, col;
+        var tbody, protoTr, tr, td, y, x;
         
         this._rowSize = this.component.render("rowSize", 10);
         this._columnSize = this.component.render("columnSize", 15);
@@ -1634,6 +1648,7 @@ Extras.Sync.RichTextArea.TableSizeSelectorPeer = Core.extend(Echo.Render.Compone
         this._table.cellPadding = 0;
         this._table.cellSpacing = 0;
         this._table.style.cssText = "padding:0;border:none;font-size:1px;";
+        this._table.style.width = (this._columnSize * 18) + "px";
         Echo.Sync.Color.render(this.component.render("background", "#dfdfdf"), this._table, "backgroundColor");
         tbody = document.createElement("tbody");
         this._table.appendChild(tbody);

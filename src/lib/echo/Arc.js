@@ -11,6 +11,26 @@
 Echo.Arc = { };
 
 /**
+ * Application class.
+ */
+Echo.Arc.Application = Core.extend(Echo.Application, {
+    
+    /**
+     * The containing <code>Echo.Arc.ComponentSync</code> instance.
+     */
+    arcSync: null,
+    
+    /** @see Echo.Application#isActive */
+    isActive: function() {
+        if (!this.arcSync.component.isActive()) {
+            return false;
+        } else {
+            return Echo.Application.prototype.isActive.call(this);
+        }
+    }
+});
+
+/**
  * Client for application-rendered components.
  * These clients are automatically created and destroyed by the
  * ArcClient component synchronization peer.
@@ -138,9 +158,14 @@ Echo.Arc.ComponentSync = Core.extend(Echo.Render.ComponentSync, {
          */
         renderDisplay: function() {
             if (this.arcApplication) {
+                if (!this.baseComponent.peer) {
+                    // Do nothing in the event application peers have not been instantiated.
+                    return;
+                }
                 Echo.Render.renderComponentDisplay(this.baseComponent);
             } else {
-                this.arcApplication = new Echo.Application();
+                this.arcApplication = new Echo.Arc.Application();
+                this.arcApplication.arcSync = this;
                 this.arcApplication.setStyleSheet(this.client.application.getStyleSheet());
                 this.baseComponent = this.createComponent();
                 if (!this.baseComponent) {
@@ -169,16 +194,33 @@ Echo.Arc.ComponentSync = Core.extend(Echo.Render.ComponentSync, {
                 // Unregister application focus listeners for both containing application and rendered application.
                 this.arcApplication.removeListener("focus", this._applicationFocusRef);
                 this.client.application.removeListener("focus", this._applicationFocusRef);
+                this._applicationFocusRef = null;
             }
             if (this.arcClient) {
                 this.arcClient.dispose();
                 this.arcClient = null;
             }
             if (this.arcApplication) {
+                this.arcApplication.arcSync = null;
                 this.arcApplication = null;
                 this.baseComponent = null;
             }
             this._defaultDomainElement = null;
+        },
+        
+        /**
+         * renderHide() implementation: must be invoked by overriding method.
+         * 
+         * @see Echo.Render.ComponentSync#renderHide
+         */
+        renderHide: function() {
+            if (this.arcApplication) {
+                if (!this.baseComponent.peer) {
+                    // Do nothing in the event application peers have not been instantiated.
+                    return;
+                }
+                Echo.Render.renderComponentHide(this.baseComponent);
+            }
         },
         
         /**

@@ -27,7 +27,74 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         /** 
          * Map containing position/size-related properties whose update can be rendered by moving/resizing the window.
          */
-        PARTIAL_PROPERTIES_POSITION_SIZE: { positionX: true, positionY: true, width: true, height: true }
+        PARTIAL_PROPERTIES_POSITION_SIZE: { positionX: true, positionY: true, width: true, height: true },
+        
+        /**
+         * Fade runnable for fading in/out windows.
+         */
+        FadeRunnable: Core.extend(Core.Web.Scheduler.Runnable, {
+            
+            timeInterval: 20,
+            repeat: true,
+            
+            /** 
+             * Flag for fading in/out, set to true when fading out.
+             * @type Boolean 
+             */
+            _directionOut: false,
+            
+            /** 
+             * The DIV element being animated.
+             * @type Element 
+             */
+            _div: null,
+            
+            /** 
+             * Completion callback method to be invoked when animation completes.
+             * @type Function 
+             */
+            _completeMethod: null,
+            
+            /**
+             * Desired animation time in milliseconds.
+             * @type Number
+             */
+            _time: null,
+            
+            /**
+             * Creates a new <code>FadeRunnable</code>.
+             * 
+             * @param {Element} div the element being animated
+             * @param {Boolean} directionOut the animation direction, in = false, out = true
+             * @param {Number} the desired animation time, in milliseconds
+             * @param {Function} the completion method to execute when the animation completes
+             */
+            $construct: function(div, directionOut, time, completeMethod) {
+                this._directionOut = directionOut;
+                this._div = div;
+                this._completeMethod = completeMethod;
+                this._time = time;
+            },
+            
+            run: function() {
+                if (!this._startTime) {
+                    this._startTime = new Date().getTime();
+                }
+                var value = (new Date().getTime() - this._startTime) / this._time;
+                if (value > 1) {
+                    value = 1;
+                }
+                this._div.style.opacity = this._directionOut ? 1 - value : value;
+                
+                if (value === 1) {
+                    this.repeat = false;
+                    if (this._completeMethod) {
+                        this._completeMethod();
+                        this._completeMethod = null;
+                    }
+                }
+            }
+        })
     },
     
     $load: function() {
@@ -40,6 +107,12 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
      * @type Boolean
      */
     _initialAutoSizeComplete: false,
+    
+    /**
+     * Flag indicating whether the window has been displayed on the screen, i.e., whether CSS visibility property has
+     * been set/any open effect has been started.
+     */
+    _displayed: false,
 
     /**
      * The user-requested bounds of the window.  Contains properties x, y, width, and height.  
@@ -113,6 +186,19 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     _overlay: null,
 
     /**
+     * The closing animation time, in milliseconds.  Stored in instance variable due to unavailability of 
+     * application/stylesheet after disposal.
+     * @type Number
+     */
+    _closeAnimationTime: null,
+    
+    /**
+     * Flag indicating whether window is being "opened", i.e., if the most recent update has it being directly added to its
+     * parent <code>ContentPane</code>.
+     */
+    _opening: false,
+
+    /**
      * Creates a <code>Echo.Sync.WindowPane<code>.
      */
     $construct: function() {
@@ -153,7 +239,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
             return;
         }
         this._overlay = document.createElement("div");
-        this._overlay.style.cssText = "position:absolute;z-index:32767;width:100%;height:100%;";
+        this._overlay.style.cssText = "position:absolute;z-index:32600;width:100%;height:100%;";
         Echo.Sync.FillImage.render(this.client.getResourceUrl("Echo", "resource/Transparent.gif"), this._overlay);
         document.body.appendChild(this._overlay);
     },
@@ -288,6 +374,23 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     },
     
     /**
+     * <code>ContentPane</code>-specific method to allow component to remove.
+     * 
+     * @return true if a self-remove is being performed, or false if the parent <code>ContentPane</code> should
+     *         immediately remove the <code>WindowPane</code>
+     */
+    renderContentPaneRemove: function(container, completeCallback) {
+        if (this._closeAnimationTime > 0) {
+            Core.Web.Scheduler.add(new Echo.Sync.WindowPane.FadeRunnable(container, true, this._closeAnimationTime, 
+                    completeCallback));
+            return true;
+        } else {
+            // Return false, declining to perform effect.  Do not invoke callback.
+            return false;
+        }
+    },
+    
+    /**
      * Processes a key down event in the window.
      */
     clientKeyDown: function(e) {
@@ -414,8 +517,10 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     
     /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
+        this._opening = update.parent == this.component.parent;
         this._initialAutoSizeComplete = false;
         this._rtl = !this.component.getRenderLayoutDirection().isLeftToRight();
+        this._closeAnimationTime = Core.Web.Env.NOT_SUPPORTED_CSS_OPACITY ? 0 : this.component.render("closeAnimationTime", 0);
         
         // Create content DIV.
         // Content DIV will be appended to main DIV by _renderAddFrame().
@@ -459,11 +564,6 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     _renderAddFrame: function(parentElement) {
         this._loadPositionAndSize();
 
-        // Create main component DIV.
-        this._div = document.createElement("div");
-        this._div.id = this.component.renderId;
-        this._div.tabIndex = "0";
-
         // Load property states.
         this._minimumWidth = Echo.Sync.Extent.toPixels(
                 this.component.render("minimumWidth", Echo.WindowPane.DEFAULT_MINIMUM_WIDTH), true);
@@ -482,10 +582,16 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         var hasControlIcons = closable || maximizeEnabled || minimizeEnabled;
         var fillImageFlags = this.component.render("ieAlphaRenderBorder") ? Echo.Sync.FillImage.FLAG_ENABLE_IE_PNG_ALPHA_FILTER : 0;
         
+        // Create main component DIV.
         this._div = Echo.Sync.FillImageBorder.renderContainer(border, { absolute: true });
+        this._div.id = this.component.renderId;
+        this._div.tabIndex = "0";
         this._div.style.outlineStyle = "none";
         this._div.style.overflow = "hidden";
         this._div.style.zIndex = 1;
+        if (!this._displayed) {
+            this._div.style.visibility = "hidden";
+        }
         
         this._borderDivs = Echo.Sync.FillImageBorder.getBorder(this._div);
         var mouseDownHandler = this._resizable ? Core.method(this, this._processBorderMouseDown) : null; 
@@ -686,6 +792,17 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
             });
             Core.Web.Image.monitor(this._contentDiv, imageListener);
         }
+        
+        if (!this._displayed) {
+            this._displayed = true;
+            var time = (Core.Web.Env.NOT_SUPPORTED_CSS_OPACITY || !this._opening) ? 
+                    0 : this.component.render("openAnimationTime", 0);
+            if (time > 0) {
+                Core.Web.Scheduler.add(new Echo.Sync.WindowPane.FadeRunnable(this._div, false, time, null));
+                this._div.style.opacity = 0;
+            }
+            this._div.style.visibility = "visible";
+        }
     },
     
     /** @see Echo.Render.ComponentSync#renderDispose */
@@ -833,7 +950,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
 
                     // Determine size using getPreferredSize()
                     var prefSize = this.component.children[0].peer.getPreferredSize(Echo.Render.ComponentSync.SIZE_HEIGHT);
-                    if (prefSize.height) {
+                    if (prefSize && prefSize.height) {
                         pxBounds.height = this._contentInsets.top + this._contentInsets.bottom + this._titleBarHeight + 
                                 prefSize.height;
                     }

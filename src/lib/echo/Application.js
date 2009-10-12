@@ -53,7 +53,19 @@ Echo.Application = Core.extend({
          * implementation if required. The superclass' <code>dispose()</code> method should always be invoked out of convention.
          * The <code>client</code> property will be available.
          */
-        dispose: function() { }
+        dispose: function() { },
+        
+        /**
+         * Returns the active state of the application.
+         * 
+         * @return the active state of the application, a value of 
+         *         true indicating the application is ready for user
+         *         input, a value of false indicating otherwise
+         * @type Boolean
+         */
+        isActive: function() {
+            return true;
+        }
     },
     
     /**
@@ -281,18 +293,6 @@ Echo.Application = Core.extend({
      */
     getStyleSheet: function() {
         return this._styleSheet;
-    },
-    
-    /**
-     * Returns the active state of the application.
-     * 
-     * @return the active state of the application, a value of 
-     *         true indicating the application is ready for user
-     *         input, a value of false indicating otherwise
-     * @type Boolean
-     */
-    isActive: function() {
-        return true;
     },
     
     /**
@@ -3276,6 +3276,7 @@ Echo.SplitPane = Core.extend(Echo.Component, {
 /**
  * Abstract base class for text-entry components.
  * 
+ * @cp {String} text the text value
  * @sp {String} actionCommand the action command fired when the enter key is
  *     pressed within the text component
  * @sp {#Alignment} alignment an alignment setting describing the alignment of
@@ -3288,6 +3289,7 @@ Echo.SplitPane = Core.extend(Echo.Component, {
  * @sp {#Border} disabledBorder the disabled border
  * @sp {#Font} disabledFont the disabled font
  * @sp {#Color} disabledForeground the disabled foreground color
+ * @sp {Boolean} editable flag indicating whether field is editable (true) or read-only (false); default value is true
  * @sp {#Extent} height the height of the component
  * @sp {#Extent} horizontalScroll the horizontal scrollbar position
  * @sp {#Insets} insets the inset margin between the border and the text content
@@ -3404,6 +3406,8 @@ Echo.PasswordField = Core.extend(Echo.TextField, {
  *     content area
  * @sp {#FillImageBorder} border the border frame containing the WindowPane
  * @sp {Boolean} closable flag indicating whether the window is closable
+ * @sp {Number} closeAnimationTime the duration of the close animation, in 
+ *     milliseconds (default/zero value will result in no animation)
  * @sp {#ImageReference} closeIcon the close button icon
  * @sp {#Insets} closeIconInsets the inset margin around the close button icon
  * @sp {#ImageReference} closeRolloverIcon the close button rollover icon
@@ -3433,6 +3437,8 @@ Echo.PasswordField = Core.extend(Echo.TextField, {
  * @sp {#Extent} minimumHeight the minimum height of the window
  * @sp {#Extent} minimumWidth the minimum width of the window
  * @sp {Boolean} movable flag indicating whether the window is movable
+ * @sp {Number} openAnimationTime the duration of the open animation, in 
+ *     milliseconds (default/zero value will result in no animation)
  * @sp {#Extent} positionX the horizontal (x) position of the window
  * @sp {#Extent} positionY the vertical (y) position of the window
  * @sp {Boolean} resizable flag indicating whether the window is resizable

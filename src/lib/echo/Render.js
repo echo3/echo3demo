@@ -62,11 +62,31 @@ Echo.Render = {
      *        specified component (if false, it will only be invoked on child components)
      */
     _doRenderDisplay: function(component, includeSelf) {
+        // Ensure component is visible.
+        var i, testComponent = component;
+        var testParent = testComponent.parent;
+        while (testParent) {
+            if (testParent.peer.isChildVisible && !testParent.peer.isChildVisible(testComponent)) {
+                // Do nothing for components that are not visible. 
+                return;
+            }
+            testComponent = testParent;
+            testParent = testParent.parent;
+        }
+        
         if (includeSelf) {
             Echo.Render._doRenderDisplayImpl(component);
         } else {
-            for (var i = 0; i < component.children.length; ++i) {
-                Echo.Render._doRenderDisplayImpl(component.children[i]);
+            if (component.peer.isChildVisible) {
+                for (i = 0; i < component.children.length; ++i) {
+                    if (component.peer.isChildVisible(component.children[i])) {
+                        Echo.Render._doRenderDisplayImpl(component.children[i]);
+                    }
+                }
+            } else {
+                for (i = 0; i < component.children.length; ++i) {
+                    Echo.Render._doRenderDisplayImpl(component.children[i]);
+                }
             }
         }
     },
@@ -350,7 +370,9 @@ Echo.Render = {
         if (!component.parent || !component.parent.peer || !component.parent.peer.client) {
             throw new Error("Cannot find reference to the Client with which this component should be associated: " +
                     "cannot load peer.  This is due to the component's parent's peer not being associated with a Client. " +
-                    "Component = " + component);
+                    "Component = " + component + ", Parent = " + component.parent + ", Parent Peer = " + 
+                    (component.parent ? component.parent.peer : "N/A") + ", Parent Peer Client = " + 
+                    ((component.parent && component.parent.peer) ? component.parent.peer.client : "N/A"));
         }
     
         Echo.Render._loadPeer(component.parent.peer.client, component);
@@ -406,6 +428,8 @@ Echo.Render = {
     /**
      * Notifies a child component and its descendants that it is about to be removed from the DOM or otherwise hidden from view.
      * The <code>renderHide()</code> methods of the peers of the specified child component and its descendants will be invoked.
+     * <strong>It is absolutely critical that this method be invoked before the component's rendered state is removed from the DOM 
+     * hierarchy.</strong>
      * 
      * @param {Echo.Component} component the child component being hidden
      */
@@ -634,7 +658,6 @@ Echo.Render.ComponentSync = Core.extend({
     
     $virtual: {
     
-        //FIXME Experimental.
         /**
          * (Optional) Processes a key down event received by the client's key listeners.  
          * Invoked by client based on current focused component of application.
@@ -646,7 +669,6 @@ Echo.Render.ComponentSync = Core.extend({
          */
         clientKeyDown: null,
 
-        //FIXME Experimental.
         /**
          * (Optional) Processes a key press event received by the client's key listeners.  
          * Invoked by client based on current focused component of application.
@@ -658,7 +680,6 @@ Echo.Render.ComponentSync = Core.extend({
          */
         clientKeyPress: null,
         
-        //FIXME Experimental.
         /**
          * (Optional) Processes a key up event received by the client's key listeners.  
          * Invoked by client based on current focused component of application.
@@ -789,7 +810,10 @@ Echo.Render.RootSync = Core.extend(Echo.Render.ComponentSync, {
 
         if (update.fullRefresh || update.hasAddedChildren() || update.hasRemovedChildren()) {
             Echo.Sync.renderComponentDefaults(this.component, this.client.domainElement);
-            document.title = this.component.render("title", "");
+            var title = this.component.render("title");
+            if (title) {
+                document.title = title;
+            }
             this._renderContent(update);
             fullRender = true;
         } else {

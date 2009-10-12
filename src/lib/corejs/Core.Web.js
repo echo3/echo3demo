@@ -49,8 +49,9 @@ Core.Web = {
             Core.Web.VirtualPosition._init();
         }
     
-        if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
+        if (Core.Web.Env.ENGINE_MSHTML) {
             Core.Web.DOM.addEventListener(document, "selectstart", Core.Web._selectStartListener, false);
+            Core.Web.DOM.addEventListener(document, "dragstart", Core.Web._selectStartListener, false);
         }
         
         Core.Web.initialized = true;
@@ -524,6 +525,19 @@ Core.Web.Env = {
      * @type Boolean
      */
     NOT_SUPPORTED_RELATIVE_COLUMN_WIDTHS: null,
+    
+    /**
+     * Flag indicating that selectionStart/selectionEnd/setSelectionRange() are not
+     * supported on text field INPUT elements and TEXTAREA elements.
+     * @type Boolean
+     */
+    NOT_SUPPORTED_INPUT_SELECTION: null,
+    
+    /**
+     * Flag indicating complete lack of support for W3C DOM range API. 
+     * @type Boolean
+     */
+    NOT_SUPPORTED_RANGE: null,
 
     /**
      * Flag indicating support for "mouseenter" and "mouseleave" events. This is
@@ -553,6 +567,12 @@ Core.Web.Env = {
      * @type Boolean
      */
     PROPRIETARY_IE_PNG_ALPHA_FILTER_REQUIRED: null,
+    
+    /**
+     * Flag indicating support for the IE text range API.
+     * @type Boolean
+     */
+    PROPRIETARY_IE_RANGE: null,
     
     /**
      * Flag indicating that keypress events will place charCode value in keyCode property.
@@ -616,12 +636,6 @@ Core.Web.Env = {
      * See http://msdn.microsoft.com/en-us/library/bb250481.aspx 
      */
     QUIRK_IE_HAS_LAYOUT: null,
-
-    /**
-     * Flag indicating multiple keydown events will be fired when a key is held down.
-     * @type Boolean
-     */
-    QUIRK_IE_KEY_DOWN_EVENT_REPEAT: null,
 
     /**
      * Flag indicating DOM updates to SELECT elements may result in their
@@ -805,22 +819,24 @@ Core.Web.Env = {
             this.CSS_FLOAT = "styleFloat";
             this.QUIRK_KEY_CODE_IS_CHAR_CODE = true;
             this.QUIRK_IE_SECURE_ITEMS = true;
+            this.NOT_SUPPORTED_RANGE = true;
+            this.NOT_SUPPORTED_INPUT_SELECTION = true;
+            this.PROPRIETARY_IE_RANGE = true;
             this.PROPRIETARY_EVENT_MOUSE_ENTER_LEAVE_SUPPORTED = true;
             this.PROPRIETARY_EVENT_SELECT_START_SUPPORTED = true;
-            this.QUIRK_IE_KEY_DOWN_EVENT_REPEAT = true;
             this.QUIRK_DELAYED_FOCUS_REQUIRED = true;
             this.QUIRK_UNLOADED_IMAGE_HAS_SIZE = true;
             this.MEASURE_OFFSET_EXCLUDES_BORDER = true;
             this.QUIRK_IE_BLANK_SCREEN = true;
             this.QUIRK_IE_HAS_LAYOUT = true;
+            this.NOT_SUPPORTED_CSS_OPACITY = true;
+            this.PROPRIETARY_IE_OPACITY_FILTER_REQUIRED = true;
             
             if (this.BROWSER_VERSION_MAJOR < 8) {
                 // Internet Explorer 6 and 7 Flags.
                 this.QUIRK_TABLE_CELL_WIDTH_EXCLUDES_PADDING = true;
                 this.NOT_SUPPORTED_RELATIVE_COLUMN_WIDTHS = true;
                 this.QUIRK_CSS_BORDER_COLLAPSE_INSIDE = true;
-                this.NOT_SUPPORTED_CSS_OPACITY = true;
-                this.PROPRIETARY_IE_OPACITY_FILTER_REQUIRED = true;
                 this.QUIRK_IE_TABLE_PERCENT_WIDTH_SCROLLBAR_ERROR = true;
                 this.QUIRK_IE_SELECT_PERCENT_WIDTH = true;
                 
@@ -914,15 +930,48 @@ Core.Web.Env = {
 };
 
 /**
- * Event Processing System namespace.
- * The static methods in this object provide a standard framework for handling
- * DOM events across incompatible browser platforms.
+ * Event Processing System namespace. The static methods in this object provide
+ * a standard framework for handling DOM events across often-incompatible
+ * browser platforms.
  * <p>
- * <b>Capturing/Bubbling Listeners:</b>
- * This implementation additionally allows for the registration of capturing and bubbling event 
- * listeners that work even on Internet Explorer platforms, where they are not natively supported.
- * This implementation relies on the fact that all event listeners will be registered
- * through it.
+ * <b>Event Propagation:</b> Capturing listeners are notified of events first,
+ * followed by bubbling listeners. During the capturing phase of event firing,
+ * listeners on higher-level DOM elements are notified before the lower-level
+ * DOM elements. During the bubbling phase of event firing, lower-level DOM
+ * elements are notified before higher-level DOM elements.
+ * <p>
+ * For example, given the DOM hierarchy
+ * <code>&lt;body&gt;&lt;div&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/body&gt;</code>,
+ * with click listeners registered for both capturing and bubbling phases on all
+ * elements, the listener notification order for a click on the
+ * <code>&lt;span&gt;</code> element would be as folows:
+ * <ol>
+ * <li>Notify capturing listener of <code>&lt;body&gt;</code> element.</li>
+ * <li>Notify capturing listener of <code>&lt;div&gt;</code> element.</li>
+ * <li>Notify capturing listener of <code>&lt;span&gt;</code> element.</li>
+ * <li>Notify bubbling listener of <code>&lt;span&gt;</code> element.</li>
+ * <li>Notify bubbling listener of <code>&lt;div&gt;</code> element.</li>
+ * <li>Notify bubbling listener of <code>&lt;body&gt;</code> element.</li>
+ * </ol>
+ * <b>Listener Return Values:</b> Listeners should return a value of true if
+ * they wish to continue to allow propogation of an event, and false if they do
+ * not.
+ * <p>
+ * <b>Capturing/Bubbling Listeners:</b> This implementation allows for the
+ * registration of both capturing and bubbling event listeners on all browser
+ * platforms, including Internet Explorer, even though Internet Explorer does
+ * not inhererntly support such listeners. This is accomplished by the Event
+ * system adding a layer of abstraction between event registration and the
+ * browser, and then invoking event listeners itself.
+ * <p>
+ * This implementation relies on the fact that all event listeners will be 
+ * registered through it.  The implementation is in fact internally registering only
+ * bubbling-phase event listeners on the DOM.  Thus, if other event listeners are 
+ * registered directly on the DOM, scenarios may occur such as a direct-registered
+ * bubbling listener receiving an event before a Core.Web.Event-registered capturing
+ * listener.  This is not necessarily a critical issue, but the developer should
+ * be aware of it. 
+ * 
  * @class
  */
 Core.Web.Event = {

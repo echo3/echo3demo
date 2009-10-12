@@ -16,13 +16,7 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
             selectionForeground: "#ffffff",
             selectionBackground: "#3f3f3f",
             border: "1px outset #cfcfcf"
-        },
-        
-        /**
-         * Highest possible z-index.
-         * @type Number
-         */
-        MAX_Z_INDEX: 65535
+        }
     }, 
     
     /**
@@ -67,12 +61,6 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
      */
     _processMaskClickRef: null,
     
-    /** 
-     * Reference to menu key press listener.
-     * @type Function 
-     */
-    _processKeyPressRef: null,
-    
     /**
      * The collection of named overlay elements (top/left/right/bottom) deployed to cover non-menu elements of the
      * screen with transparent DIVs when the menu is active.  This allows the menu to receive de-activation events,
@@ -85,7 +73,6 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
      */
     $construct: function() {
         this._processMaskClickRef = Core.method(this, this._processMaskClick);
-        this._processKeyPressRef = Core.method(this, this.processKeyPress);
         this._openMenuPath = [];
     },
 
@@ -123,9 +110,6 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
             
             this.client.application.setFocusedComponent(this.component);
             Core.Web.DOM.focusElement(this.element);
-            Core.Web.Event.add(this.element, 
-                    Core.Web.Env.QUIRK_IE_KEY_DOWN_EVENT_REPEAT ? "keydown" : "keypress",
-                    this._processKeyPressRef, true);
             
             return true;
         },
@@ -153,21 +137,6 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
          */
         processAction: function(itemModel) {
             this.component.doAction(itemModel);
-        },
-        
-        /**
-         * Key press listener.
-         */
-        processKeyPress: function(e) {
-            if (e.keyCode == 27) {
-                this.deactivate();
-                return false;
-            }
-            return true;
-        },
-        
-        renderFocus: function() {
-            Core.Web.DOM.focusElement(this.element);
         }
     },
 
@@ -192,6 +161,17 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
         
         Core.Web.Event.add(document.body, "click", this._processMaskClickRef, false);
         Core.Web.Event.add(document.body, "contextmenu", this._processMaskClickRef, false);
+    },
+    
+    /**
+     * Processes a key down event.
+     */
+    clientKeyDown: function(e) {
+        if (e.keyCode == 27) {
+            this.deactivate();
+            return false;
+        }
+        return true;
     },
     
     /**
@@ -227,10 +207,6 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
         }
         this.active = false;
 
-        Core.Web.Event.remove(this.element, 
-                Core.Web.Env.QUIRK_IE_KEY_DOWN_EVENT_REPEAT ? "keydown" : "keypress",
-                this._processKeyPressRef, true);
-        
         this.closeAll();
         this.removeMask();
     },
@@ -267,28 +243,28 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
 
         if (bounds.top > 0) {
             this._overlay.top = document.createElement("div");
-            this._overlay.top.style.cssText = "position:absolute;z-index:32767;top:0;left:0;width:100%;" +
+            this._overlay.top.style.cssText = "position:absolute;z-index:30000;top:0;left:0;width:100%;" +
                     "height:" + bounds.top + "px;";
             document.body.appendChild(this._overlay.top);
         }
         
         if (bottom < domainBounds.height) {
             this._overlay.bottom = document.createElement("div");
-            this._overlay.bottom.style.cssText = "position:absolute;z-index:32767;bottom:0;left:0;width:100%;" +
+            this._overlay.bottom.style.cssText = "position:absolute;z-index:30000;bottom:0;left:0;width:100%;" +
                     "top:" + bottom + "px;";
             document.body.appendChild(this._overlay.bottom);
         }
 
         if (bounds.left > 0) {
             this._overlay.left = document.createElement("div");
-            this._overlay.left.style.cssText = "position:absolute;z-index:32767;left:0;" +
+            this._overlay.left.style.cssText = "position:absolute;z-index:30000;left:0;" +
                     "width:" + bounds.left + "px;top:" + bounds.top + "px;height:" + bounds.height + "px;";
             document.body.appendChild(this._overlay.left);
         }
 
         if (right < domainBounds.width) {
             this._overlay.right = document.createElement("div");
-            this._overlay.right.style.cssText = "position:absolute;z-index:32767;right:0;" +
+            this._overlay.right.style.cssText = "position:absolute;z-index:30000;right:0;" +
                     "left:" + right + "px;top:" + bounds.top + "px;height:" + bounds.height + "px;";
             document.body.appendChild(this._overlay.right);
         }
@@ -400,6 +376,16 @@ Extras.Sync.Menu = Core.extend(Echo.Render.ComponentSync, {
     
     /** @see Echo.Render.ComponentSync#renderUpdate */
     renderDispose: function(update) {
+        this.deactivate();
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderFocus */
+    renderFocus: function() {
+        Core.Web.DOM.focusElement(this.element);
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderHide */
+    renderHide: function() {
         this.deactivate();
     },
     
@@ -574,7 +560,7 @@ Extras.Sync.Menu.RenderedMenu = Core.extend({
 
         this.element = document.createElement("div");
         this.element.style.position = "absolute";
-        this.element.style.zIndex = Extras.Sync.Menu.MAX_Z_INDEX;
+        this.element.style.zIndex = 30050;
         
         var opacity = (Core.Web.Env.NOT_SUPPORTED_CSS_OPACITY ? 100 : this.component.render("menuOpacity", 100)) / 100;
 
@@ -699,10 +685,7 @@ Extras.Sync.Menu.RenderedMenu = Core.extend({
 
                 menuItemContentTd = document.createElement("td");
                 Echo.Sync.Insets.render(textPadding, menuItemContentTd, "padding");
-                var lineWrap = this.component.render("lineWrap");
-                if (lineWrap != null && !lineWrap) {
-                    menuItemContentTd.style.whiteSpace = "nowrap";
-                }
+                menuItemContentTd.style.whiteSpace = "nowrap";
                 if (this.stateModel && !this.stateModel.isEnabled(item.modelId)) {
                     Echo.Sync.Color.render(this.component.render("disabledForeground", 
                             Extras.Sync.Menu.DEFAULTS.disabledForeground), menuItemContentTd, "color");
@@ -1191,7 +1174,10 @@ Extras.Sync.DropDownMenu = Core.extend(Extras.Sync.Menu, {
         relativeDiv.appendChild(expandDiv);
   
         this._contentDiv = document.createElement("div");
-        this._contentDiv.style.cssText = "float:left;white-space:nowrap;";
+        this._contentDiv.style.cssText = "float:left;";
+        if (!this.component.render("lineWrap")) {
+            this._contentDiv.style.whiteSpace = "nowrap";
+        }
         Echo.Sync.Insets.render(this.component.render("insets", "2px 5px"), this._contentDiv, "padding");
         dropDownDiv.appendChild(this._contentDiv);
         
@@ -1492,47 +1478,57 @@ Extras.Sync.MenuBarPane = Core.extend(Extras.Sync.Menu, {
         var menuBarTr = document.createElement("tr");
         menuBarTbody.appendChild(menuBarTr);
         
-        if (this.menuModel != null) {
+        if (this.menuModel == null || this.menuModel.items.length === 0) {
+            menuBarTr.appendChild(this._createMenuBarItem("\u00a0", null));
+        } else {
             var items = this.menuModel.items;
             for (var i = 0; i < items.length; ++i) {
                 var item = items[i];
                 if (item instanceof Extras.OptionModel || item instanceof Extras.MenuModel) {
-                    var menuBarItemTd = document.createElement("td");
-                    this.itemElements[item.id] = menuBarItemTd;
-                    menuBarItemTd.style.padding = "0px";
-                    menuBarItemTd.style.cursor = "pointer";
+                    var menuBarItemTd = this._createMenuBarItem(item.text, item.icon);
                     menuBarTr.appendChild(menuBarItemTd);
-                    var menuBarItemDiv = document.createElement("div");
-                    menuBarItemDiv.style.whiteSpace = "nowrap";
-                    Echo.Sync.Insets.render(Extras.Sync.MenuBarPane.DEFAULTS.itemInsets, menuBarItemDiv, "padding");
-                    menuBarItemTd.appendChild(menuBarItemDiv);
-                    if (item.icon) {
-                        // FIXME no load listeners being set on images for auto-resizing yet.
-                        var img = document.createElement("img");
-                        img.style.verticalAlign = "middle";
-                        img.src = item.icon;
-                        menuBarItemDiv.appendChild(img);
-                        if (item.text) {
-                            // FIXME Does not handle RTL.
-                            img.style.paddingRight = "1ex";
-                        }
-                    }
-                    if (item.text) {
-                        var textSpan = document.createElement("span");
-                        textSpan.style.verticalAlign = "middle";
-                        textSpan.appendChild(document.createTextNode(item.text));
-                        menuBarItemDiv.appendChild(textSpan);
-                    }
+                    this.itemElements[item.id] = menuBarItemTd;
                 }
             }
+
+            Core.Web.Event.add(menuBarDiv, "click", Core.method(this, this._processClick), false);
+            Core.Web.Event.add(menuBarDiv, "mouseover", Core.method(this, this._processItemEnter), false);
+            Core.Web.Event.add(menuBarDiv, "mouseout", Core.method(this, this._processItemExit), false);
         }
         
-        Core.Web.Event.add(menuBarDiv, "click", Core.method(this, this._processClick), false);
-        Core.Web.Event.add(menuBarDiv, "mouseover", Core.method(this, this._processItemEnter), false);
-        Core.Web.Event.add(menuBarDiv, "mouseout", Core.method(this, this._processItemExit), false);
         Core.Web.Event.Selection.disable(menuBarDiv);
-    
+        
         return menuBarDiv;
+    },
+    
+    _createMenuBarItem: function(text, icon) {
+        var menuBarItemTd = document.createElement("td");
+        menuBarItemTd.style.padding = "0px";
+        menuBarItemTd.style.cursor = "pointer";
+        
+        var menuBarItemDiv = document.createElement("div");
+        menuBarItemDiv.style.whiteSpace = "nowrap";
+        Echo.Sync.Insets.render(Extras.Sync.MenuBarPane.DEFAULTS.itemInsets, menuBarItemDiv, "padding");
+        
+        menuBarItemTd.appendChild(menuBarItemDiv);
+        if (icon) {
+            // FIXME no load listeners being set on images for auto-resizing yet.
+            var img = document.createElement("img");
+            img.style.verticalAlign = "middle";
+            img.src = icon;
+            menuBarItemDiv.appendChild(img);
+            if (text) {
+                // FIXME Does not handle RTL.
+                img.style.paddingRight = "1ex";
+            }
+        }
+        if (text) {
+            var textSpan = document.createElement("span");
+            textSpan.style.verticalAlign = "middle";
+            textSpan.appendChild(document.createTextNode(text));
+            menuBarItemDiv.appendChild(textSpan);
+        }
+        return menuBarItemTd;
     },
     
     /**

@@ -44,12 +44,26 @@ Echo.Client = Core.extend({
             for (var i = 0; i < Echo.Client._activeClients.length; ++i) {
                 Echo.Client._activeClients[i]._windowResizeListener(e);
             }
-        }
+        },
+        
+        /**
+         * A client-generated unique persistent identifier for the window, stored in window.name.
+         * @type String
+         */
+        windowId: null
     },
     
     $load: function() {
         // Register resize listener on containing window one time.
         Core.Web.DOM.addEventListener(window, "resize", this._globalWindowResizeListener, false);
+        
+        var re = /EchoWindowId=([0-9a-f]*\.[0-9a-f]*);/i;
+        var match = re.exec(window.name || "");
+        this.windowId = match && match[1];
+        if (!this.windowId) {
+            this.windowId = new Date().getTime().toString(16) + "." + parseInt(Math.random() * 0x100000000, 10).toString(16);
+            window.name = (window.name || "") + ";EchoWindowId=" + this.windowId + ";";
+        }
     },
     
     /**
@@ -104,6 +118,18 @@ Echo.Client = Core.extend({
     _inputRescriptionMap: null,
     
     /**
+     * The renderId of the component which was focused during the last received <code>keyDown</code> event.
+     * @String
+     */
+    _keyFocusedComponentId: null,
+    
+    /**
+     * Last received keycode from <code>keydown</code> event.  Used for firing cross-browser <Code>keypress</code> events.
+     * @type Number
+     */
+    _lastKeyCode: null,
+    
+    /**
      * Method reference to this._processKey().
      * @type Function
      */
@@ -146,10 +172,9 @@ Echo.Client = Core.extend({
     _waitIndicatorRunnable: null,
     
     /**
-     * Last received keycode from <code>keydown</code> event.  Used for firing cross-browser <Code>keypress</code> events.
-     * @type Number
+     * Flag indicating whether a client failure has occurred (indicating there a fail error has also been displayed).
      */
-    _lastKeyCode: null,
+    _failed: false,
 
     /**
      * Creates a new Client instance.  Derived classes must invoke.
@@ -231,6 +256,27 @@ Echo.Client = Core.extend({
     },
     
     /**
+     * Registers an element (which is not a descendant of <code>domainElement</code>) that will contain rendered components.
+     * The client will register event listeners to this element, such that it can provide notification of client-level events
+     * to component synchronization peers when they occur within this element and its descendants.
+     * Any component adding an element outside of the <code>domainElement</code> should invoke this method with said element.
+     * Any object invoking this method <strong>MUST</strong> invoke <code>removeElement</code> when the element will no longer
+     * be used.
+     * This method should only be invoked <strong>once per element</code>, and only on the <strong>root element</code> of any 
+     * element hierarchy added outside of the <code>domainElement</code>.
+     * 
+     * The common use case for this method is when adding elements directly to the <code>BODY</code> element of the DOM.
+     * 
+     * @param element the element to register
+     * @see #removeElement
+     */
+    addElement: function(element) {
+        Core.Web.Event.add(element, "keypress", this._processKeyRef, false);
+        Core.Web.Event.add(element, "keydown", this._processKeyRef, false);
+        Core.Web.Event.add(element, "keyup", this._processKeyRef, false);
+    },
+    
+    /**
      * Configures/Deconfigures the client.  This method must be invoked
      * with the supported application/containing domain element before
      * the client is used, and invoked with null values before it is
@@ -245,9 +291,7 @@ Echo.Client = Core.extend({
         if (this.application) {
             // Deconfigure current application if one is configured.
             Core.Arrays.remove(Echo.Client._activeClients, this);
-            Core.Web.Event.remove(this.domainElement, "keypress", this._processKeyRef, false);
-            Core.Web.Event.remove(this.domainElement, "keydown", this._processKeyRef, false);
-            Core.Web.Event.remove(this.domainElement, "keyup", this._processKeyRef, false);
+            this.removeElement(this.domainElement);
             this.application.removeListener("focus", this._processApplicationFocusRef);
             this.application.doDispose();
             this.application.client = null;
@@ -262,9 +306,7 @@ Echo.Client = Core.extend({
             this.application.client = this;
             this.application.doInit();
             this.application.addListener("focus", this._processApplicationFocusRef);
-            Core.Web.Event.add(this.domainElement, "keypress", this._processKeyRef, false);
-            Core.Web.Event.add(this.domainElement, "keydown", this._processKeyRef, false);
-            Core.Web.Event.add(this.domainElement, "keyup", this._processKeyRef, false);
+            this.addElement(this.domainElement);
             Echo.Client._activeClients.push(this);
         }
     },
@@ -372,6 +414,16 @@ Echo.Client = Core.extend({
             Core.Web.DOM.addEventListener(actionDiv, "keypress", listener, false);
             Core.Web.DOM.focusElement(actionDiv);
         }
+        
+        var closeDiv = document.createElement("div");
+        closeDiv.style.cssText = "position:absolute;top:2px;right:8px;color:#ffffff;font-weight:bold;cursor:pointer;";
+        closeDiv.appendChild(document.createTextNode("x"));
+        Core.Web.DOM.addEventListener(closeDiv, "click", Core.method(this, function() {
+            blackoutDiv.parentNode.removeChild(blackoutDiv);
+            div.parentNode.removeChild(div);
+        }), false);
+        
+        div.appendChild(closeDiv);
     },
     
     /**
@@ -401,6 +453,11 @@ Echo.Client = Core.extend({
      * @param {String} detail the error details 
      */
     fail: function(detail) {
+        if (this._failed) {
+            // Do nothing if failure has already been processed.
+            return;
+        }
+        this._failed = true;
         var element = this.domainElement;
         try {
             // Attempt to dispose.
@@ -463,8 +520,9 @@ Echo.Client = Core.extend({
     },
     
     /**
-     * Event handler for <code>keydown</code> and <code>keypress</code> events.
-     * Notifies focsued component of event via <code>clientKeyDown</code> and <code>clientKeyPress</code> methods respectively.
+     * Event handler for <code>keydown</code>, <code>keypress</code> events, and <code>keyup</code> events.
+     * Notifies focsued component (and its ancestry) of event via <code>clientKeyDown</code>, <code>clientKeyPress</code>,
+     * and <code>clientKeyUp</code> methods respectively.
      * 
      * @param e the event
      */
@@ -475,8 +533,15 @@ Echo.Client = Core.extend({
             bubble = true,
             keyEvent = null,
             keyCode;
-            
-        keyCode = press ? this._lastKeyCode : this._lastKeyCode = Core.Web.Key.translateKeyCode(e.keyCode);
+        
+        // Determine key code.
+        if (press) {
+            // If key event is a keypress, retrieve keycode from previous keydown event.
+            keyCode = this._lastKeyCode;
+        } else {
+            // If key event is not a keypress, translate value from event and additionally store in _lastKeyCode property.
+            keyCode = this._lastKeyCode = Core.Web.Key.translateKeyCode(e.keyCode);
+        }
         
         if (!up) {
             if (keyCode == 8) {
@@ -486,6 +551,7 @@ Echo.Client = Core.extend({
                     Core.Web.DOM.preventEventDefault(e);
                 }
             } else if (!press && keyCode == 9) {
+                // Process tab keydown event: focus next component in application, prevent default browser action.
                 this.application.focusNext(e.shiftKey);
                 Core.Web.DOM.preventEventDefault(e);
             }
@@ -497,19 +563,35 @@ Echo.Client = Core.extend({
         }
             
         if (!component) {
+            // No component is focused, take no action.
             return true;
         }
+
+        if (up || press) {
+            if (this._keyFocusedComponentId != component.renderId) {
+                // Focus has changed: do not fire clientKeyUp/clientKeyPress events.
+                return true;
+            }
+        } else {
+            // Store render id of focused component for keyDown events, such that it can be ensured that keyUp/keyPress events
+            // will only be fired if that component remains focused when those events are received. 
+            this._keyFocusedComponentId = component.renderId;
+        }
         
+        // Determine event method which should be invoked.
         var eventMethod = press ? "clientKeyPress" : (up ? "clientKeyUp" : "clientKeyDown");
         
+        // Fire event to component and ancestry.
         while (component && bubble) {
             if (component.peer && component.peer[eventMethod]) {
                 if (!keyEvent) {
+                    // Lazy-create key event.
                     keyEvent = { type: e.type, source: this, keyCode: keyCode, domEvent: e };
                     if (press) {
                         keyEvent.charCode = Core.Web.Env.QUIRK_KEY_CODE_IS_CHAR_CODE ? e.keyCode : e.charCode;
                     }
                 }
+                // Fire event to clientKeyXXX() method.  Continue bubbling event only if clientKeyXXX() method returns true.
                 bubble = component.peer[eventMethod](keyEvent);
             }
             component = component.parent;
@@ -517,7 +599,7 @@ Echo.Client = Core.extend({
         
         return true;
     },
-    
+
     /**
      * Processes updates to the component hierarchy.
      * Invokes <code>Echo.Render.processUpdates()</code>.
@@ -626,8 +708,23 @@ Echo.Client = Core.extend({
     setWaitIndicator: function(waitIndicator) {
         if (this._waitIndicator) {
             this._setWaitVisible(false);
+            if (this._waitIndicator.dispose) {
+                this._waitIndicator.dispose(this);
+            }
         }
         this._waitIndicator = waitIndicator;
+    },
+    
+    /**
+     * Unregisters an element (which is not a descendant of <code>domainElement</code>) that will contain rendered components.
+     * 
+     * @param element the element to unregister
+     * @see #addElement
+     */
+    removeElement: function(element) {
+        Core.Web.Event.remove(element, "keypress", this._processKeyRef, false);
+        Core.Web.Event.remove(element, "keydown", this._processKeyRef, false);
+        Core.Web.Event.remove(element, "keyup", this._processKeyRef, false);
     },
     
     /**
@@ -643,7 +740,9 @@ Echo.Client = Core.extend({
      * @param e the DOM resize event
      */
     _windowResizeListener: function(e) {
-        Echo.Render.notifyResize(this.application.rootComponent);
+        if (this.application.rootComponent.peer) {
+            Echo.Render.notifyResize(this.application.rootComponent);
+        }
     }
 });
 
@@ -725,6 +824,16 @@ Echo.Client.WaitIndicator = Core.extend({
          * @param {Echo.Client} the client
          */
         deactivate: function(client) { }
+    },
+    
+    $virtual: {
+        
+        /**
+         * Disposes of the wait indicator.
+         * 
+         * @param {Echo.Client} the client
+         */
+        dispose: null
     }
 });
 
@@ -736,7 +845,7 @@ Echo.Client.DefaultWaitIndicator = Core.extend(Echo.Client.WaitIndicator, {
     /** Creates a new DefaultWaitIndicator. */
     $construct: function() {
         this._divElement = document.createElement("div");
-        this._divElement.style.cssText = "display: none;z-index:32767;position:absolute;top:30px;right:30px;" +
+        this._divElement.style.cssText = "display: none;z-index:32000;position:absolute;top:30px;right:30px;" +
                  "width:200px;padding:20px;border:1px outset #abcdef;background-color:#abcdef;color:#000000;text-align:center;";
         this._textNode = document.createTextNode("");
         this._divElement.appendChild(this._textNode);
@@ -765,6 +874,15 @@ Echo.Client.DefaultWaitIndicator = Core.extend(Echo.Client.WaitIndicator, {
         Core.Web.Scheduler.remove(this._fadeRunnable);
     },
     
+    /** @see Echo.Client.WaitIndicator#dispose */
+    dispose: function(client) {
+        if (this._divElement && this._divElement.parentNode) {
+            this._divElement.parentNode.removeChild(this._divElement);
+        }
+        this._divElement = null;
+        this._textNode = null;
+    },
+    
     /**
      * Runnable-invoked method to animate (fade in/out) wait indicator.
      */
@@ -782,4 +900,3 @@ Echo.Client.DefaultWaitIndicator = Core.extend(Echo.Client.WaitIndicator, {
         }
     }
 });
-

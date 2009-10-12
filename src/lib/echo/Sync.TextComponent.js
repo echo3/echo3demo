@@ -18,6 +18,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
         
         /**
          * Processes a focus blur event.
+         * Overriding implementations must invoke.
          */
         processBlur: function(e) {
             this._focused = false;
@@ -26,6 +27,22 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
             return true;
         },
         
+        /**
+         * Processes a focus event. Notifies application of focus.
+         * Overriding implementations must invoke.
+         */
+        processFocus: function(e) {
+            this._focused = true;
+            if (this.client) {
+                if (this.component.isActive()) {
+                    this.client.application.setFocusedComponent(this.component);
+                } else {
+                    this._resetFocus();
+                }
+            }
+            return false;
+        },
+            
         /**
          * Invoked to ensure that input meets requirements of text field.  Default implementation ensures input
          * does not exceed maximum length.
@@ -132,8 +149,9 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
      * Registers event handlers on the text component.
      */
     _addEventHandlers: function() {
+        Core.Web.Event.add(this.input, "keydown", Core.method(this, this._processKeyDown), false);
         Core.Web.Event.add(this.input, "click", Core.method(this, this._processClick), false);
-        Core.Web.Event.add(this.input, "focus", Core.method(this, this._processFocus), false);
+        Core.Web.Event.add(this.input, "focus", Core.method(this, this.processFocus), false);
         Core.Web.Event.add(this.input, "blur", Core.method(this, this.processBlur), false);
     },
     
@@ -145,30 +163,8 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
      * @param {Number} containerPixels the size of the container element 
      */
     _adjustPercentWidth: function(percentValue, reducePixels, containerPixels) {
-        var value = (100 - Math.ceil(100 * reducePixels / containerPixels)) * percentValue / 100;
+        var value = (100 - (100 * reducePixels / containerPixels)) * percentValue / 100;
         return value > 0 ? value : 0;
-    },
-    
-    /**
-     * Processes a mouse click event. Notifies application of focus.
-     */
-    _processClick: function(e) {
-        if (!this.client || !this.component.isActive()) {
-            return true;
-        }
-        this.client.application.setFocusedComponent(this.component);
-        this._storeSelection();
-    },
-
-    /**
-     * Processes a focus event. Notifies application of focus.
-     */
-    _processFocus: function(e) {
-        this._focused = true;
-        if (!this.client || !this.component.isActive()) {
-            return true;
-        }
-        this.client.application.setFocusedComponent(this.component);
     },
     
     /** @see Echo.Render.ComponentSync#clientKeyDown */
@@ -193,10 +189,36 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
         return true;
     },
     
-    /** @see Echo.Render.ComponentSync#clientKeyPress */
+    /** @see Echo.Render.ComponentSync#clientKeyUp */
     clientKeyUp: function(e) {
         this._storeSelection();
         this._storeValue(e);
+        return true;
+    },
+
+    /**
+     * Processes a mouse click event. Notifies application of focus.
+     */
+    _processClick: function(e) {
+        if (!this.client || !this.component.isActive()) {
+            Core.Web.DOM.preventEventDefault(e);
+            return true;
+        }
+        this.client.application.setFocusedComponent(this.component);
+        this._storeSelection();
+        return false;
+    },
+
+    /**
+     * Keydown event handler to suppress input when component is inactive
+     * (clientKeyXXX() methods will not be invoked, even though component can potentially be focused).
+     * 
+     * @param e the event
+     */
+    _processKeyDown: function(e) {
+        if (!this.component.isActive()) {
+            Core.Web.DOM.preventEventDefault(e);
+        }
         return true;
     },
     
@@ -221,6 +243,25 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
     },
 
     /**
+     * Forcibly resets focus.  Creates hidden focusable text field, focuses it, destroys it.  Then invokes
+     * Echo.Render.updateFocus() to re-focus correct component.
+     */
+    _resetFocus: function() {
+        var div = document.createElement("div");
+        div.style.cssText = "position:absolute;width:0;height:0;overflow:hidden;";
+        var input = document.createElement("input");
+        input.type = "text";
+        div.appendChild(input);
+        document.body.appendChild(div);
+        input.focus();
+        document.body.removeChild(div);
+        div = null;
+        input = null;
+        this.client.forceRedraw();
+        Echo.Render.updateFocus(this.client);
+    },
+    
+    /**
      * Adds the input element to its parent in the DOM.
      * Wraps the element in a special container DIV if necessary to appease Internet Explorer's various text field/area bugs,
      * including percent-based text areas inducing scroll bars and the IE6 percentage width "growing" text area bug.
@@ -228,7 +269,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
      * @param parentElement the parent element
      */
     renderAddToParent: function(parentElement) {
-        if (Core.Web.Env.BROWSER_INTERNET_EXPLORER && this.percentWidth) {
+        if (Core.Web.Env.ENGINE_MSHTML && this.percentWidth) {
             this.container = document.createElement("div");
             this.container.appendChild(this.input);
             parentElement.appendChild(this.container);
@@ -244,9 +285,18 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
             // If width is a percentage, reduce rendered percent width based on measured container size and border width,
             // such that border pixels will not make the component wider than specified percentage.
             var border = this.component.render("border");
-            var borderSize = Echo.Sync.Border.getPixelSize(this.component.render("border", "2px solid #000000"), "left") +
-                    Echo.Sync.Border.getPixelSize(this.component.render("border", "2px solid #000000"), "right") + 1;
-            if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
+            var borderSize = border ? 
+                    (Echo.Sync.Border.getPixelSize(border, "left") + Echo.Sync.Border.getPixelSize(border, "right")) : 4;
+            var insets = this.component.render("insets");
+            if (insets) {
+                var insetsPx = Echo.Sync.Insets.toPixels(insets);
+                borderSize += insetsPx.left + insetsPx.right;
+            }
+            
+            // Perform fairly ridiculous browser-specific adjustments.
+            if (Core.Web.Env.ENGINE_MSHTML) {
+                // Add additional 1px for IE.
+                borderSize += 1;
                 // Add default windows scroll bar width to border size for Internet Explorer browsers.
                 if (this.container) {
                     this.container.style.width = this._adjustPercentWidth(100, Core.Web.Measure.SCROLL_WIDTH, 
@@ -254,7 +304,17 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
                 } else {
                     borderSize += Core.Web.Measure.SCROLL_WIDTH;
                 }
+            } else if (Core.Web.Env.BROWSER_CHROME && this.input.nodeName.toLowerCase() == "textarea") {
+                // Add additional 3px to TEXTAREA elements for Chrome.
+                borderSize += 3;
+            } else if (Core.Web.Env.BROWSER_SAFARI && this.input.nodeName.toLowerCase() == "input") {
+                // Add additional 1px to INPUT elements for Safari.
+                borderSize += 1;
+            } else if (Core.Web.Env.ENGINE_PRESTO) {
+                // Add additional 1px to all for Opera.
+                borderSize += 1;
             }
+            
             this.input.style.width = this._adjustPercentWidth(parseInt(width, 10), borderSize, 
                     this.input.parentNode.offsetWidth) + "%";
         }
@@ -312,12 +372,15 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
      * Stores the selection/cursor position within the input field.
      */
     _storeSelection: function() {
+        var range, measureRange;
         if (!this.component) {
             return;
         }
-        var range, measureRange;
-        if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
-            //FIXME Move to Core.Web.Env variable describing selection
+        
+        if (!Core.Web.Env.NOT_SUPPORTED_INPUT_SELECTION) {
+            this._selectionStart = this.input.selectionStart;
+            this._selectionEnd = this.input.selectionEnd;
+        } else if (Core.Web.Env.PROPRIETARY_IE_RANGE) {
             range = document.selection.createRange();
             if (range.parentElement() != this.input) {
                 return;
@@ -332,8 +395,7 @@ Echo.Sync.TextComponent = Core.extend(Echo.Render.ComponentSync, {
             this._selectionStart = measureRange.text.length - range.text.length;
             this._selectionEnd = this._selectionStart + range.text.length;
         } else {
-            this._selectionStart = this.input.selectionStart;
-            this._selectionEnd = this.input.selectionEnd;
+            return;
         }
         this.component.set("selectionStart", this._selectionStart, true);
         this.component.set("selectionEnd", this._selectionEnd, true);

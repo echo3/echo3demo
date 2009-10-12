@@ -249,7 +249,7 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
                 html = html || "<p></p>";
                 html = html.replace(Extras.Sync.RichTextInput.Html._LEADING_WHITESPACE, "");
                 html = html.replace(Extras.Sync.RichTextInput.Html._TRAILING_WHITESPACE, "");
-                if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
+                if (Core.Web.Env.ENGINE_MSHTML) {
                     html = html.replace(Extras.Sync.RichTextInput.Html._MSIE_INVALID_FONT_COLOR_REPL, "$1\"$2\"$3");
                     html = html.replace(Extras.Sync.RichTextInput.Html._MSIE_INVALID_FONT_BACKGROUND_REPL, "$1background-color");
                 }
@@ -292,7 +292,7 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
              */
             $construct: function(targetWindow) {
                 this.window = targetWindow;
-                if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
+                if (Core.Web.Env.ENGINE_MSHTML) {
                     this.ieRange = targetWindow.document.selection.createRange();
                     if (this.ieRange.parentElement().ownerDocument != targetWindow.document) {
                         targetWindow.focus();
@@ -312,6 +312,9 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
             activate: function() {
                 if (this.domRange) {
                     var selection = this.window.getSelection();
+                    if (!selection) {
+                        return;
+                    }
                     selection.removeAllRanges();
                     selection.addRange(this.domRange);
                 } else if (this.ieRange) {
@@ -437,6 +440,7 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
         this.component.addListener("property", this._propertyListener);
     },
     
+
     /**
      * Deletes a column from an HTML table containing the current selection.
      * Takes no action in the event that the selection is not in a table cell. 
@@ -460,6 +464,16 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
             return;
         }
         tr.parentNode.removeChild(tr);
+    },
+
+    /**
+     * Disposes of current selection range.
+     */
+    _disposeRange: function() {
+        if (this._selectionRange) {
+            //FIXME 
+            this._selectionRange.dispose();
+        }
     },
     
     /**
@@ -508,7 +522,7 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
             }
             break;
         case "insertHtml":
-            if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
+            if (Core.Web.Env.ENGINE_MSHTML) {
                 if (!this._selectionRange) {
                     this._storeRange(); 
                 }
@@ -660,6 +674,7 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
      * @see #_storeRange
      */
     _loadRange: function() {
+Core.Debug.consoleWrite("LOADRANGE");            
         if (this._selectionRange) {
             this._selectionRange.activate();
             if (Core.Web.Env.ENGINE_MSHTML && this.component.application.getFocusedComponent() != this.component) {
@@ -853,7 +868,7 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
                 // Not added to parent.
                 return;
             }
-            if (element.style.display == "none") {
+            if (element.nodeType == 1 && element.style.display == "none") {
                 // Not rendered.
                 return;
             }
@@ -915,6 +930,18 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
         this._documentRendered = true;
     },
     
+    /**
+     * Clears the editable document, disposing any resources related to it.
+     * Invoked by renderHide() implementation.
+     */
+    _renderDocumentRemove: function() {
+        Core.Web.Event.removeAll(this._document);
+        while (this._document.body.firstChild) {
+            this._document.body.removeChild(this._document.body.firstChild);
+        }
+        this._documentRendered = false;
+    },
+    
     /** @see Echo.Render.ComponentSync#renderDispose */
     renderDispose: function(update) {
         this._removeComponentListeners();
@@ -932,6 +959,8 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
             this._renderDocument();
         }
 
+        this.client.forceRedraw();
+        
         var bounds = new Core.Web.Measure.Bounds(this._div.parentNode);
         
         if (bounds.height) {
@@ -944,7 +973,7 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
             }
         }
     },
-
+    
     /** @see Echo.Render.ComponentSync#renderFocus */
     renderFocus: function() {
         if (Core.Web.Env.BROWSER_SAFARI) {
@@ -953,6 +982,18 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
         }
         Core.Web.DOM.focusElement(this._iframe.contentWindow);
         this.client.forceRedraw();
+    },
+    
+    /** @see Echo.Render.ComponentSync#renderHide */
+    renderHide: function() {
+        // Dispose selection range (critical for MSIE).
+        this._disposeRange();
+        
+        // Store state.
+        this._renderedHtml = this._document.body.innerHTML;
+        
+        // Clear editable document and dispose resources.
+        this._renderDocumentRemove();
     },
     
     /** @see Echo.Render.ComponentSync#renderUpdate */
@@ -985,10 +1026,7 @@ Extras.Sync.RichTextInput = Core.extend(Echo.Render.ComponentSync, {
      * @see #_loadRange
      */
     _storeRange: function() {
-        if (this._selectionRange) {
-            //FIXME 
-            this._selectionRange.dispose();
-        }
+        this._disposeRange();
         this._selectionRange = new Extras.Sync.RichTextInput.Range(this._iframe.contentWindow);
     },
 

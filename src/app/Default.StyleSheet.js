@@ -158,6 +158,8 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             }
         },
         "WindowPane": {
+            openAnimationTime: 300,
+            closeAnimationTime: 300,
             ieAlphaRenderBorder: true,
             titleForeground: "#ffffff",
             titleBackground: "#2f2f4f",
@@ -371,6 +373,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             },
             foreground: "#ffffff",
             menuBackground: "#000000",
+            menuExpandIcon: "image/icon/Icon16ExpandRight.png",
             menuOpacity: 92,
             menuBackgroundImage: "image/fill/InterlaceDarkGrey.png",
             menuBorder: {
