@@ -2,9 +2,12 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
 
     _msg: null,
     _reorder: null,
+    _dropRef: null,
+    _dropTargetIds: [ "drop1", "drop2" ],
 
     $construct: function() {
         this._msg = DemoApp.getMessages(null);
+        this._dropRef = Core.method(this, this._drop);
         Echo.ContentPane.call(this, {
             background: "#efefef",
             children: [
@@ -26,6 +29,7 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                                     insets: 10,
                                     children: [
                                         new Echo.Grid({
+                                            renderId: "drop1",
                                             layoutData: {
                                                 alignment: "top"
                                             },
@@ -43,6 +47,7 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                                             ]
                                         }),
                                         new Echo.Grid({
+                                            renderId: "drop2",
                                             layoutData: {
                                                 alignment: "top"
                                             },
@@ -92,6 +97,10 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
     
     _createDragItem: function(icon) {
         return new Extras.DragSource({
+            dropTargetIds: this._dropTargetIds,
+            events: {
+                drop: this._dropRef
+            },
             children: [
                 new Echo.Panel({
                     alignment: "center",
@@ -122,5 +131,12 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                 })
             ]
         });
+    },
+    
+    _drop: function(e) {
+        if (e.dropTarget != e.source.parent.renderId) {
+            var target = this.application.getComponentByRenderId(e.dropTarget);
+            target.add(e.source);
+        }
     }
 });
