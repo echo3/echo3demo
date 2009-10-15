@@ -137,6 +137,7 @@ DemoApp = Core.extend(Echo.Application, {
         MODULE_DEMO_DND: [
             "lib/echo/Sync.Composite.js",
             "lib/echo/Sync.Grid.js",
+            "lib/echo/Sync.TextComponent.js",
             "lib/extras/Application.Group.js",
             "lib/extras/Sync.Group.js",
             "lib/extras/Application.DragSource.js",

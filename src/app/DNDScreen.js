@@ -93,7 +93,11 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                             children: [
                                 new Echo.Column({
                                     insets: 10,
+                                    cellSpacing: 10,
                                     children: [
+                                        new Echo.Label({
+                                            text: "A reorder component allows a user to sort arbitrary components within a column."
+                                        }),
                                         this._reorder = new Extras.Reorder({
                                             children: [
                                                 this._createReorderItem(0, "Alpha"),
@@ -147,12 +151,17 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
         return new Echo.Row({
             border: "1px outset " + background,
             background: background,
-            insets: "5px 10px",
+            insets: "2px 10px",
             cellSpacing: 20,
             children: [
                 new Extras.Reorder.Handle({
                 }),
                 new Echo.Label({
+                    text: label
+                }),
+                new Echo.TextField({
+                    styleName: "Default",
+                    width: 60,
                     text: label
                 })
             ]
