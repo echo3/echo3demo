@@ -28,38 +28,52 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                                     columnWidth: [ "50%", "50%" ],
                                     insets: 10,
                                     children: [
-                                        new Echo.Grid({
+                                        new Echo.Panel({
                                             renderId: "drop1",
+                                            styleName: "DisplayPanel",
+                                            insets: 10,
                                             layoutData: {
                                                 alignment: "top"
                                             },
-                                            width: "100%",
-                                            size: 3,
-                                            children: [
-                                                this._createDragItem("image/emoticon/FaceAngel.png"),
-                                                this._createDragItem("image/emoticon/FaceCool.png"),
-                                                this._createDragItem("image/emoticon/FaceCrying.png"),
-                                                this._createDragItem("image/emoticon/FaceDevilish.png"),
-                                                this._createDragItem("image/emoticon/FaceGlasses.png"),
-                                                this._createDragItem("image/emoticon/FaceGrin.png"),
-                                                this._createDragItem("image/emoticon/FaceKiss.png"),
-                                                this._createDragItem("image/emoticon/FaceMonkey.png")
+                                            children:  [
+                                                new Echo.Grid({
+                                                    renderId: "drop1Container",
+                                                    width: "100%",
+                                                    size: 3,
+                                                    children: [
+                                                        this._createDragItem("image/emoticon/FaceAngel.png"),
+                                                        this._createDragItem("image/emoticon/FaceCool.png"),
+                                                        this._createDragItem("image/emoticon/FaceCrying.png"),
+                                                        this._createDragItem("image/emoticon/FaceDevilish.png"),
+                                                        this._createDragItem("image/emoticon/FaceGlasses.png"),
+                                                        this._createDragItem("image/emoticon/FaceGrin.png"),
+                                                        this._createDragItem("image/emoticon/FaceKiss.png"),
+                                                        this._createDragItem("image/emoticon/FaceMonkey.png")
+                                                    ]
+                                                })
                                             ]
                                         }),
-                                        new Echo.Grid({
+                                        new Echo.Panel({
                                             renderId: "drop2",
+                                            styleName: "DisplayPanel",
+                                            insets: 10,
                                             layoutData: {
                                                 alignment: "top"
                                             },
-                                            width: "100%",
-                                            size: 3,
-                                            children: [
-                                                this._createDragItem("image/emoticon/FacePlain.png"),
-                                                this._createDragItem("image/emoticon/FaceSad.png"),
-                                                this._createDragItem("image/emoticon/FaceSmile.png"),
-                                                this._createDragItem("image/emoticon/FaceSmileBig.png"),
-                                                this._createDragItem("image/emoticon/FaceSurprise.png"),
-                                                this._createDragItem("image/emoticon/FaceWink.png")
+                                            children:  [
+                                                new Echo.Grid({
+                                                    renderId: "drop2Container",
+                                                    width: "100%",
+                                                    size: 3,
+                                                    children: [
+                                                        this._createDragItem("image/emoticon/FacePlain.png"),
+                                                        this._createDragItem("image/emoticon/FaceSad.png"),
+                                                        this._createDragItem("image/emoticon/FaceSmile.png"),
+                                                        this._createDragItem("image/emoticon/FaceSmileBig.png"),
+                                                        this._createDragItem("image/emoticon/FaceSurprise.png"),
+                                                        this._createDragItem("image/emoticon/FaceWink.png")
+                                                    ]
+                                                })
                                             ]
                                         })
                                     ]
@@ -134,8 +148,8 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
     },
     
     _drop: function(e) {
-        if (e.dropTarget != e.source.parent.renderId) {
-            var target = this.application.getComponentByRenderId(e.dropTarget);
+        if (e.dropTarget != e.source.parent.parent.renderId) {
+            var target = this.application.getComponentByRenderId(e.dropTarget + "Container");
             target.add(e.source);
         }
     }
