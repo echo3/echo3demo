@@ -138,6 +138,8 @@ DemoApp = Core.extend(Echo.Application, {
             "lib/echo/Sync.Grid.js",
             "lib/extras/Application.Group.js",
             "lib/extras/Sync.Group.js",
+            "lib/extras/Application.Reorder.js",
+            "lib/extras/Sync.Reorder.js",
             "app/DNDScreen.js"
         ],
         
