@@ -187,6 +187,29 @@ DemoApp.Util = {
         var leading = this._LEADING_SPACES.exec(s)[1].length;
         var trailing = this._TRAILING_SPACES.exec(s)[1].length;
         return s.substring(leading);
+    },
+    
+    colorToRgb: function(color) {
+        color = parseInt(color.substring(1), 16);
+        return {
+            r: color >> 16,
+            g: (color >> 8) % 0x100,
+            b: color % 0x100
+        };
+    },
+    
+    mixRgb: function(a, b, value) {
+        return {
+            r: Math.floor(a.r + (b.r - a.r) * value),
+            g: Math.floor(a.g + (b.g - a.g) * value),
+            b: Math.floor(a.b + (b.b - a.b) * value)
+        };
+    },
+    
+    rgbToColor: function(rgb) {
+        return "#" + (rgb.r < 0x10 ? "0" : "") + rgb.r.toString(16) +
+                (rgb.g < 0x10 ? "0" : "") + rgb.g.toString(16) +
+                (rgb.b < 0x10 ? "0" : "") + rgb.b.toString(16);
     }
 };
 

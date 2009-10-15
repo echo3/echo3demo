@@ -1,5 +1,10 @@
 DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
 
+    $static: {
+        REORDER_START: DemoApp.Util.colorToRgb("#fce1c3"),
+        REORDER_END: DemoApp.Util.colorToRgb("#8190c9")
+    },
+    
     _msg: null,
     _reorder: null,
     _dropRef: null,
@@ -91,12 +96,17 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                                     children: [
                                         this._reorder = new Extras.Reorder({
                                             children: [
-                                                this._createReorderItem("Alpha"),
-                                                this._createReorderItem("Beta"),
-                                                this._createReorderItem("Gamma"),
-                                                this._createReorderItem("Delta"),
-                                                this._createReorderItem("Epsilon"),
-                                                this._createReorderItem("Zeta")
+                                                this._createReorderItem(0, "Alpha"),
+                                                this._createReorderItem(0.1, "Beta"),
+                                                this._createReorderItem(0.2, "Gamma"),
+                                                this._createReorderItem(0.3, "Delta"),
+                                                this._createReorderItem(0.4, "Epsilon"),
+                                                this._createReorderItem(0.5, "Zeta"),
+                                                this._createReorderItem(0.6, "Eta"),
+                                                this._createReorderItem(0.7, "Theta"),
+                                                this._createReorderItem(0.8, "Iota"),
+                                                this._createReorderItem(0.9, "Kappa"),
+                                                this._createReorderItem(1.0, "Lambda")
                                             ]
                                         })
                                     ]
@@ -131,10 +141,12 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
         })
     },
     
-    _createReorderItem: function(label) {
+    _createReorderItem: function(gradientValue, label) {
+        var background = DemoApp.Util.rgbToColor(
+                DemoApp.Util.mixRgb(DemoApp.DNDScreen.REORDER_START, DemoApp.DNDScreen.REORDER_END, gradientValue));
         return new Echo.Row({
-            border: "1px outset #abcdef",
-            background: "#abcdef",
+            border: "1px outset " + background,
+            background: background,
             insets: "5px 10px",
             cellSpacing: 20,
             children: [
