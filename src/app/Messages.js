@@ -189,6 +189,8 @@ DemoApp.Messages = new Core.ResourceBundle({
                                                             "the color of this text.",
     "ExtrasWidgetsScreen.ColorSelect.DisplayHex":           "Display Hex Color Value",
 
+    "DNDScreen.Title":                                      "Drag-and-Drop",
+    
     "JavaDevelopmentScreen.Title":                          "Java Development",
     "JavaDevelopmentScreen.Text.1":                         "Echo3 applications can be built entirely in server-side " +
                                                             "Java.  When using this development method, the state of an " +

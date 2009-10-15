@@ -134,6 +134,13 @@ DemoApp = Core.extend(Echo.Application, {
             "app/ExtrasWidgetsScreen.js"
         ],
         
+        MODULE_DEMO_DND: [
+            "lib/echo/Sync.Grid.js",
+            "lib/extras/Application.Group.js",
+            "lib/extras/Sync.Group.js",
+            "app/DNDScreen.js"
+        ],
+        
         /**
          * Set of available locale modules.
          */
@@ -305,6 +312,15 @@ DemoApp = Core.extend(Echo.Application, {
                     },
                     "app/TabPaneScreen.js"),
                 new DemoApp.Workspace.ScreenData(
+                    this._msg["ExtrasWidgetsScreen.Title"], 
+                    "image/demoicon/WidgetsIcon16.gif", 
+                    "image/demoicon/WidgetsIcon64.gif",
+                    DemoApp.MODULE_DEMO_EXTRAS_WIDGETS, 
+                    function(container) {
+                        container.setContent(new DemoApp.ExtrasWidgetsScreen());
+                    },
+                    "app/ExtrasWidgetsScreen.js"),
+                new DemoApp.Workspace.ScreenData(
                     this._msg["RichTextScreen.Title"], 
                     "image/demoicon/RichTextIcon16.gif", 
                     "image/demoicon/RichTextIcon64.gif",
@@ -314,12 +330,12 @@ DemoApp = Core.extend(Echo.Application, {
                     },
                     "app/RichTextScreen.js"),
                 new DemoApp.Workspace.ScreenData(
-                    this._msg["ExtrasWidgetsScreen.Title"], 
-                    "image/demoicon/WidgetsIcon16.gif", 
-                    "image/demoicon/WidgetsIcon64.gif",
-                    DemoApp.MODULE_DEMO_EXTRAS_WIDGETS, 
+                    this._msg["DNDScreen.Title"], 
+                    "image/demoicon/DNDIcon16.gif", 
+                    "image/demoicon/DNDIcon64.gif",
+                    DemoApp.MODULE_DEMO_DND, 
                     function(container) {
-                        container.setContent(new DemoApp.ExtrasWidgetsScreen());
+                        container.setContent(new DemoApp.DNDScreen());
                     },
                     "app/ExtrasWidgetsScreen.js")
             ])
