@@ -135,9 +135,12 @@ DemoApp = Core.extend(Echo.Application, {
         ],
         
         MODULE_DEMO_DND: [
+            "lib/echo/Sync.Composite.js",
             "lib/echo/Sync.Grid.js",
             "lib/extras/Application.Group.js",
             "lib/extras/Sync.Group.js",
+            "lib/extras/Application.DragSource.js",
+            "lib/extras/Sync.DragSource.js",
             "lib/extras/Application.Reorder.js",
             "lib/extras/Sync.Reorder.js",
             "app/DNDScreen.js"
@@ -347,7 +350,7 @@ DemoApp = Core.extend(Echo.Application, {
         this.rootComponent.add(this.workspace);
         
         // Edit/Enable the following line to launch a specific screen at startup.
-        // this.workspace.launchScreen(sections[2].screens[0]);
+        this.workspace.launchScreen(sections[3].screens[4]);
     }
 });
 

@@ -6,14 +6,61 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
     $construct: function() {
         this._msg = DemoApp.getMessages(null);
         Echo.ContentPane.call(this, {
-            background: "#ffffff",
+            background: "#efefef",
             children: [
                 new Echo.Grid({
                     width: "100%",
-                    columnWidth: [ "40%", "60%" ],
+                    columnWidth: [ "64%", "36%" ],
                     size: 2,
                     insets: 10,
                     children: [
+                        new Extras.Group({
+                            layoutData: {
+                                alignment: "top"
+                            },
+                            title: "DragSource",
+                            children: [
+                                new Echo.Grid({
+                                    width: "100%",
+                                    columnWidth: [ "50%", "50%" ],
+                                    insets: 10,
+                                    children: [
+                                        new Echo.Grid({
+                                            layoutData: {
+                                                alignment: "top"
+                                            },
+                                            width: "100%",
+                                            size: 3,
+                                            children: [
+                                                this._createDragItem("image/emoticon/FaceAngel.png"),
+                                                this._createDragItem("image/emoticon/FaceCool.png"),
+                                                this._createDragItem("image/emoticon/FaceCrying.png"),
+                                                this._createDragItem("image/emoticon/FaceDevilish.png"),
+                                                this._createDragItem("image/emoticon/FaceGlasses.png"),
+                                                this._createDragItem("image/emoticon/FaceGrin.png"),
+                                                this._createDragItem("image/emoticon/FaceKiss.png"),
+                                                this._createDragItem("image/emoticon/FaceMonkey.png")
+                                            ]
+                                        }),
+                                        new Echo.Grid({
+                                            layoutData: {
+                                                alignment: "top"
+                                            },
+                                            width: "100%",
+                                            size: 3,
+                                            children: [
+                                                this._createDragItem("image/emoticon/FacePlain.png"),
+                                                this._createDragItem("image/emoticon/FaceSad.png"),
+                                                this._createDragItem("image/emoticon/FaceSmile.png"),
+                                                this._createDragItem("image/emoticon/FaceSmileBig.png"),
+                                                this._createDragItem("image/emoticon/FaceSurprise.png"),
+                                                this._createDragItem("image/emoticon/FaceWink.png")
+                                            ]
+                                        })
+                                    ]
+                                })
+                            ]
+                        }),
                         new Extras.Group({
                             layoutData: {
                                 alignment: "top"
@@ -36,22 +83,29 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                                     ]
                                 })
                             ]
-                        }),
-                        new Extras.Group({
-                            layoutData: {
-                                alignment: "top"
-                            },
-                            title: "DragSource",
-                            children: [
-                                new Echo.Column({
-                                    insets: 10
-                                })
-                            ]
                         })
                     ]
                 })
             ]
         });
+    },
+    
+    _createDragItem: function(icon) {
+        return new Extras.DragSource({
+            children: [
+                new Echo.Panel({
+                    alignment: "center",
+                    background: "#abcdef",
+                    border: "1px outset #abcdef",
+                    insets: 16,
+                    children: [
+                        new Echo.Label({
+                            icon: icon
+                        })
+                    ]
+                })
+            ]
+        })
     },
     
     _createReorderItem: function(label) {
