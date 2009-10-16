@@ -744,7 +744,8 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
         launchMenu.addItem(windowedLaunchMenu);
         launchMenu.addItem(new Extras.SeparatorModel());
         launchMenu.addItem(new Extras.OptionModel("autodemo", this._msg["Menu.StartAutoDemo"], "image/icon/Icon16Play.gif"));
-        launchMenu.addItem(new Extras.OptionModel("perftest", this._msg["Menu.PerformanceTest"], "image/icon/Icon16Performance.gif"));
+        launchMenu.addItem(new Extras.OptionModel("perftest", this._msg["Menu.PerformanceTest"], 
+                "image/icon/Icon16Performance.gif"));
     
         var menuModel = new Extras.MenuModel(null, null, null, [
             launchMenu,
