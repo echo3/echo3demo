@@ -8,7 +8,7 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
     _msg: null,
     _reorder: null,
     _dropRef: null,
-    _dropTargetIds: [ "drop1", "drop2" ],
+    _dropTargetIds: [ "drop1", "drop2", "drop3" ],
 
     $construct: function() {
         this._msg = DemoApp.getMessages(null);
@@ -26,13 +26,20 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                             layoutData: {
                                 alignment: "top"
                             },
-                            title: "DragSource",
+                            title: this._msg["DNDScreen.DragSource.Title"],
                             children: [
                                 new Echo.Grid({
+                                    size: 2,
                                     width: "100%",
                                     columnWidth: [ "50%", "50%" ],
-                                    insets: 10,
+                                    insets: "5 10",
                                     children: [
+                                        new Echo.Label({
+                                            layoutData: {
+                                                columnSpan: -1
+                                            },
+                                            text: this._msg["DNDScreen.DragSource.Description"]
+                                        }),
                                         new Echo.Panel({
                                             renderId: "drop1",
                                             styleName: "DisplayPanel",
@@ -46,14 +53,14 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                                                     width: "100%",
                                                     size: 3,
                                                     children: [
-                                                        this._createDragItem("image/emoticon/FaceAngel.png"),
-                                                        this._createDragItem("image/emoticon/FaceCool.png"),
-                                                        this._createDragItem("image/emoticon/FaceCrying.png"),
-                                                        this._createDragItem("image/emoticon/FaceDevilish.png"),
-                                                        this._createDragItem("image/emoticon/FaceGlasses.png"),
-                                                        this._createDragItem("image/emoticon/FaceGrin.png"),
-                                                        this._createDragItem("image/emoticon/FaceKiss.png"),
-                                                        this._createDragItem("image/emoticon/FaceMonkey.png")
+                                                        this._createDragIcon("image/emoticon/FaceAngel.png"),
+                                                        this._createDragIcon("image/emoticon/FaceCool.png"),
+                                                        this._createDragIcon("image/emoticon/FaceCrying.png"),
+                                                        this._createDragIcon("image/emoticon/FaceDevilish.png"),
+                                                        this._createDragIcon("image/emoticon/FaceGlasses.png"),
+                                                        this._createDragIcon("image/emoticon/FaceGrin.png"),
+                                                        this._createDragIcon("image/emoticon/FaceKiss.png"),
+                                                        this._createDragIcon("image/emoticon/FaceMonkey.png")
                                                     ]
                                                 })
                                             ]
@@ -71,12 +78,55 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                                                     width: "100%",
                                                     size: 3,
                                                     children: [
-                                                        this._createDragItem("image/emoticon/FacePlain.png"),
-                                                        this._createDragItem("image/emoticon/FaceSad.png"),
-                                                        this._createDragItem("image/emoticon/FaceSmile.png"),
-                                                        this._createDragItem("image/emoticon/FaceSmileBig.png"),
-                                                        this._createDragItem("image/emoticon/FaceSurprise.png"),
-                                                        this._createDragItem("image/emoticon/FaceWink.png")
+                                                        this._createDragIcon("image/emoticon/FacePlain.png"),
+                                                        this._createDragIcon("image/emoticon/FaceSad.png"),
+                                                        this._createDragIcon("image/emoticon/FaceSmile.png"),
+                                                        this._createDragIcon("image/emoticon/FaceSmileBig.png"),
+                                                        this._createDragIcon("image/emoticon/FaceSurprise.png"),
+                                                        this._createDragIcon("image/emoticon/FaceWink.png")
+                                                    ]
+                                                })
+                                            ]
+                                        }),
+                                        new Echo.Panel({
+                                            renderId: "drop3",
+                                            styleName: "DisplayPanel",
+                                            insets: 10,
+                                            layoutData: {
+                                                columnSpan: -1,
+                                                alignment: "top"
+                                            },
+                                            children: [
+                                                new Echo.Grid({
+                                                    renderId: "drop3Container",
+                                                    width: "100%",
+                                                    size: 3,
+                                                    insets: 3,
+                                                    children: [
+                                                        this._createDragComponent(new Echo.TextField({
+                                                            styleName: "Default",
+                                                            width: 60,
+                                                            text: "TextField"
+                                                        })),
+                                                        this._createDragComponent(new Echo.Button({
+                                                            styleName: "Default",
+                                                            text: "Button",
+                                                            events: {
+                                                                action: Core.method(this, function(e) {
+                                                                    e.source.set("text", 
+                                                                            e.source.get("text") == "Button" ?
+                                                                            "[Button]" : "Button")
+                                                                })
+                                                            }
+                                                        })),
+                                                        this._createDragComponent(new Echo.CheckBox({
+                                                            text: "CheckBox"
+                                                        })),
+                                                        this._createDragComponent(new Echo.TextArea({
+                                                            styleName: "Default",
+                                                            width: 60,
+                                                            text: "TextArea"
+                                                        }))
                                                     ]
                                                 })
                                             ]
@@ -89,14 +139,14 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                             layoutData: {
                                 alignment: "top"
                             },
-                            title: "Reorder",
+                            title: this._msg["DNDScreen.Reorder.Title"],
                             children: [
                                 new Echo.Column({
                                     insets: 10,
                                     cellSpacing: 10,
                                     children: [
                                         new Echo.Label({
-                                            text: "A reorder component allows a user to sort arbitrary components within a column."
+                                            text: this._msg["DNDScreen.Reorder.Description"]
                                         }),
                                         this._reorder = new Extras.Reorder({
                                             children: [
@@ -123,7 +173,19 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
         });
     },
     
-    _createDragItem: function(icon) {
+    _createDragComponent: function(component) {
+        return new Extras.DragSource({
+            dropTargetIds: this._dropTargetIds,
+            events: {
+                drop: this._dropRef
+            },
+            children: [
+                component
+            ]
+        })
+    },
+    
+    _createDragIcon: function(icon) {
         return new Extras.DragSource({
             dropTargetIds: this._dropTargetIds,
             events: {

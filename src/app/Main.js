@@ -138,6 +138,7 @@ DemoApp = Core.extend(Echo.Application, {
             "lib/echo/Sync.Composite.js",
             "lib/echo/Sync.Grid.js",
             "lib/echo/Sync.TextComponent.js",
+            "lib/echo/Sync.ToggleButton.js",
             "lib/extras/Application.Group.js",
             "lib/extras/Sync.Group.js",
             "lib/extras/Application.DragSource.js",

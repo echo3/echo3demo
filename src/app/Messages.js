@@ -190,6 +190,12 @@ DemoApp.Messages = new Core.ResourceBundle({
     "ExtrasWidgetsScreen.ColorSelect.DisplayHex":           "Display Hex Color Value",
 
     "DNDScreen.Title":                                      "Drag-and-Drop",
+    "DNDScreen.Reorder.Title":                              "Reorder",
+    "DNDScreen.Reorder.Description":                        "The Reorder component allows a user to sort arbitrary components " +
+                                                            "within a column.",
+    "DNDScreen.DragSource.Title":                           "DragSource",
+    "DNDScreen.DragSource.Description":                     "A DragSource enables arbitrary components to be dragged and dropped " +
+                                                            "on specified \"drop targets\".",
     
     "JavaDevelopmentScreen.Title":                          "Java Development",
     "JavaDevelopmentScreen.Text.1":                         "Echo3 applications can be built entirely in server-side " +
