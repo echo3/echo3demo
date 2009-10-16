@@ -231,9 +231,17 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
     },
     
     _drop: function(e) {
-        if (e.dropTarget != e.source.parent.parent.renderId) {
-            var target = this.application.getComponentByRenderId(e.dropTarget + "Container");
-            target.add(e.source);
+        var target = this.application.getComponentByRenderId(e.dropTarget + "Container");
+
+        var index = -1;
+        var insertBefore = this.application.getComponentByRenderId(e.specificTarget);
+        while (insertBefore && !(insertBefore instanceof Extras.DragSource)) {
+            insertBefore = insertBefore.parent;
         }
+        if (insertBefore) {
+            index = target.indexOf(insertBefore);
+        }
+        
+        target.add(e.source, index == -1 ? null : index);
     }
 });
