@@ -15,6 +15,10 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
         this._dropRef = Core.method(this, this._drop);
         Echo.ContentPane.call(this, {
             background: "#efefef",
+            backgroundImage: {
+                url: "image/bgpictures/Clouds.jpg",
+                repeat: 0
+            },
             children: [
                 new Echo.Grid({
                     width: "100%",
