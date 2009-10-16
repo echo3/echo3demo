@@ -115,7 +115,7 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                                                                 action: Core.method(this, function(e) {
                                                                     e.source.set("text", 
                                                                             e.source.get("text") == "Button" ?
-                                                                            "[Button]" : "Button")
+                                                                            "[Button]" : "Button");
                                                                 })
                                                             }
                                                         })),
@@ -182,7 +182,7 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
             children: [
                 component
             ]
-        })
+        });
     },
     
     _createDragIcon: function(icon) {
@@ -204,7 +204,7 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                     ]
                 })
             ]
-        })
+        });
     },
     
     _createReorderItem: function(gradientValue, label) {
