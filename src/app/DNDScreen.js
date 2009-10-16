@@ -120,7 +120,7 @@ DemoApp.DNDScreen = Core.extend(Echo.ContentPane, {
                                                             }
                                                         })),
                                                         this._createDragComponent(new Echo.CheckBox({
-                                                            text: "CheckBox"
+                                                            text: "Check"
                                                         })),
                                                         this._createDragComponent(new Echo.TextArea({
                                                             styleName: "Default",
