@@ -341,6 +341,8 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
 
+_initialRenderLayoutComplete: false,    
+    
     /**
      * Measures the height of the header region of the tab pane, adjusting the content region's size to accommodate it.
      * Invoked in renderDisplay phase when <code>_layoutRequired</code> flag has been set.
@@ -375,14 +377,18 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
             this._tabs[i]._renderDisplay();
         }
         
-        // Add image monitor to re-execute renderLayout as images are loaded.
-        var imageListener = Core.method(this, function() {
-            if (this.component) { // Verify component still registered.
-                this._layoutRequired = true;
-                this._renderLayout();
-            }
-        });
-        Core.Web.Image.monitor(this._headerContainerDiv, imageListener);
+        if (!this._initialRenderLayoutComplete) {
+            this._initialRenderLayoutComplete = true;
+            // Add image monitor to re-execute renderLayout as images are loaded.
+            var imageListener = Core.method(this, function() {
+                if (this.component) { // Verify component still registered.
+                    this._layoutRequired = true;
+                    this._renderLayout();
+                }
+            });
+            imageListener.id = "TabPane:" + this.component.renderId;
+            Core.Web.Image.monitor(this._headerContainerDiv, imageListener);
+        }
     },
     
     /**
