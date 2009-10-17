@@ -1526,6 +1526,11 @@ Core.Web.HttpConnection = Core.extend({
 Core.Web.Image = {
     
     /**
+     * Expiration time, after which an image monitor will give up.
+     */
+    _EXPIRE_TIME: 3000,
+    
+    /**
      * Work object for monitorImageLoading() method.
      */
     _Monitor: Core.extend({
@@ -1534,7 +1539,7 @@ Core.Web.Image = {
         _processImageLoadRef: null,
         
         /** Currently enqueued runnable. */
-        _queuedRunnable: null,
+        _runnable: null,
         
         /** Listener to notify of successful image loadings. */
         _listener: null,
@@ -1542,8 +1547,17 @@ Core.Web.Image = {
         /** Minimum Listener callback interval. */
         _interval: null,
         
+        /** Images with remaining load listeners. */
+        _images: null,
+        
         /** The number of images to be loaded. */
         _count: 0,
+        
+        /** Expiration time.  When system time is greater than this value, monitor will give up. */
+        _expiration: null,
+        
+        /** Flag indicating whether one or more images have been loaded since last update. */ 
+        _imagesLoadedSinceUpdate: false,
         
         /**
          * Creates a new image monitor.
@@ -1557,14 +1571,24 @@ Core.Web.Image = {
             this._interval = interval || 250;
             this._processImageLoadRef = Core.method(this, this._processImageLoad);
             
+            this._runnable = new Core.Web.Scheduler.MethodRunnable(Core.method(this, this._update), this._interval, true);
+            
             // Find all images beneath element, register load listeners on all which are not yet loaded.
-            var imgs = element.getElementsByTagName("img");
-            this._count = imgs.length;
-            for (var i = 0; i < this._count; ++i) {
-                if (!imgs[i].complete && (Core.Web.Env.QUIRK_UNLOADED_IMAGE_HAS_SIZE || 
-                        (!imgs[i].height && !imgs[i].style.height))) {
-                    Core.Web.Event.add(imgs[i], "load", this._processImageLoadRef, false);
+            var nodeList = element.getElementsByTagName("img");
+            this._images = [];
+            for (var i = 0; i < nodeList.length; ++i) {
+                if (!nodeList[i].complete && (Core.Web.Env.QUIRK_UNLOADED_IMAGE_HAS_SIZE || 
+                        (!nodeList[i].height && !nodeList[i].style.height))) {
+                    this._images.push(nodeList[i]);
+                    Core.Web.Event.add(nodeList[i], "load", this._processImageLoadRef, false);
                 }
+            }
+            
+            this._count = this._images.length;
+            if (this._count > 0) {
+                this._expiration = new Date().getTime() + Core.Web.Image._EXPIRE_TIME;
+                Core.Web.Scheduler.add(this._runnable);
+Core.Debug.consoleWrite("construct");            
             }
         },
         
@@ -1574,27 +1598,54 @@ Core.Web.Image = {
          * @param e the event object
          */
         _processImageLoad: function(e) {
+Core.Debug.consoleWrite("pil");            
             e = e ? e : window.event;
+            var image = Core.Web.DOM.getEventTarget(e);
+            
+            this._imagesLoadedSinceUpdate = true;
             
             // Remove listener.
-            Core.Web.Event.remove(Core.Web.DOM.getEventTarget(e), "load", this._processImageLoadRef, false);
+            Core.Web.Event.remove(image, "load", this._processImageLoadRef, false);
+            
+            // Remove image from list of images to be loaded.
+            Core.Arrays.remove(this._images, image);
             
             // Decrement remaining image count.
             --this._count;
             
             // If runnable is enqueued and no more images now remain to be loaded,
             // remove the enqueued runnable. 
-            if (this._queuedRunnable && this._count === 0) {
-                Core.Web.Scheduler.remove(this._queuedRunnable);
-                this._queuedRunnable = null;
+            if (this._count === 0) {
+                this._stop();
             }
             
-            // Enqueue runnable if required.  Set delay to immediate if all images are laoded.
-            if (!this._queuedRunnable) {
-                this._queuedRunnable = Core.Web.Scheduler.run(Core.method(this, function() {
-                    this._queuedRunnable = null;
+            if (!this._runnable) {
+                Core.Web.Scheduler.run(Core.method(this, function() {
                     this._listener();
-                }), this._count === 0 ? 0 : this._interval);
+                }));
+            }
+        },
+        
+        _stop: function() {
+Core.Debug.consoleWrite("stop");            
+            Core.Web.Scheduler.remove(this._runnable);
+            this._runnable = null;
+            
+            for (var i = 0; i < this._images.length; ++i) {
+                Core.Web.Event.remove(this._images[i], "load", this._processImageLoadRef, false);
+            }
+        },
+        
+        _update: function() {
+Core.Debug.consoleWrite("update");            
+            if (this._imagesLoadedSinceUpdate) {
+                this._imagesLoadedSinceUpdate = false;
+                this._listener();
+            }
+            
+            if (new Date().getTime() > this._expiration) {
+Core.Debug.consoleWrite("EXPIRED");                
+                this._stop();
             }
         }
     }),
