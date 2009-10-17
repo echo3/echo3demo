@@ -282,6 +282,11 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
     _layoutRequired: false,
     
     /**
+     * Flag indicating whether header images have been completely loaded.
+     */
+    _headerImageLoadingComplete: false,
+    
+    /**
      * Flag indicating whether a full header re-render operation is required.  Flag is set by renderUpdate() method in response
      * to child layout data changes to avoid full render.
      * @type Boolean
@@ -341,8 +346,6 @@ Extras.Sync.TabPane = Core.extend(Echo.Render.ComponentSync, {
         }
     },
 
-_initialRenderLayoutComplete: false,    
-    
     /**
      * Measures the height of the header region of the tab pane, adjusting the content region's size to accommodate it.
      * Invoked in renderDisplay phase when <code>_layoutRequired</code> flag has been set.
@@ -377,8 +380,8 @@ _initialRenderLayoutComplete: false,
             this._tabs[i]._renderDisplay();
         }
         
-        if (!this._initialRenderLayoutComplete) {
-            this._initialRenderLayoutComplete = true;
+        if (!this._headerImageLoadingComplete) {
+            this._headerImageLoadingComplete = true;
             // Add image monitor to re-execute renderLayout as images are loaded.
             var imageListener = Core.method(this, function() {
                 if (this.component) { // Verify component still registered.
@@ -638,6 +641,8 @@ _initialRenderLayoutComplete: false,
     
     /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
+        this._headerImageLoadingComplete = false;
+
         this.component.addListener("tabSelect", this._tabSelectListenerRef);
         
         // Store rendering properties.
@@ -869,6 +874,8 @@ _initialRenderLayoutComplete: false,
         var fullRender = false,
             tab,
             i;
+        
+        this._headerImageLoadingComplete = false;
         
         if (update.hasUpdatedLayoutDataChildren()) {
             this._headerUpdateRequired = true;

@@ -1528,7 +1528,7 @@ Core.Web.Image = {
     /**
      * Expiration time, after which an image monitor will give up.
      */
-    _EXPIRE_TIME: 3000,
+    _EXPIRE_TIME: 5000,
     
     /**
      * Work object for monitorImageLoading() method.
@@ -1543,9 +1543,6 @@ Core.Web.Image = {
         
         /** Listener to notify of successful image loadings. */
         _listener: null,
-        
-        /** Minimum Listener callback interval. */
-        _interval: null,
         
         /** Images with remaining load listeners. */
         _images: null,
@@ -1568,10 +1565,9 @@ Core.Web.Image = {
          */
         $construct: function(element, listener, interval) {
             this._listener = listener;
-            this._interval = interval || 250;
             this._processImageLoadRef = Core.method(this, this._processImageLoad);
             
-            this._runnable = new Core.Web.Scheduler.MethodRunnable(Core.method(this, this._update), this._interval, true);
+            this._runnable = new Core.Web.Scheduler.MethodRunnable(Core.method(this, this._update), interval || 250, true);
             
             // Find all images beneath element, register load listeners on all which are not yet loaded.
             var nodeList = element.getElementsByTagName("img");
