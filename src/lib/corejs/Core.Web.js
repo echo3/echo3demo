@@ -1588,7 +1588,6 @@ Core.Web.Image = {
             if (this._count > 0) {
                 this._expiration = new Date().getTime() + Core.Web.Image._EXPIRE_TIME;
                 Core.Web.Scheduler.add(this._runnable);
-Core.Debug.consoleWrite("construct");            
             }
         },
         
@@ -1598,7 +1597,6 @@ Core.Debug.consoleWrite("construct");
          * @param e the event object
          */
         _processImageLoad: function(e) {
-Core.Debug.consoleWrite("pil");            
             e = e ? e : window.event;
             var image = Core.Web.DOM.getEventTarget(e);
             
@@ -1627,7 +1625,6 @@ Core.Debug.consoleWrite("pil");
         },
         
         _stop: function() {
-Core.Debug.consoleWrite("stop");            
             Core.Web.Scheduler.remove(this._runnable);
             this._runnable = null;
             
@@ -1637,14 +1634,12 @@ Core.Debug.consoleWrite("stop");
         },
         
         _update: function() {
-Core.Debug.consoleWrite("update");            
             if (this._imagesLoadedSinceUpdate) {
                 this._imagesLoadedSinceUpdate = false;
                 this._listener();
             }
             
             if (new Date().getTime() > this._expiration) {
-Core.Debug.consoleWrite("EXPIRED");                
                 this._stop();
             }
         }
