@@ -103,10 +103,10 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     
     /**
      * Flag indicating whether initial automatic sizing operation (which occurs on first invocation of 
-     * <code>renderDisplay()</code> after <code>renderAdd()</code>) has been completed.
+     * <code>renderDisplay()</code> after <code>_renderAddFrame()</code>) has been completed.
      * @type Boolean
      */
-    _initialAutoSizeComplete: false,
+    _initialRenderDisplayComplete: false,
     
     /**
      * Flag indicating whether the window has been displayed on the screen, i.e., whether CSS visibility property has
@@ -195,8 +195,17 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     /**
      * Flag indicating whether window is being "opened", i.e., if the most recent update has it being directly added to its
      * parent <code>ContentPane</code>.
+     * @type Boolean
      */
     _opening: false,
+
+    /**
+     * Time at which window started to wait for image loading.  Null in the event that images have completed loading.
+     * This property is used to hold display of the window until images have loaded, unless a certain amount of time
+     * passes before images can load.
+     * @type Number
+     */
+    _imageWaitStartTime: null,
 
     /**
      * Creates a <code>Echo.Sync.WindowPane<code>.
@@ -206,6 +215,51 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         this._processBorderMouseUpRef = Core.method(this, this._processBorderMouseUp);
         this._processTitleBarMouseMoveRef = Core.method(this, this._processTitleBarMouseMove);
         this._processTitleBarMouseUpRef = Core.method(this, this._processTitleBarMouseUp);
+    },
+    
+    /**
+     * Vertically centers the window icon.
+     */
+    _centerIcon: function() {
+        if (!this._titleIconImg || !this._titleIconImg.complete || !this._titleIconImg.height) {
+            return;
+        }
+        
+        var insetsPx = Echo.Sync.Insets.toPixels(this.component.render("iconInsets"));
+        var padHeight = parseInt(this._titleBarDiv.style.height, 10) - insetsPx.top - insetsPx.bottom - this._titleIconImg.height;
+        
+        if (padHeight <= 0) {
+            // Title bar sized by icon+insets, make no vertical adjustment.
+            return;
+        }
+        
+        this._titleIconDiv.style.paddingTop = Math.floor(padHeight / 2) + "px";
+    },
+    
+    /**
+     * Listener for events fired from <code>Core.Web.Image.Monitor</code> as contained images within
+     * the <code>WindowPane</code> load.
+     */
+    _imageLoadListener: function(e) {
+        if (!this.component) { // Verify component still registered.
+            return;
+        }
+        
+        if (this._titleIconImgLoading && this._titleIconImg.complete) {
+            this._titleIconImgLoading = false;
+            this._titleBarDiv.style.height = "";
+            this._titleBarHeight = new Core.Web.Measure.Bounds(this._titleBarDiv).height || 
+                    Echo.Sync.Extent.toPixels(Echo.WindowPane.DEFAULT_TITLE_HEIGHT);
+            this._titleBarDiv.style.height = this._titleBarHeight + "px";
+            
+            this._contentDiv.style.top = (this._contentInsets.top + this._titleBarHeight) + "px";
+        }
+        
+        if (e.complete) {
+            this._imageWaitStartTime = null;
+        }
+        
+        Echo.Render.renderComponentDisplay(this.component);
     },
     
     /**
@@ -518,7 +572,6 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
     /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
         this._opening = update.parent == this.component.parent;
-        this._initialAutoSizeComplete = false;
         this._rtl = !this.component.getRenderLayoutDirection().isLeftToRight();
         this._closeAnimationTime = Core.Web.Env.NOT_SUPPORTED_CSS_OPACITY ? 0 : this.component.render("closeAnimationTime", 0);
         
@@ -562,6 +615,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
      * @param {Element} parentElement the parent element to which the rendered frame should be appended 
      */
     _renderAddFrame: function(parentElement) {
+        this._initialRenderDisplayComplete = false;
         this._loadPositionAndSize();
 
         // Load property states.
@@ -607,22 +661,39 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         
         // Render Title Bar
         
+        var titleInsets = this.component.render("titleInsets", Echo.WindowPane.DEFAULT_TITLE_INSETS);
+        
         this._titleBarDiv = document.createElement("div");
         this._titleBarDiv.style.position = "absolute";
         this._titleBarDiv.style.zIndex = 3;
         
         var icon = this.component.render("icon");
         if (icon) {
-            var titleIconDiv = document.createElement("div");
-            titleIconDiv.style[Core.Web.Env.CSS_FLOAT] = this._rtl ? "right" : "left";
-            Echo.Sync.Insets.render(this.component.render("iconInsets"), titleIconDiv, "padding");
-            this._titleBarDiv.appendChild(titleIconDiv);
+            this._titleIconDiv = document.createElement("div");
+            this._titleIconDiv.style[Core.Web.Env.CSS_FLOAT] = this._rtl ? "right" : "left";
             
-            var img = document.createElement("img");
-            Echo.Sync.ImageReference.renderImg(icon, img);
-            titleIconDiv.appendChild(img);
+            // Set icon insets.  If icon insets are unset, apply outside setting of title insets  to outside side of icon.
+            var iconInsets = this.component.render("iconInsets");
+            if (iconInsets) {
+                Echo.Sync.Insets.render(iconInsets, this._titleIconDiv, "padding");
+            } else {
+                var titleInsetsPx = Echo.Sync.Insets.toPixels(titleInsets);
+                if (this._rtl) {
+                    this._titleIconDiv.style.paddingRight = titleInsetsPx.right + "px";
+                } else {
+                    this._titleIconDiv.style.paddingLeft = titleInsetsPx.left + "px";
+                }
+            }
+            
+            this._titleBarDiv.appendChild(this._titleIconDiv);
+
+            this._titleIconImg = document.createElement("img");
+            Echo.Sync.ImageReference.renderImg(icon, this._titleIconImg);
+            this._titleIconDiv.appendChild(this._titleIconImg);
+            
+            this._titleIconImgLoading = true;
         }
-    
+
         var title = this.component.render("title");
         var titleTextDiv = document.createElement("div");
         if (icon) {
@@ -630,8 +701,7 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         }
         titleTextDiv.style.whiteSpace = "nowrap";
         Echo.Sync.Font.render(this.component.render("titleFont"), titleTextDiv);
-        Echo.Sync.Insets.render(this.component.render("titleInsets", 
-                Echo.WindowPane.DEFAULT_TITLE_INSETS), titleTextDiv, "padding");
+        Echo.Sync.Insets.render(titleInsets, titleTextDiv, "padding");
         titleTextDiv.appendChild(document.createTextNode(title ? title : "\u00a0"));
         this._titleBarDiv.appendChild(titleTextDiv);
         
@@ -640,12 +710,8 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
             this._titleBarHeight = Echo.Sync.Extent.toPixels(titleBarHeight);
         }
         if (!titleBarHeight) {
-            var titleMeasure = new Core.Web.Measure.Bounds(this._titleBarDiv);
-            if (titleMeasure.height) {
-                this._titleBarHeight = titleMeasure.height;
-            } else {
-                this._titleBarHeight = Echo.Sync.Extent.toPixels(Echo.WindowPane.DEFAULT_TITLE_HEIGHT);
-            }
+            this._titleBarHeight = new Core.Web.Measure.Bounds(this._titleBarDiv).height || 
+                            Echo.Sync.Extent.toPixels(Echo.WindowPane.DEFAULT_TITLE_HEIGHT);
         }
     
         this._titleBarDiv.style.top = this._contentInsets.top + "px";
@@ -780,28 +846,33 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         this._setBounds(this._requested, false);
         Core.Web.VirtualPosition.redraw(this._contentDiv);
         Core.Web.VirtualPosition.redraw(this._maskDiv);
-        
-        if (!this._initialAutoSizeComplete) {
+        this._centerIcon();
+
+        if (!this._initialRenderDisplayComplete) {
             // If position was successfully set, perform initial operations related to automatic sizing 
             // (executed on first renderDisplay() after renderAdd()).
-            this._initialAutoSizeComplete = true;
-            var imageListener = Core.method(this, function() {
-                if (this.component) { // Verify component still registered.
-                    Echo.Render.renderComponentDisplay(this.component);
-                }
-            });
-            Core.Web.Image.monitor(this._contentDiv, imageListener);
+            this._initialRenderDisplayComplete = true;
+            var waiting = Core.Web.Image.monitor(this._div, Core.method(this, this._imageLoadListener));
+            if (waiting) {
+                this._imageWaitStartTime = new Date().getTime();
+            }
         }
         
         if (!this._displayed) {
-            this._displayed = true;
-            var time = (Core.Web.Env.NOT_SUPPORTED_CSS_OPACITY || !this._opening) ? 
-                    0 : this.component.render("openAnimationTime", 0);
-            if (time > 0) {
-                Core.Web.Scheduler.add(new Echo.Sync.WindowPane.FadeRunnable(this._div, false, time, null));
-                this._div.style.opacity = 0;
+            if (this._imageWaitStartTime && new Date().getTime() > this._imageWaitStartTime + 1000) {
+                this._imageWaitStartTime = null;
             }
-            this._div.style.visibility = "visible";
+            
+            if (!this._imageWaitStartTime) {
+                this._displayed = true;
+                var time = (Core.Web.Env.NOT_SUPPORTED_CSS_OPACITY || !this._opening) ? 
+                        0 : this.component.render("openAnimationTime", 0);
+                if (time > 0) {
+                    Core.Web.Scheduler.add(new Echo.Sync.WindowPane.FadeRunnable(this._div, false, time, null));
+                    this._div.style.opacity = 0;
+                }
+                this._div.style.visibility = "";
+            }
         }
     },
     
@@ -838,6 +909,10 @@ Echo.Sync.WindowPane = Core.extend(Echo.Render.ComponentSync, {
         
         Core.Web.Event.removeAll(this._titleBarDiv);
         this._titleBarDiv = null;
+        
+        this._titleIconDiv = null;
+        this._titleIconImg = null;
+        this._titleIconImgLoading = false;
         
         this._div = null;
     },

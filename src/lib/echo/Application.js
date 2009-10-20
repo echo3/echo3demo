@@ -2996,7 +2996,8 @@ Echo.ContentPane = Core.extend(Echo.Component, {
  * @sp {#Border} border the border displayed around the grid, and between cells
  * @sp {#Extent} columnWidth an indexed property whose indices represent the
  *     width of each column of the grid
- * @sp {#Extent} height the overall height of the grid
+ * @sp {#Extent} height the overall height of the grid (may not be specified
+ *     as a percentage value)
  * @sp {#Insets} insets the default inset margin displayed in each cell
  * @sp {Number} orientation a value indicating whether the grid will be laid out
  *     horizontally and then vertically or vice-versa, one of the following
@@ -3007,7 +3008,7 @@ Echo.ContentPane = Core.extend(Echo.Component, {
  *     <li><code>ORIENTATION_VERTICAL</code> lay children out vertically,
  *     then horizontally</li>
  *     </ul>
- * @sp {#Extent} rowWidth an indexed property whose indices represent the height
+ * @sp {#Extent} rowHeight an indexed property whose indices represent the height
  *     of each row of the grid
  * @sp {Number} size the number of cells to render before wrapping to the next
  *     column/row (default 2)
@@ -3165,7 +3166,7 @@ Echo.Row = Core.extend(Echo.Component, {
  * @ldp {#Alignment} alignment the alignment of the child component within its
  *      subpane
  * @ldp {#Color} background the background of the child component's subpane
- * @ldp {#FillImage} backrgoundImage the background image of the child
+ * @ldp {#FillImage} backgroundImage the background image of the child
  *      component's subpane
  * @ldp {#Insets} insets the insets margin of the child component's subpane
  * @ldp {#Extent} maximumSize the maximum size of the child component's subpane
@@ -3436,6 +3437,8 @@ Echo.PasswordField = Core.extend(Echo.TextField, {
  * @sp {#ImageReference} minimizeRolloverIcon the minimize button rollover icon
  * @sp {#Extent} minimumHeight the minimum height of the window
  * @sp {#Extent} minimumWidth the minimum width of the window
+ * @sp {Boolean} modal flag indicating whether the window is modal (and will thus
+ *     block input to components not contained within it)
  * @sp {Boolean} movable flag indicating whether the window is movable
  * @sp {Number} openAnimationTime the duration of the open animation, in 
  *     milliseconds (default/zero value will result in no animation)
