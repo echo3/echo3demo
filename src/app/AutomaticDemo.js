@@ -27,7 +27,6 @@ DemoApp.AutomaticDemo.StartDialog = Core.extend(Echo.WindowPane, {
             width: "40em",
             title: this._msg["AutomaticDemo.WindowTitle"],
             icon: "image/icon/Icon16Play.gif",
-            iconInsets: "6px 10px",
             events: {
                 close: Core.method(this, this._close)
             },
@@ -187,7 +186,6 @@ DemoApp.AutomaticDemo.StopDialog = Core.extend(Echo.WindowPane, {
             styleName: "GlassBlue2",
             title: this._msg[performanceTest ? "PerformanceTest.WindowTitle" : "AutomaticDemo.RunWindowTitle"],
             icon: performanceTest ? "image/icon/Icon16Performance.gif" : "image/icon/Icon16Play.gif",
-            iconInsets: "6px 10px",
             closable: false,
             resizable: false,
             movable: false,
@@ -400,7 +398,6 @@ DemoApp.AutomaticDemo.PerformanceTestDialog = Core.extend(Echo.WindowPane, {
             width: 400,
             title: this._msg["PerformanceTest.WindowTitle"],
             icon: "image/icon/Icon16Performance.gif",
-            iconInsets: "6px 10px",
             events: {
                 close: Core.method(this, this._close)
             },
@@ -476,7 +473,6 @@ DemoApp.AutomaticDemo.PerformanceTestResultDialog = Core.extend(Echo.WindowPane,
             resizable: false,
             title: this._msg["PerformanceTest.WindowTitle"],
             icon: "image/icon/Icon16Performance.gif",
-            iconInsets: "6px 10px",
             events: {
                 close: Core.method(this, this._close)
             },

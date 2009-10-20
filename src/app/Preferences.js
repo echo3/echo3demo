@@ -18,7 +18,6 @@ DemoApp.PreferencesDialog = Core.extend(Echo.WindowPane, {
             width: "40em",
             title: this._msg["PrefDialog.WindowTitle"],
             icon: "image/icon/Icon16Preferences.png",
-            iconInsets: "6px 10px",
             events: {
                 close: Core.method(this, this._close)
             },

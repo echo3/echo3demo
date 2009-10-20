@@ -124,7 +124,6 @@ DemoApp.SourceWindow = Core.extend(Echo.WindowPane, {
     
         Echo.WindowPane.call(this, {
             icon: icon,
-            iconInsets: "6px 10px",
             title: this._msg["SourceWindow.TitlePrompt"] + " \"" + title + "\"",
             styleName: DemoApp.pref.windowStyleName,
             width: "50em",

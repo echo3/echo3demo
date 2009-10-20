@@ -373,7 +373,6 @@ DemoApp.DownloadWindow = Core.extend(Echo.WindowPane, {
             styleName: DemoApp.pref.windowStyleName,
             title: this._msg["DownloadWindow.Title"],
             icon:  "image/icon/Icon16ArrowBottom.png",
-            iconInsets: "6px 10px",
             insets: 10,
             events: {
                 close: function(e) {
@@ -402,7 +401,6 @@ DemoApp.ScreenWindow = Core.extend(Echo.WindowPane, {
     $construct: function(screen) {
         Echo.WindowPane.call(this, {
             icon: screen.icon16,
-            iconInsets: "6px 10px",
             title: screen.title,
             styleName: DemoApp.pref.windowStyleName,
             width: 600,
