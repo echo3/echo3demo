@@ -89,7 +89,14 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                     maximizeEnabled: true,
                     title: this._msg["WindowPaneScreen.ConfigurationTitle"],
                     events: {
-                        windowClosing: Core.method(this, this._processConfigurationClose)
+                        close: Core.method(this, function(e) {
+                            this.application.workspace.alert(this._msg["WindowPaneScreen.CloseDialog.Title"],
+                                    this._msg["WindowPaneScreen.CloseDialog.Message"]);
+                        }),
+                        minimize: Core.method(this, function(e) {
+                            this.application.workspace.alert(this._msg["WindowPaneScreen.MinimizeDialog.Title"],
+                                    this._msg["WindowPaneScreen.MinimizeDialog.Message"]);
+                        })
                     },
                     children: [
                         new Extras.TabPane({

@@ -453,6 +453,12 @@ DemoApp.Messages = new Core.ResourceBundle({
     "WindowPaneScreen.ConfigurationMaximizeDisable":        "Disable maximize button.",
     "WindowPaneScreen.ConfigurationMinimizeEnable":         "Enable minimize button.",
     "WindowPaneScreen.ConfigurationMinimizeDisable":        "Disable minimize button.",
+    
+    "WindowPaneScreen.CloseDialog.Title":                   "Window Close",
+    "WindowPaneScreen.CloseDialog.Message":                 "A close event was received from the window.",
+    
+    "WindowPaneScreen.MinimizeDialog.Title":                "Window Minimize",
+    "WindowPaneScreen.MinimizeDialog.Message":              "A minimize event was received from the window.",
 
     "WindowPaneScreen.ModalTitle":                          "Modal Dialogs",
     "WindowPaneScreen.ModalText1":                          "A WindowPane can be configured to be modal, such that " +

@@ -13,7 +13,6 @@ DemoApp.AboutDialog = Core.extend(Echo.WindowPane, {
             width: "40em",
             height: "30em",
             title: this._msg["About.WindowTitle"],
-            iconInsets: "6px 10px",
             icon: "image/icon/Icon16About.png",
             modal: true,
             closable: true,

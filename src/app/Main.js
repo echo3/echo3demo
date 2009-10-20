@@ -693,6 +693,52 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
     },
     
     /**
+     * Displays an alert dialog.
+     */
+    alert: function(title, message) {
+        var windowPane = new Echo.WindowPane({
+            styleName: "Default",
+            title: title,
+            modal: true,
+            events: {
+                close: Core.method(this, function(e) {
+                    windowPane.parent.remove(windowPane);
+                })
+            },
+            children: [
+                new Echo.SplitPane({
+                    orientation: Echo.SplitPane.ORIENTATION_VERTICAL_BOTTOM_TOP,
+                    autoPositioned: true,
+                    children: [
+                        new Echo.Row({
+                            styleName: "ControlPane",
+                            children: [
+                                new Echo.Button({
+                                    styleName: "ControlPane.Button",
+                                    icon: "image/icon/Icon24Ok.png",
+                                    text: this._msg["Generic.Ok"],
+                                    events: {
+                                        action: Core.method(this, function(e) {
+                                            windowPane.parent.remove(windowPane);
+                                        })
+                                    }
+                                })
+                            ]
+                        }),
+                        new Echo.Label({
+                            layoutData: {
+                                insets: 10
+                            },
+                            text: message
+                        })
+                    ]
+                })
+            ]
+        });
+        this.add(windowPane);
+    },
+    
+    /**
      * Iterates sections/screens to create launch panel component and screen-id to screen mapping.
      */
     _createLaunchPanel: function() {
