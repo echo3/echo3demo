@@ -236,6 +236,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             tabCloseIcon: "image/icon/Icon16TabClose.png",
             tabRolloverEnabled: true,
             tabRolloverForeground: "#ffffff",
+            tabRolloverBackground: "#1212ce",
             tabRolloverBackgroundImage: {
                 url: "image/fill/GradientBlue.png",
                 y: "50%"
@@ -301,6 +302,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             tabCloseIcon: "image/icon/Icon16TabClose.png",
             tabRolloverEnabled: true,
             tabRolloverForeground: "#ffffff",
+            tabRolloverBackground: "#1212ce",
             tabRolloverBackgroundImage: {
                 url: "image/fill/GradientBlue.png",
                 y: "50%"
