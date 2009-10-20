@@ -18,7 +18,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             lineWrap: false,
             foreground: "#000000",
             rolloverForeground: "#ffffff",
-            rolloverBackground: "#3939d6",
+            rolloverBackground: "#1212ce",
             rolloverBackgroundImage: {
                 url: "image/fill/GradientBlue.png",
                 y: "50%"
