@@ -87,6 +87,7 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                     positionY: "17%",
                     closable: true,
                     maximizeEnabled: true,
+                    minimizeEnabled: true,
                     title: this._msg["WindowPaneScreen.ConfigurationTitle"],
                     events: {
                         close: Core.method(this, function(e) {
@@ -257,6 +258,7 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                                 this._minimizeEnableButton = new Echo.RadioButton({
                                                     group: minimizeGroup,
                                                     text: this._msg["WindowPaneScreen.ConfigurationMinimizeEnable"],
+                                                    selected: true,
                                                     events: {
                                                         action: Core.method(this, this._processConfigMinimizeEnable)
                                                     }
@@ -264,7 +266,6 @@ DemoApp.WindowPaneScreen = Core.extend(Echo.ContentPane, {
                                                 new Echo.RadioButton({
                                                     group: minimizeGroup,
                                                     text: this._msg["WindowPaneScreen.ConfigurationMinimizeDisable"],
-                                                    selected: true,
                                                     events: {
                                                         action: Core.method(this, this._processConfigMinimizeEnable)
                                                     }
