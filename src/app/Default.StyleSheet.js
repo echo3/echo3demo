@@ -1,18 +1,5 @@
 DemoApp.StyleSheet = new Echo.StyleSheet({
     "ControlPane": {
-        "Row": {
-            layoutData: {
-                backgroundImage: {
-                    url: "image/fill/GradientWhiteSilver.png",
-                    y: "50%"
-                },
-                overflow: Echo.SplitPane.OVERFLOW_HIDDEN
-            },
-            cellSpacing: 3,
-            insets: "0px 9px"
-        }
-    },
-    "ControlPane.Button": {
         "Button": {
             insets: "3px 15px",
             lineWrap: false,
@@ -31,6 +18,17 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 y: "50%"
             },
             pressedEnabled: true
+        },
+        "Row": {
+            layoutData: {
+                backgroundImage: {
+                    url: "image/fill/GradientWhiteSilver.png",
+                    y: "50%"
+                },
+                overflow: Echo.SplitPane.OVERFLOW_HIDDEN
+            },
+            cellSpacing: 3,
+            insets: "0px 9px"
         }
     },
     "Default": {
@@ -142,7 +140,7 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
         "Extras.RichTextArea": {
             controlPaneSplitPaneStyleName: "ControlPane.Container.Bottom",
             controlPaneRowStyleName: "ControlPane",
-            controlPaneButtonStyleName: "ControlPane.Button", 
+            controlPaneButtonStyleName: "ControlPane", 
             menuStyleName: "RichTextArea.Menu",
             toolbarButtonStyleName: "RichTextArea.Toolbar",
             toolbarPanelStyleName: "RichTextArea.Toolbar",

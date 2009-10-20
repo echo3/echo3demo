@@ -714,7 +714,7 @@ DemoApp.Workspace = Core.extend(Echo.ContentPane, {
                             styleName: "ControlPane",
                             children: [
                                 new Echo.Button({
-                                    styleName: "ControlPane.Button",
+                                    styleName: "ControlPane",
                                     icon: "image/icon/Icon24Ok.png",
                                     text: this._msg["Generic.Ok"],
                                     events: {

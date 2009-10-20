@@ -31,7 +31,7 @@ DemoApp.PreferencesDialog = Core.extend(Echo.WindowPane, {
                             styleName: "ControlPane",
                             children: [
                                 new Echo.Button({
-                                    styleName: "ControlPane.Button",
+                                    styleName: "ControlPane",
                                     text: this._msg["Generic.Ok"],
                                     icon: "image/icon/Icon24Ok.png",
                                     events: {
@@ -39,7 +39,7 @@ DemoApp.PreferencesDialog = Core.extend(Echo.WindowPane, {
                                     }
                                 }),
                                 new Echo.Button({
-                                    styleName: "ControlPane.Button",
+                                    styleName: "ControlPane",
                                     text: this._msg["Generic.Cancel"],
                                     icon: "image/icon/Icon24Cancel.png",
                                     events: {
