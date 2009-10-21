@@ -10,12 +10,24 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
                 url: "image/fill/GradientBlue.png",
                 y: "50%"
             },
+            rolloverBorder: {
+                left: "1px solid #afafcf",
+                top: "1px solid #afafcf",
+                right: "1px solid #00004f",
+                bottom: "1px solid #00004f"
+            },
             rolloverEnabled: true,
             pressedForeground: "#dfffff",
             pressedBackground: "#3939d6",
             pressedBackgroundImage: {
                 url: "image/fill/GradientBlueHighlight.png",
                 y: "50%"
+            },
+            pressedBorder: {
+                right: "1px solid #afafcf",
+                bottom: "1px solid #afafcf",
+                top: "1px solid #00004f",
+                left: "1px solid #00004f"
             },
             pressedEnabled: true
         },
