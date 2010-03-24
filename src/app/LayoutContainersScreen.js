@@ -12,12 +12,6 @@ DemoApp.LayoutContainersScreen = Core.extend(Echo.ContentPane, {
     $construct: function() {
         this._msg = DemoApp.getMessages(null);
         Echo.ContentPane.call(this, {
-            font: {
-                typeface: "serif",
-                size: "14pt",
-                bold: true,
-                italic: true
-            },
             children: [
                 new Echo.SplitPane({
                     styleName: "DefaultResizableLarge",
