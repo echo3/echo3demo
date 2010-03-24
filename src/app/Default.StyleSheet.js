@@ -4,6 +4,9 @@ DemoApp.StyleSheet = new Echo.StyleSheet({
             insets: "3px 15px",
             lineWrap: false,
             foreground: "#000000",
+            focusedEnabled: true,
+            focusedBackground: "#ffffff",
+            focusedBorder: "1px dotted #00007f",
             rolloverForeground: "#ffffff",
             rolloverBackground: "#1212ce",
             rolloverBackgroundImage: {
