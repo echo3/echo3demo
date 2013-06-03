@@ -1,4 +1,6 @@
-<project name="Echo3Demo" default="build" basedir=".">
+<project name="echoe-demo" default="build" basedir=".">
+
+    <property name="version" value="3.0.0"/>
 
     <taskdef 
             name="yui-compressor" 
@@ -113,10 +115,10 @@
         <copy todir="release/e3d">
             <fileset dir="out/"/>
         </copy>
-        <tar tarfile="tmp/e3d.tar" basedir="release" longfile="gnu"/>
+        <tar tarfile="tmp/echo3-demo-${version}.tar" basedir="release" longfile="gnu"/>
         <delete dir="release/e3d"/>
-        <gzip src="tmp/e3d.tar" zipfile="release/e3d.tgz"/>
-        <delete file="release/e3d.tar"/>
+        <gzip src="tmp/echo3-demo-${version}.tar" zipfile="release/echo3-demo-${version}.tgz"/>
+        <delete file="release/echo3-demo-${version}.tar"/>
     </target>
     
 </project>
